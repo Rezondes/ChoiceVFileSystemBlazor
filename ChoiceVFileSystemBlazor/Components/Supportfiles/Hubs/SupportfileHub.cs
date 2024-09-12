@@ -35,7 +35,7 @@ public class SupportfileHub : Hub
     /// <summary>
     /// SupportfileHubMethodEnum.EntryCreated
     /// </summary>
-    public async Task RemoveFile(Ulid supportfileId)
+    public async Task ToggleFileDeleted(Ulid supportfileId)
     {
         await Clients.All.SendAsync(SupportfileHubMethodEnum.ToggleFileDeleted.ToString(), supportfileId);
     }
