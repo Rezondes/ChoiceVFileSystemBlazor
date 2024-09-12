@@ -1,0 +1,107 @@
+﻿@page "/admin/logs"
+
+@code {
+    private const string Url = "/admin/logs";
+    public static string GetRedirectUrl() => Url;
+}
+
+<PageTitle>AccessLogs Übersicht</PageTitle>
+
+@if (_loading || !_isAuthorized || _shouldRedirect)
+{
+    <PageLoading/>
+}
+else
+{
+    <MudDataGrid
+        T="AccessLogsDbModel" MultiSelection="true"
+        Items="@_data" SortMode="SortMode.Multiple" Filterable="true"
+        QuickFilter="@QuickFilter"
+        Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">AccessLogs Übersicht</MudText>
+            <MudSpacer />
+            <MudTextField
+                T="string" @bind-Value="_searchString" Placeholder="Search"
+                Adornment="Adornment.Start" Immediate="true"
+                AdornmentIcon="@Icons.Material.Filled.Search"
+                IconSize="Size.Medium" Class="mt-0"/>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" InitialDirection="SortDirection.Descending"/>
+            <PropertyColumn Property="x => x.Content" Title="Content" />
+            <PropertyColumn Property="x => x.AccessId" Title="AccessId" />
+            <PropertyColumn Property="x => x.Type" Title="Type" />
+            <PropertyColumn Property="x => x.CreatedAt" Title="CreatedAt" />
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="AccessLogsDbModel" />
+        </PagerContent>
+    </MudDataGrid>
+}
+
+@code {
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+    private bool _loading = true;
+
+    private List<AccessLogsDbModel> _data = [];
+    
+    private string? _searchString;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        
+        _isAuthorized = MainLayout.HasRight(RightEnum.ViewAdminAccessLogs);
+        _shouldRedirect = !_isAuthorized;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+            
+        await Load();
+    }
+    
+    private async Task Load()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        _data = await AccessLogsProxy.GetAllAsync();
+
+        _loading = false;
+        StateHasChanged();
+    }
+    
+    private Func<AccessLogsDbModel, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+        
+        var lowerSearchString = _searchString.ToLower();
+        
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.Content.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.Type.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.CreatedAt.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if ($"{x.Id}".ToLower().Contains(lowerSearchString))
+            return true;
+
+        return false;
+    };
+}

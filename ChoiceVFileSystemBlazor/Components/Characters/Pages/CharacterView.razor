@@ -1,0 +1,249 @@
+﻿@page "/characters/view/{id}"
+@using ChoiceVFileSystemBlazor.Components.Accounts.Pages
+
+@code {
+    private const string Url = "/characters/view/";
+    public static string GetRedirectUrl(string id) => Url + id;
+}
+
+<PageTitle>Character Ansicht</PageTitle>
+
+@if (_loading || !_isAuthorized || _shouldRedirect)
+{
+    <PageLoading/>
+}
+else if (_inventory is null || _model is null)
+{
+    <PageLoading/>
+}
+else
+{
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="12">
+            <MudPaper>
+                <MudToolBar>
+                    <MudTooltip Text="Account öffnen" Duration="@Constants.TOOLTIP_DURATION">
+                        <MudIconButton Icon="@Icons.Material.Filled.AccountBox" OnClick="OpenAccount"/>
+                    </MudTooltip>
+                    <MudSpacer />
+                    <MudIconButton Icon="@Icons.Material.Outlined.MoreVert" Color="Color.Inherit"/>
+                </MudToolBar>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="6">
+            <MudPaper Class="mud-width-full mud-height-full">
+                <div class="d-flex align-items-center justify-content-center" style="padding: 15px 0 25px 0">
+                    <MudText Typo="Typo.h5">[@_model.Id] @_model.FirstName @_model.MiddleName @_model.LastName</MudText>
+                    
+                    @if (_model.Gender == 'M')
+                    {
+                        <MudTooltip Text="Männlich" Duration="@Constants.TOOLTIP_DURATION">
+                            <MudAvatar Color="Color.Primary">M</MudAvatar>
+                        </MudTooltip>
+                    }
+                    else
+                    {
+                        <MudTooltip Text="Weiblich" Duration="@Constants.TOOLTIP_DURATION">
+                            <MudAvatar Color="Color.Secondary">W</MudAvatar>
+                        </MudTooltip>
+                    }
+
+                </div>
+                
+                <MudGrid>
+                    <MudItem xs="6" Class="centered">
+                        <MudText Color="Color.Warning">Hunger</MudText>
+                        <MudTooltip Text="@_model.Hunger.ToString()" Duration="@Constants.TOOLTIP_DURATION" Color="Color.Warning">
+                            <MudProgressCircular Color="Color.Warning" Value="@_model.Hunger" Max="100" Min="0"/>
+                        </MudTooltip> 
+                    </MudItem>
+                    <MudItem xs="6" Class="centered">
+                        <MudText Color="Color.Info">Thirst</MudText>
+                        <MudTooltip Text="@_model.Thirst.ToString()" Duration="@Constants.TOOLTIP_DURATION" Color="Color.Info">
+                            <MudProgressCircular Color="Color.Info" Value="@_model.Thirst" Max="100" Min="0"/>
+                        </MudTooltip>
+                    </MudItem>
+                    <MudItem xs="6" Class="centered">
+                        <MudText Color="Color.Primary">Energy</MudText>
+                        <MudTooltip Text="@_model.Energy.ToString()" Duration="@Constants.TOOLTIP_DURATION" Color="Color.Primary">
+                            <MudProgressCircular Color="Color.Primary" Value="@_model.Energy" Max="100" Min="0"/>
+                        </MudTooltip>
+                    </MudItem>
+                    <MudItem xs="6" Class="centered">
+                        <MudText Color="Color.Secondary">Health</MudText>
+                        <MudTooltip Text="@_model.Health.ToString()" Duration="@Constants.TOOLTIP_DURATION" Color="Color.Secondary">
+                            <MudProgressCircular Color="Color.Secondary" Value="@_model.Health" Max="100" Min="0"/>
+                        </MudTooltip>
+                    </MudItem>
+                </MudGrid>
+                
+                <MudText Typo="Typo.h5">Weitere Infos:</MudText>
+                
+                <MudText>Title: @(_model.Title ?? "Kein Titel")</MudText>
+
+                <MudText>BirthDate: @_model.BirthDate</MudText>
+
+                <MudText>Cash: @_model.Cash</MudText>
+                
+                <MudText>Position: @_model.Position</MudText>
+                <MudText>Rotation: @_model.Rotation</MudText>
+                <MudText>Dimension: @_model.Dimension</MudText>
+                
+                <MudText>LastLogin: @_model.LastLogin</MudText>
+                <MudText>LastLogout: @_model.LastLogout</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="6">
+            <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-8">
+                <MudDataGrid
+                    T="InventoryItemModel" MultiSelection="true"
+                    Items="@_inventory.Items" SortMode="SortMode.Multiple" Filterable="true"
+                    QuickFilter="@QuickFilter"
+                    Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="65vh" Class="mud-width-full">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Inventar</MudText>
+                        <MudSpacer/>
+                        <MudTextField
+                            T="string" @bind-Value="_searchString" Placeholder="Search"
+                            Adornment="Adornment.Start" Immediate="true"
+                            AdornmentIcon="@Icons.Material.Filled.Search"
+                            IconSize="Size.Medium" Class="mt-0"/>
+                    </ToolBarContent>
+                    <Columns>
+                        <PropertyColumn Property="x => x.Id" Title="#" Filterable="false"/>
+                        <PropertyColumn Property="x => x.Name" Title="Name"/>
+                        <PropertyColumn Property="x => x.Description" Title="Description"/>
+                        <PropertyColumn Property="x => x.Quantity" Title="Quantity"/>
+                    </Columns>
+                    <PagerContent>
+                        <MudDataGridPager T="InventoryItemModel"/>
+                    </PagerContent>
+                </MudDataGrid>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+    private bool _loading = true;
+
+    [Parameter] public string Id { get; set; }
+    private int _id;
+    
+    private CharacterModel? _model;
+    
+    private InventoryModel? _inventory;
+    private string? _searchString;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _isAuthorized = MainLayout.HasRight(RightEnum.ViewSupportfiles);
+        _shouldRedirect = !_isAuthorized;
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+
+        var parsingSuccess = ParseId();
+        if (!parsingSuccess)
+        {
+            Navigation.NavigateToError();
+            return;
+        }
+        
+        await LoadAllAsync();
+    }
+
+    private bool ParseId()
+    {
+        if (!int.TryParse(Id, out var characterId))
+        {
+            Snackbar.Add("Parsing failed", Severity.Error);
+            _loading = false;
+            return false;
+        }
+
+        _id = characterId;
+        return true;
+    }
+
+    private async Task LoadAllAsync()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        await LoadCharacterAsync();
+        await LoadInventoryAsync();
+        
+        _loading = false;
+        StateHasChanged();
+    }
+
+    private async Task LoadCharacterAsync()
+    {
+        var response = await CharacterApi.GetByCharacterIdAsync(_id);
+        if (!response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateToError();
+            return; 
+        }
+
+        _model = response.Content;
+    }
+
+    private async Task LoadInventoryAsync()
+    {
+        var response = await InventoryApi.GetByCharacterIdAsync(_id);
+        if (!response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateToError();
+            return; 
+        }
+
+        _inventory = response.Content;
+    }
+    
+    private Func<InventoryItemModel, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+        
+        var lowerSearchString = _searchString.ToLower();
+        
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.Name.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.Description.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.Quantity.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if ($"{x.Id}".ToLower().Contains(lowerSearchString))
+            return true;
+
+        return false;
+    };
+
+    private void OpenAccount()
+    {
+        if (_model is null) return;
+        
+        Navigation.NavigateTo(AccountView.GetRedirectUrl(_model.Id.ToString()));
+    }
+
+}

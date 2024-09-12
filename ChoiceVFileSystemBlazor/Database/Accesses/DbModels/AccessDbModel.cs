@@ -1,0 +1,26 @@
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using ChoiceVFileSystemBlazor.Database._Shared;
+using ChoiceVFileSystemBlazor.Database.Accesses.DbModels.Partials;
+using ChoiceVSharedApiModels.Accounts;
+
+namespace ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
+
+public class AccessDbModel : PartialAccessModel
+{
+    public AccessDbModel(int accountId, string discordId, string name)
+    {
+        AccountId = accountId;
+        DiscordId = discordId;
+        Name = name;
+    }
+    
+    public AccessDbModel(int accountId, string discordId, string name, RankEnum rank)
+    {
+        AccountId = accountId;
+        DiscordId = discordId;
+        Name = name;
+        Rank = rank;
+    }
+    
+    public Ulid Id { get; set; } = Ulid.NewUlid();
+}

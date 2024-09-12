@@ -1,0 +1,210 @@
+﻿@page "/admin/access"
+@using ChoiceVFileSystemBlazor.Database.Accesses.DbModels.Partials
+
+@code {
+    private const string Url = "/admin/access";
+    public static string GetRedirectUrl() => Url;
+}
+
+<PageTitle>Zugriffsverteilung</PageTitle>
+
+@if (!_isAuthorized || _loading)
+{
+    <PageLoading/>
+}
+else
+{
+    <MudDataGrid
+        T="AccessDbModel" MultiSelection="true"
+        Items="@_accessDbModels" SortMode="SortMode.Multiple" Filterable="true"
+        QuickFilter="@QuickFilter" RowClick="@RowClicked"
+        Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Zugriffsverteilung</MudText>
+            <MudSpacer />
+            <MudTextField
+                T="string" @bind-Value="_searchString" Placeholder="Search"
+                Adornment="Adornment.Start" Immediate="true"
+                AdornmentIcon="@Icons.Material.Filled.Search"
+                IconSize="Size.Medium" Class="mt-0"/>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
+            <PropertyColumn Property="x => x.Name" Title="Name" />
+            <PropertyColumn Property="x => x.AccountId" Title="AccountId" />
+            <PropertyColumn Property="x => x.DiscordId" Title="DiscordId" />
+            <PropertyColumn Property="x => x.Rank" Title="Rank" />
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="AccessDbModel" />
+        </PagerContent>
+    </MudDataGrid>
+}
+
+@code {
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+
+    private bool _loading = true;
+    private string? _searchString;
+    private List<AccessDbModel> _accessDbModels = [];
+    
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        
+        _isAuthorized = MainLayout.HasRight(RightEnum.ViewAdminAccessControl);
+        _shouldRedirect = !_isAuthorized;
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (_shouldRedirect)
+                Navigation.NavigateToNotAuthorized();
+
+            await Load();
+        }
+    }
+
+    private async Task Load()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        _accessDbModels = await AccessProxy.GetAllAsync();
+
+        _loading = false;
+        StateHasChanged();
+    }
+    
+    private Func<AccessDbModel, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+        
+        var lowerSearchString = _searchString.ToLower();
+        
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.Name.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.AccountId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.DiscordId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.Rank.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if ($"{x.Id}".ToLower().Contains(lowerSearchString))
+            return true;
+
+        return false;
+    };
+    
+    async Task RowClicked(DataGridRowClickEventArgs<AccessDbModel> args)
+    {
+        if (MainLayout.BaseHubConnection is null) return;
+        if (MainLayout.AccessModel is null) return;
+        
+        var accessDbModel = args.Item;
+        
+        const string title = "Access überarbeiten";
+        const string description = "";
+        const string submitButtonText = "Speichern";
+
+        const string nameLabel = "Name";
+        const string accountIdLabel = "AccountId";
+        const string discordIdLabel = "DiscordId";
+        const string rankLabel = "rankLabel";
+        
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                nameLabel,
+                accessDbModel.Name,
+                "John Doe"
+            ),
+            new(
+                InputTypes.Number,
+                accountIdLabel,
+                accessDbModel.AccountId.ToString(),
+                "AccountId"
+            ),
+            new(
+                InputTypes.Text,
+                discordIdLabel,
+                accessDbModel.DiscordId,
+                "DiscordId"
+            ),
+            new(
+                InputTypes.Select,
+                rankLabel,
+                accessDbModel.Rank.ToString(),
+                "Welchen AccessRank?",
+                InputOptionModel.GetOptionsForRankEnum()
+            )
+        };
+
+        var parameter = new DialogParameters<SimpleMudDialog>
+        {
+            { x => x.Description, description },
+            { x => x.Inputs, inputs },
+            { x => x.SubmitButtonText, submitButtonText },
+        };
+
+        var dialog = await DialogService.ShowAsync<SimpleMudDialog>(title, parameter, new DialogOptions { FullWidth = true });
+        var dialogResult = await dialog.Result;
+
+        if (dialogResult != null && dialogResult.Canceled) return;
+
+        var data = (List<InputModel>)dialogResult.Data!;
+        
+        var name = data.First(x => x.Label == nameLabel).Value;
+        if (string.IsNullOrEmpty(name))
+        {
+            Snackbar.Add("Es wurde kein Name eingetragen!", Severity.Error);
+            return;
+        }
+        
+        var accountIdString = data.First(x => x.Label == accountIdLabel).Value;
+        if (!int.TryParse(accountIdString, out var accountId))
+        {
+            Snackbar.Add("Es wurde keine richtige AccountId eingetragen!", Severity.Error);
+            return;
+        }
+        
+        var discordId = data.First(x => x.Label == discordIdLabel).Value;
+        if (string.IsNullOrEmpty(discordId))
+        {
+            Snackbar.Add("Es wurde keine DiscordId eingetragen!", Severity.Error);
+            return;
+        }
+        
+        var rankString = data.First(x => x.Label == rankLabel).Value;
+        if (!Enum.TryParse(rankString, out RankEnum accountRank))
+        {
+            Snackbar.Add("Es wurde keine richter Rank ausgewählt!", Severity.Error);
+            return;
+        }
+
+        var partialAccessModel = new PartialAccessModel(accountId, discordId, name, accountRank);
+        var response = await AccessProxy.UpdateToPartial(accessDbModel, partialAccessModel, MainLayout.AccessModel.Id);
+        if (!response)
+        {
+            Snackbar.Add("Beim Aktualisieren ist ein Fehler aufgetreten oder es wurden keine andere Werte angegeben.", Severity.Error);
+            return;
+        }
+
+        await MainLayout.BaseHubConnection.SendAsync(BaseHubMethodEnum.UpdateAccess.ToString(), accessDbModel.Id);
+        
+        Snackbar.Add($"[{accessDbModel.Id}] {accessDbModel.Name} wurde aktualisiert.", Severity.Success);
+        
+        await Load();
+    }
+}

@@ -1,0 +1,77 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using System.Diagnostics
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.JSInterop
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.Server.Circuits
+
+// MudBlazor
+@using MudBlazor
+
+// Customs Imports
+@using ChoiceVFileSystemBlazor
+@using ChoiceVFileSystemBlazor.Services
+@using ChoiceVFileSystemBlazor.Models
+@using ChoiceVFileSystemBlazor.Helper
+@using ChoiceVFileSystemBlazor.Extensions
+@using ChoiceVFileSystemBlazor.Components
+@using ChoiceVFileSystemBlazor.Components._Base
+@using ChoiceVFileSystemBlazor.Components._Layout
+@using ChoiceVFileSystemBlazor.Components._Layout.Hubs
+@using ChoiceVFileSystemBlazor.Components._Layout.Enums
+@using ChoiceVFileSystemBlazor.Components._Shared
+@using ChoiceVFileSystemBlazor.Components.Supportfiles.Hubs
+@using ChoiceVFileSystemBlazor.Components.Supportfiles.Enums
+@using ChoiceVFileSystemBlazor.Database
+@using ChoiceVFileSystemBlazor.Database._Shared
+@using ChoiceVFileSystemBlazor.Database.Accesses.DbModels
+@using ChoiceVFileSystemBlazor.Database.Accesses.Proxies.Interfaces
+@using ChoiceVFileSystemBlazor.Database.Discord.Proxies.Interfaces
+@using ChoiceVFileSystemBlazor.Database.Ranks.Proxies
+@using ChoiceVFileSystemBlazor.Database.Ranks.Proxies.Intefaces
+@using ChoiceVFileSystemBlazor.Database.Supportfiles
+@using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies
+@using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces
+@using ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels
+@using ChoiceVFileSystemBlazor.Database.Supportfiles.Extension
+
+@using ChoiceVRefitClient
+@using ChoiceVSharedApiModels.Accounts
+@using ChoiceVSharedApiModels.Characters
+@using ChoiceVSharedApiModels.Inventory
+
+@using Microsoft.AspNetCore.SignalR.Client
+
+@attribute [Authorize(AuthenticationSchemes = "Discord")]
+
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject AuthorizationService AuthorizationService
+
+// ChoiceV Gameserver Api
+@inject IAccountApi AccountApi
+@inject ICharacterApi CharacterApi
+@inject IInventoryApi InventoryApi
+
+// SCP Database Proxies
+@inject IAccessProxy AccessProxy
+@inject IAccessLogsProxy AccessLogsProxy
+
+@inject IDiscordRolesProxy DiscordRolesProxy
+@inject IDiscordRoleLogsProxy DiscordRoleLogsProxy
+
+@inject ISupportfileProxy SupportfileProxy
+@inject ISupportfileLogsProxy SupportfileLogsProxy
+@inject ISupportfileEntryProxy SupportfileEntryProxy
+
+@inject IRankProxy RankProxy

@@ -1,0 +1,47 @@
+﻿using System.ComponentModel.DataAnnotations;
+using ChoiceVFileSystemBlazor.Database._Shared;
+
+namespace ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
+
+public class SupportfileDbModel
+{
+    public SupportfileDbModel()
+    {
+    }   
+    
+    public SupportfileDbModel(Ulid createdByAccessId)
+    {
+        CreatedByAccessId = createdByAccessId;
+    }   
+
+    public SupportfileDbModel(
+        string title, string description, Ulid createdByAccessId, 
+        FileStatusEnum status, RankEnum minRank)
+    {
+        Id = Ulid.NewUlid();
+        Title = title;
+        Description = description;
+        CreatedAt = DateTime.UtcNow;
+        CreatedByAccessId = createdByAccessId;
+        Status = status;
+        MinRank = minRank;
+    }
+    
+    public Ulid Id { get; set; } = Ulid.NewUlid();
+
+    [Required]
+    [MinLength(3, ErrorMessage = "Title must be at least 3 characters long.")]
+    public string Title { get; set; }
+    [Required]
+    [MaxLength(150, ErrorMessage = "Description must be at most 150 characters long.")]
+    public string Description { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public Ulid CreatedByAccessId { get; set; }
+    [Required]
+    public FileStatusEnum Status { get; set; }
+
+    [Required] 
+    public RankEnum MinRank { get; set; } = RankEnum.Rank1;
+
+    public bool Deleted { get; set; } = false;
+}

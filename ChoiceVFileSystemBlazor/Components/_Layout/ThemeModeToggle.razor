@@ -1,0 +1,36 @@
+﻿
+<MudTooltip Text="@GetThemeModeText()" Duration="@Constants.TOOLTIP_DURATION" Class="mr-5">
+    <MudIconButton Icon="@GetThemeModeIcon()" Color="Color.Inherit" Edge="Edge.Start" OnClick="@(()=> ToggleDarkMode())" />
+</MudTooltip>
+
+@code {
+    [Parameter] public bool IsDarkMode { get; set; }
+    [Parameter] public EventCallback<bool> OnDarkModeChanged { get; set; }
+    
+    private void ToggleDarkMode()
+    {
+        IsDarkMode = !IsDarkMode;
+        OnDarkModeChanged.InvokeAsync(IsDarkMode);
+    }
+
+    private string GetThemeModeText()
+    {
+        var text = "Wechseln zum ";
+
+        if (IsDarkMode)
+        {
+            text += "Light-Mode";
+        }
+        else
+        {
+            text += "Dark-Mode";
+        }
+        
+        return text;
+    }
+
+    private string GetThemeModeIcon()
+    {
+        return IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode;
+    }
+}

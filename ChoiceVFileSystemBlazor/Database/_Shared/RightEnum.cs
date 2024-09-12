@@ -1,0 +1,48 @@
+﻿namespace ChoiceVFileSystemBlazor.Database._Shared;
+
+public enum RightEnum
+{
+    ViewSupportfilesArea = 1000,
+    ViewSupportfiles = 1001,
+    ViewDeletedFiles = 1002,
+    SupportfileCreate = 1100,
+    SupportfileActions = 1200,
+    SupportfileEditTitle = 1210,
+    SupportfileEditDescription = 1211,
+    SupportfileEditStatus = 1212,
+    SupportfileEditMinRank = 1213,
+    SupportfileDelete = 1220,
+    SupportfileRestore = 1221,
+    SupportfileViewLogs = 1300,
+    ViewSupportfileEntrys = 1400,
+    ViewSupportfileDeletedEntrys = 1401,
+    SupportfileCreateEntrys = 1410,
+    SupportfileEditEntrys = 1411,
+    SupportfileDeleteEntrys = 1412,
+    SupportfileRestoreEntrys = 1412,
+    
+    ViewGroupingfilesArea = 2000,
+    ViewGroupingfiles = 2001,
+    GroupingfileCreate = 2100,
+    GroupingfileEdit = 2200,
+    GroupingfileDelete = 2300, 
+    GroupingfileViewLogs = 2400,
+    GroupingfileCreateEntrys = 2500,
+    GroupingfileEditEntrys = 2600,
+    GroupingfileDeleteEntrys = 2700,
+    
+    ViewGameserverArea = 3000,
+    ViewAccountsArea = 3100,
+    ViewAccounts = 3101,
+    ViewCharactersArea = 3200,
+    ViewSupportKeyLogsArea = 3300,
+    
+    ViewAdminPanelArea = 9000,
+    ViewAdminAccessControl = 9100,
+    ViewAdminAccessLogs = 9110,
+    ViewAdminRightsControl = 9200,
+    ViewDiscordRolesControl = 9300,
+    DiscordRoleCreate = 9310,
+    DiscordRoleDelete = 9320,
+    DiscordRoleEdit = 9330,
+}

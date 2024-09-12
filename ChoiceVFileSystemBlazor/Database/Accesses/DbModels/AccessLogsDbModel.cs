@@ -1,0 +1,23 @@
+﻿using ChoiceVFileSystemBlazor.Database.Accesses.Enums;
+
+namespace ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
+
+public class AccessLogsDbModel
+{
+    public AccessLogsDbModel() {}
+
+    public AccessLogsDbModel(Ulid supportfileId, AccessLogTypeEnum type, Ulid accessId, string content)
+    {
+        TargetAccessId = supportfileId;
+        Type = type;
+        AccessId = accessId;
+        Content = content;
+    }
+    
+    public Ulid Id { get; set; } = Ulid.NewUlid();
+    public Ulid TargetAccessId { get; set; }
+    public AccessLogTypeEnum Type { get; set; }
+    public Ulid AccessId { get; set; }
+    public string Content { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}

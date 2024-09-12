@@ -1,0 +1,28 @@
+﻿@page "/notfound"
+
+@code {
+    private const string Url = "/notfound";
+    public static string GetRedirectUrl() => Url;
+}
+
+<div class="centered">
+
+    <h3>Not Found</h3>
+    <p>Die angeforderte URL: </p>
+    <strong>@_originalUrl</strong>
+    <p>wurde nicht gefunden.</p>
+
+</div>
+
+@code {
+    private string? _originalUrl;
+
+    protected override void OnInitialized()
+    {
+        // Hole die Query-String-Parameter von der aktuellen URL
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+
+        _originalUrl = query.TryGetValue("requestedUrl", out var url) ? url.ToString() : "Unbekannt";
+    }
+}

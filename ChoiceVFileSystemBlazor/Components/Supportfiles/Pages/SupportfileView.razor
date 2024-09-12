@@ -1,0 +1,650 @@
+﻿@page "/supportfiles/view/{id}"
+
+@code {
+    private const string Url = "/supportfiles/view/";
+    public static string GetRedirectUrl(string id) => Url + id;
+}
+
+<PageTitle>@(GetSupportfileTitle())</PageTitle>
+<h1>@(GetSupportfileTitle())</h1>
+
+@if (_loading || _hubConnection is null || !_isAuthorized || !_hasNeededRank || _model is null)
+{
+    <PageLoading/>
+}
+else if (_model is not null)
+{
+    <style>
+        .height-85 {
+            height: 85%
+        }
+    </style>
+    
+    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6 height-85" Style="height: 100%">
+        <MudTabPanel Text="Allgemein" Icon="@Icons.Material.Filled.Info">
+            <MudGrid Justify="Justify.FlexStart">
+                <MudItem xs="8">
+                    <MudPaper Class="pa-4">
+                        <MudTextField Label="CreatedByAccessId" Variant="Variant.Outlined" ReadOnly Value="@(_creator is null ? _model.CreatedByAccessId.ToString() : _creator.Name)"/>
+
+                        <MudDivider Style="@_dividerStyle"/>
+                        <MudTextField Label="Title" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditTitle))" @bind-Value="_model.Title"/>
+
+                        <MudDivider Style="@_dividerStyle"/>
+                        <MudTextField Label="Description" Lines="3" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditDescription))" @bind-Value="_model.Description"/>
+
+                        <MudDivider Style="@_dividerStyle"/>
+                        <MudSelect T="FileStatusEnum" Label="Status" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditStatus))" @bind-Value="_model.Status">
+                            @foreach (FileStatusEnum status in Enum.GetValues(typeof(FileStatusEnum)))
+                            {
+                                <MudSelectItem Value="@(status)"/>
+                            }
+                        </MudSelect>
+
+                        <MudDivider Style="@_dividerStyle"/>
+                        <MudSelect T="RankEnum" Label="MinRank" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditMinRank))" @bind-Value="_model.MinRank">
+                            @foreach (RankEnum status in Enum.GetValues(typeof(RankEnum)))
+                            {
+                                <MudSelectItem Value="@(status)"/>
+                            }
+                        </MudSelect>
+                    </MudPaper>
+                </MudItem>
+
+                @if (MainLayout.HasRight(RightEnum.SupportfileActions))
+                {
+                    <MudItem xs="4">
+                        <MudPaper Class="pa-4">
+                            <MudToolBar>
+                            @if (MainLayout.HasAnyRights([RightEnum.SupportfileEditTitle, RightEnum.SupportfileEditDescription, RightEnum.SupportfileEditStatus, RightEnum.SupportfileEditMinRank]))
+                            {
+                                <MudTooltip Text="Änderungen speichern" Duration="@Constants.TOOLTIP_DURATION">
+                                    <MudIconButton Variant="Variant.Text" Color="Color.Primary" Icon="@Icons.Material.Filled.Save" OnClick="() => SaveChanges()"/>
+                                </MudTooltip>
+                            }
+                            
+                            <MudSpacer />
+
+                            @if (_model.Deleted && MainLayout.HasRight(RightEnum.SupportfileRestore))
+                            {
+                                <MudTooltip Text="Supportakte wiederherstellen" Duration="@Constants.TOOLTIP_DURATION">
+                                    <MudIconButton Variant="Variant.Text" Color="Color.Success" Icon="@Icons.Material.Filled.RestoreFromTrash" OnClick="() => ToggleFileDeleted()"/>
+                                </MudTooltip>
+                            }
+                            else if (!_model.Deleted && MainLayout.HasRight(RightEnum.SupportfileDelete))
+                            {
+                                <MudTooltip Text="Supportakte löschen" Duration="@Constants.TOOLTIP_DURATION">
+                                    <MudIconButton Variant="Variant.Text" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" OnClick="() => ToggleFileDeleted()"/>
+                                </MudTooltip>
+                            }
+                            </MudToolBar>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudTabPanel>
+        
+        @if (MainLayout.HasRight(RightEnum.ViewSupportfileEntrys))
+        {
+            <MudTabPanel Text="Einträge" Icon="@Icons.Custom.FileFormats.FileDocument">
+                @if (MainLayout.HasRight(RightEnum.SupportfileCreateEntrys))
+                {
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="() => OnClickCreate()">Eintrag hinzufügen</MudButton>
+                }
+                @if (MainLayout.HasRight(RightEnum.ViewSupportfileDeletedEntrys))
+                {
+                    @if (_showDeletedEntrys)
+                    {
+                        <MudTooltip Text="Gelöschte Einträge ausblenden" Duration="@Constants.TOOLTIP_DURATION">
+                            <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" OnClick="() => ToggleShowDeletedEntrys()"/>
+                        </MudTooltip>
+                    }
+                    else
+                    {
+                        <MudTooltip Text="Gelöschte Einträge anzeigen" Duration="@Constants.TOOLTIP_DURATION">
+                            <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Outlined.Delete" OnClick="() => ToggleShowDeletedEntrys()"/>
+                        </MudTooltip>
+                    }
+                }
+
+                <MudPaper Square="true" style="height: 100%; overflow-y: auto;">
+                    <MudList T="Object">
+                        @foreach (var entry in _entrys)
+                        {
+                            var creator = _allAccessModels.FirstOrDefault(x => x.Id == entry.CreatedByAccessId);
+
+                            if (entry != _entrys.First())
+                            {
+                                <MudDivider/>
+                            }
+
+                            <MudCard>
+                                <MudCardHeader>
+                                    <CardHeaderContent>
+                                        <MudText Typo="Typo.h5">[@entry.CreatedByAccessId] @(creator is null ? "ERROR" : creator.Name) am @entry.CreatedAt</MudText>
+                                    </CardHeaderContent>
+                                </MudCardHeader>
+                                <MudCardContent>
+                                    <MudTextField @bind-Value="entry.Content" ReadOnly Variant="Variant.Text" Lines="@_entryLines" AutoGrow MaxLines="10"/>
+                                </MudCardContent>
+                                <MudCardActions>
+                                    <div class="d-flex align-center justify-space-between" style="width: 100%;">
+                                        <MudText Style="opacity: 0.2" Typo="Typo.body2">@GetSublineText(entry)</MudText>
+                                        <MudButtonGroup Color="Color.Primary" Variant="Variant.Text">
+                                            @if (MainLayout.HasRight(RightEnum.SupportfileEditEntrys))
+                                            {
+                                                <MudIconButton Variant="Variant.Text" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" OnClick="() => EditEntry(entry)"/>
+                                            }
+                                            @if (!entry.Deleted && MainLayout.HasRight(RightEnum.SupportfileDeleteEntrys))
+                                            {
+                                                <MudIconButton Variant="Variant.Text" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" OnClick="() => RemoveEntry(entry)"/>
+                                            }
+                                            else if (entry.Deleted && MainLayout.HasRight(RightEnum.SupportfileRestoreEntrys))
+                                            {
+                                                <MudIconButton Variant="Variant.Text" Color="Color.Success" Icon="@Icons.Material.Filled.RestoreFromTrash" OnClick="() => RestoreEntry(entry)"/>
+                                            }
+                                        </MudButtonGroup>
+                                    </div>
+                                </MudCardActions>
+                            </MudCard>
+                        }
+                    </MudList>
+                </MudPaper>
+            </MudTabPanel>
+        }
+        
+        @if (MainLayout.HasRight(RightEnum.SupportfileViewLogs))
+        {
+            <MudTabPanel Text="Logs" Icon="@Icons.Material.Filled.ScreenSearchDesktop">
+                <MudDataGrid
+                    T="SupportfileLogsDbModel" MultiSelection="true"
+                    Items="@_logs" SortMode="SortMode.Multiple" Filterable="true"
+                    QuickFilter="@QuickFilter"
+                    Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="65vh">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Logs für @_model.Id</MudText>
+                        <MudSpacer />
+                        <MudTextField
+                            T="string" @bind-Value="_logSearchString" Placeholder="Search"
+                            Adornment="Adornment.Start" Immediate="true"
+                            AdornmentIcon="@Icons.Material.Filled.Search"
+                            IconSize="Size.Medium" Class="mt-0"/>
+                    </ToolBarContent>
+                    <Columns>
+                        <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" InitialDirection="SortDirection.Descending"/>
+                        <PropertyColumn Property="x => x.Content" Title="Content" />
+                        <PropertyColumn Property="x => x.AccessId" Title="AccessId" />
+                        <PropertyColumn Property="x => x.Type" Title="Type" />
+                        <PropertyColumn Property="x => x.CreatedAt" Title="CreatedAt" />
+                    </Columns>
+                    <PagerContent>
+                        <MudDataGridPager T="SupportfileLogsDbModel" />
+                    </PagerContent>
+                </MudDataGrid>
+            </MudTabPanel>
+        }
+    </MudTabs>
+}
+else
+{
+    <MudAlert Severity="Severity.Error">Ein Fehler ist aufgetreten!</MudAlert>
+}
+
+@code {
+    [Parameter] public string Id { get; set; }
+    private HubConnection? _hubConnection;
+    private bool _loading = true;
+    
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+    private bool _hasNeededRank;
+
+    private SupportfileDbModel? _model;
+    private SupportfileDbModel? _checkModel;
+    private List<SupportfileLogsDbModel> _logs = [];
+    private List<SupportfileEntryDbModel> _entrys = [];
+    private List<AccessDbModel> _allAccessModels = [];
+    private AccessDbModel? _creator;
+    
+    private static string _dividerStyle = "margin: 10px 0; opacity: 0;";
+    private string GetSupportfileTitle() => _model != null ? "Supportakte " + _model.Title : "Loading...";
+
+    private const int _entryLines = 3;
+    private bool _showDeletedEntrys = false;
+    
+    private string? _logSearchString;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _isAuthorized = MainLayout.HasRight(RightEnum.ViewSupportfiles);
+        _shouldRedirect = !_isAuthorized;
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+            
+        await StartHubConnection();
+        
+        await FetchSupportfileById();
+    }
+
+    private async Task FetchSupportfileById()
+    {
+        _loading = true;
+        
+        await LoadModel();
+        
+        _loading = false;
+        StateHasChanged();
+    }
+
+    private async Task LoadModel()
+    {
+        if (!Ulid.TryParse(Id, out var fileId))
+        {
+            Snackbar.Add("Parsing failed", Severity.Error);
+            _loading = false;
+            return;
+        }
+        
+        var model = await SupportfileProxy.GetAsync(fileId);
+        if (model is null)
+        {
+            Snackbar.Add("Ein Fehler beim Laden ist aufgetreten.", Severity.Error);
+            _loading = false;
+            return;
+        }
+
+        if (MainLayout.Rank < model.MinRank)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+
+        _hasNeededRank = true;
+
+        _model = model;
+        _checkModel = _model.CreateShallowCopy();
+
+        _allAccessModels = await AccessProxy.GetAllAsync();
+        _creator = _allAccessModels.FirstOrDefault(x => x.Id == _model.CreatedByAccessId);
+        
+        await LoadEntrys();
+        StateHasChanged();
+    }
+    
+    private async Task LoadEntrys()
+    {
+        if (_model is null) return;
+        
+        @if (MainLayout.HasRight(RightEnum.ViewSupportfileEntrys))
+        {
+            var entrys = await SupportfileEntryProxy.GetAllEntrysForSupportfileIdAsync(_model.Id);
+            _entrys = _showDeletedEntrys ? entrys : entrys.Where(x => !x.Deleted).ToList();
+        }
+        
+        @if (MainLayout.HasRight(RightEnum.SupportfileViewLogs))
+        {
+            _logs = await SupportfileLogsProxy.GetAllLogsForSupportfileIdAsync(_model.Id);
+        }
+        
+        StateHasChanged();
+    }
+
+    private async Task OnClickCreate()
+    {
+        if (_model is null) return;
+        if (MainLayout.AccessModel is null) return;
+        if (!MainLayout.HasRight(RightEnum.SupportfileCreateEntrys)) return;
+        
+        const string title = "Eintrag hinzufügen";
+        const string description = "Welche Information möchtest du hinzufügen?";
+        const string submitButtonText = "Eintrag hinzufügen";
+
+        const string messageLabel = "Nachricht/Information";
+
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                messageLabel,
+                string.Empty,
+                "Am... Mit... Beschlossen...",
+                _entryLines
+            ),
+        };
+
+        var parameter = new DialogParameters<SimpleMudDialog>
+        {
+            { x => x.Description, description },
+            { x => x.Inputs, inputs },
+            { x => x.SubmitButtonText, submitButtonText },
+        };
+
+        var dialog = await DialogService.ShowAsync<SimpleMudDialog>(title, parameter, new DialogOptions { FullWidth = true });
+        var dialogResult = await dialog.Result;
+
+        if (dialogResult != null && dialogResult.Canceled) return;
+
+        var data = (List<InputModel>)dialogResult.Data!;
+        var message = data.First(x => x.Label == messageLabel).Value;
+
+        if (string.IsNullOrEmpty(message))
+        {
+            Snackbar.Add("Es wurde keine Nachricht eingetragen!", Severity.Error);
+            return;
+        }
+
+        var response = await SupportfileEntryProxy.AddEntryAsync(new SupportfileEntryDbModel(_model.Id, message, MainLayout.AccessModel.Id));
+        if (response is null)
+        {
+            Snackbar.Add("Nachricht konnte nicht hinzugefügt werden!", Severity.Error);
+            return;
+        }
+
+        await SendUpdateEntryToHub();
+        await LoadEntrys();
+    }
+
+    private async Task StartHubConnection()
+    {
+        _hubConnection = HubHelper.GetHubConnection(Navigation, SupportfileHub.HubPattern);
+        
+        _hubConnection.On<Ulid>(SupportfileHubMethodEnum.UpdateFile.ToString(), async (id) =>
+        {
+            if (_model is null) return;
+            if (id != _model.Id) return;
+            
+            await InvokeAsync(LoadModel);
+            StateHasChanged();
+        });
+        
+        _hubConnection.On<Ulid>(SupportfileHubMethodEnum.UpdateEntrys.ToString(), async (id) =>
+        {
+            if (_model is null) return;
+            if (id != _model.Id) return;
+            
+            await InvokeAsync(LoadEntrys);
+            StateHasChanged();
+        });
+        
+        _hubConnection.On<Ulid>(SupportfileHubMethodEnum.ToggleFileDeleted.ToString(), (id) =>
+        {
+            if (_model is null) return;
+            if (id != _model.Id) return;
+            
+            Navigation.NavigateTo(SupportfileOverview.GetRedirectUrl());
+        });
+
+        await _hubConnection.StartAsync();
+    }
+    
+    private async Task SendUpdateEntryToHub()
+    {
+        if (_model is null) return;
+        if (_hubConnection is null) return;
+        
+        await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateEntrys.ToString(), _model.Id);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is null) return;
+        
+        await _hubConnection.DisposeAsync();
+    }
+
+    private async Task EditEntry(SupportfileEntryDbModel entry)
+    {
+        if (_model is null) return;
+        if (MainLayout.AccessModel is null) return;
+        if (!MainLayout.HasRight(RightEnum.SupportfileEditEntrys)) return;
+        
+        const string title = "Eintrag bearbeiten";
+        var description = "Wie möchtest du den Eintrag bearbeiten?";
+        const string submitButtonText = "Eintrag bearbeitet";
+
+        const string messageLabel = "Nachricht/Information";
+
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                messageLabel,
+                entry.Content,
+                "Am... Mit... Beschlossen...",
+                _entryLines
+            ),
+        };
+
+        var parameter = new DialogParameters<SimpleMudDialog>
+        {
+            { x => x.Description, description },
+            { x => x.Inputs, inputs },
+            { x => x.SubmitButtonText, submitButtonText },
+        };
+
+        var dialog = await DialogService.ShowAsync<SimpleMudDialog>(title, parameter, new DialogOptions { FullWidth = true });
+        var dialogResult = await dialog.Result;
+
+        if (dialogResult != null && dialogResult.Canceled) return;
+
+        var data = (List<InputModel>)dialogResult.Data!;
+        var message = data.First(x => x.Label == messageLabel).Value;
+
+        if (string.IsNullOrEmpty(message))
+        {
+            Snackbar.Add("Es wurde keine Nachricht eingetragen!", Severity.Error);
+            return;
+        }
+
+        var response = await SupportfileEntryProxy.UpdateEntryContentAsync(entry.Id, message, MainLayout.AccessModel.Id);
+        if (!response)
+        {
+            Snackbar.Add("Nachricht konnte nicht bearbeitet werden!", Severity.Error);
+            return;
+        }
+
+        await SendUpdateEntryToHub();
+    }
+
+    private async Task RemoveEntry(SupportfileEntryDbModel entry)
+    {
+        if (_model is null) return;
+        if (MainLayout.AccessModel is null) return;
+        if (!MainLayout.HasRight(RightEnum.SupportfileDeleteEntrys)) return;
+        
+        var result = await DialogService.ShowMessageBox(
+            "Eintrag löschen", 
+            "Bist du dir sicher diesen Eintrag zu löschen? Dies kann nicht mehr rückgängig gemacht werden!", 
+            yesText:"Löschen!", cancelText:"Abbrechen"
+        );
+
+        if (result is null or false) return;
+
+        var response = await SupportfileEntryProxy.RemoveEntryAsync(entry.Id, MainLayout.AccessModel.Id);
+        if (!response)
+        {
+            Snackbar.Add("Dieser Eintrag konnte nicht gelöscht werden!");
+            return;
+        }
+        
+        await SendUpdateEntryToHub();
+    }
+
+    private async Task RestoreEntry(SupportfileEntryDbModel entry)
+    {
+        if (_model is null) return;
+        if (MainLayout.AccessModel is null) return;
+        if (!MainLayout.HasRight(RightEnum.SupportfileDeleteEntrys)) return;
+        
+        var result = await DialogService.ShowMessageBox(
+            "Eintrag wiederherstellen", 
+            "Bist du dir sicher diesen Eintrag zu wiederherzustellen?", 
+            yesText:"Wiederherstellen!", cancelText:"Abbrechen"
+        );
+
+        if (result is null or false) return;
+
+        var response = await SupportfileEntryProxy.RestoreEntryAsync(entry.Id, MainLayout.AccessModel.Id);
+        if (!response)
+        {
+            Snackbar.Add("Dieser Eintrag konnte nicht gelöscht werden!");
+            return;
+        }
+        
+        await SendUpdateEntryToHub();
+    }
+
+
+    private string GetSublineText(SupportfileEntryDbModel entry)
+    {
+        return $"{entry.Id}" + (entry.CreatedAt != entry.ModifiedAt ? $" - geändert {entry.ModifiedAt}" : string.Empty);
+    }
+    
+    private Func<SupportfileLogsDbModel, bool> QuickFilter => x =>
+    {
+        if (_logSearchString == null) return true;
+        
+        var lowerSearchString = _logSearchString.ToLower();
+        
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.Content.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.Type.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.CreatedAt.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if ($"{x.Id}".ToLower().Contains(lowerSearchString))
+            return true;
+
+        return false;
+    };
+
+    private async Task ToggleFileDeleted()
+    {
+        if (_model is null) return;
+        if (_hubConnection is null) return;
+        if (MainLayout.AccessModel is null) return;
+
+        if (_model.Deleted && !MainLayout.HasRight(RightEnum.SupportfileRestore)) return;
+        if (!_model.Deleted && !MainLayout.HasRight(RightEnum.SupportfileDelete)) return;
+
+        var title = _model.Deleted ? "Supportakte wiederherstellen" : "Supportakte löschen";
+        var message = _model.Deleted ? 
+            "Bist du dir sicher diese Supportakte wiederherzustellen?" : 
+            "Bist du dir sicher diese Supportakte zu löschen? Dies kann nicht mehr rückgängig gemacht werden!";
+        var yesText = _model.Deleted ? "Wiederherstellen" : "Löschen";
+        
+        var result = await DialogService.ShowMessageBox(
+            title, 
+            message, 
+            yesText:yesText, cancelText:"Abbrechen"
+        );
+
+        if (result is null or false) return;
+
+        var response = await SupportfileProxy.ToggleDeletedAsync(_model.Id, MainLayout.AccessModel.Id);
+        if (!response)
+        {
+            Snackbar.Add("Dieser Eintrag konnte nicht gelöscht/wiederhergestellt werden!");
+            return;
+        }
+        
+        await _hubConnection.SendAsync(SupportfileHubMethodEnum.ToggleFileDeleted.ToString(), _model.Id);
+    }
+
+    private async Task SaveChanges()
+    {
+        if (_hubConnection is null) return; 
+        
+        if (_model is null || _checkModel is null || MainLayout.AccessModel is null)
+        {
+            Snackbar.Add("Mögliche Änderungen konnte nicht aktualisiert werden.", Severity.Error);
+            return;
+        }
+
+        var shouldReload = false;
+        
+        if (_checkModel.Title != _model.Title && MainLayout.HasRight(RightEnum.SupportfileEditTitle))
+        {
+            var updateResponse = await SupportfileProxy.UpdateTitleAsync(_model.Id, _model.Title, MainLayout.AccessModel.Id);
+            if (!updateResponse)
+            {
+                Snackbar.Add("Title konnte nicht aktualisiert werden.", Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add("Title wurde aktualisiert.", Severity.Success);
+                shouldReload = true;
+            }
+        }
+        
+        if (_checkModel.Description != _model.Description && MainLayout.HasRight(RightEnum.SupportfileEditDescription))
+        {
+            var updateResponse = await SupportfileProxy.UpdateDescriptionAsync(_model.Id, _model.Description, MainLayout.AccessModel.Id);
+            if (!updateResponse)
+            {
+                Snackbar.Add("Description konnte nicht aktualisiert werden.", Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add("Description wurde aktualisiert.", Severity.Success);
+                shouldReload = true;
+            }
+        }
+        
+        if (_checkModel.Status != _model.Status && MainLayout.HasRight(RightEnum.SupportfileEditStatus))
+        {
+            var updateResponse = await SupportfileProxy.UpdateStatusAsync(_model.Id, _model.Status, MainLayout.AccessModel.Id);
+            if (!updateResponse)
+            {
+                Snackbar.Add("Status konnte nicht aktualisiert werden.", Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add("Status wurde aktualisiert.", Severity.Success);
+                shouldReload = true;
+            }
+        }
+        
+        if (_checkModel.MinRank != _model.MinRank && MainLayout.HasRight(RightEnum.SupportfileEditMinRank))
+        {
+            var updateResponse = await SupportfileProxy.UpdateMinRankAsync(_model.Id, _model.MinRank, MainLayout.AccessModel.Id);
+            if (!updateResponse)
+            {
+                Snackbar.Add("MinRank konnte nicht aktualisiert werden.", Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add("MinRank wurde aktualisiert.", Severity.Success);
+                shouldReload = true;
+            }
+        }
+
+        if (!shouldReload) return;
+        
+        await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), _model.Id);
+    }
+
+    private async Task ToggleShowDeletedEntrys()
+    {
+        _showDeletedEntrys = !_showDeletedEntrys;
+
+        await LoadEntrys();
+    }
+}

@@ -1,0 +1,187 @@
+﻿@page "/accounts/view/{id}"
+@using ChoiceVFileSystemBlazor.Components.Characters.Pages
+
+@code {
+    private const string Url = "/accounts/view/";
+    public static string GetRedirectUrl(string id) => Url + id;
+}
+
+<PageTitle>Account Ansicht</PageTitle>
+
+@if (_loading || !_isAuthorized || _shouldRedirect)
+{
+    <PageLoading/>
+}
+else if (_characters is null || _model is null)
+{
+    <PageLoading/>
+}
+else
+{
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="6">
+            <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-8 mud-height-full">
+                <MudText>Id: @_model.Id</MudText>
+                <MudText>Name: @_model.Name</MudText>
+                <MudText>SocialClubName: @_model.SocialClubName</MudText>
+                <MudText>DiscordId: @_model.DiscordId</MudText>
+                <MudText>LastLogin: @_model.LastLogin</MudText>
+                <MudText>State: @_model.State</MudText>
+                <MudText>StateReason: @_model.StateReason</MudText>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="6">
+            <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-8">
+                <MudDataGrid
+                    T="CharacterModel" MultiSelection="true"
+                    Items="@_characters" SortMode="SortMode.Multiple" Filterable="true"
+                    QuickFilter="@QuickFilter" RowClick="@RowClicked"
+                    Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh" Class="mud-width-full">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Charaktere</MudText>
+                        <MudSpacer />
+                        <MudTextField
+                            T="string" @bind-Value="_searchString" Placeholder="Search"
+                            Adornment="Adornment.Start" Immediate="true"
+                            AdornmentIcon="@Icons.Material.Filled.Search"
+                            IconSize="Size.Medium" Class="mt-0"/>
+                    </ToolBarContent>
+                    <Columns>
+                        <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
+                        <PropertyColumn Property="x => x.AccountId" Title="AccountId" />
+                        <PropertyColumn Property="x => x.FirstName" Title="FirstName" />
+                        <PropertyColumn Property="x => x.MiddleName" Title="MiddleName" />
+                        <PropertyColumn Property="x => x.LastName" Title="LastName" />
+                        <PropertyColumn Property="x => x.Dimension" Title="Dimension" />
+                    </Columns>
+                    <PagerContent>
+                        <MudDataGridPager T="CharacterModel" />
+                    </PagerContent>
+                </MudDataGrid>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+@code {
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+    private bool _loading = true;
+
+    [Parameter] public string Id { get; set; }
+    private int _id;
+    
+    private AccountModel? _model;
+    
+    private List<CharacterModel>? _characters;
+    private string? _searchString;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _isAuthorized = MainLayout.HasRight(RightEnum.ViewAccounts);
+        _shouldRedirect = !_isAuthorized;
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+
+        var parsingSuccess = ParseId();
+        if (!parsingSuccess)
+        {
+            Navigation.NavigateToError();
+            return;
+        }
+
+        await LoadAllAsync();
+    }
+    
+    private bool ParseId()
+    {
+        if (!int.TryParse(Id, out var accountId))
+        {
+            Snackbar.Add("Parsing failed", Severity.Error);
+            _loading = false;
+            return false;
+        }
+
+        _id = accountId;
+        return true;
+    }
+
+    private async Task LoadAllAsync()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        await LoadCharacterAsync();
+        await LoadCharactersAsync();
+        
+        _loading = false;
+        StateHasChanged();
+    }
+
+    private async Task LoadCharacterAsync()
+    {
+        var response = await AccountApi.GetByIdAsync(_id);
+        if (!response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateToError();
+            return; 
+        }
+
+        _model = response.Content;
+    }
+
+    private async Task LoadCharactersAsync()
+    {
+        var response = await CharacterApi.GetByAccountIdAsync(_id);
+        if (!response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateToError();
+            return; 
+        }
+
+        _characters = response.Content;
+    }
+    
+    private Func<CharacterModel, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+        
+        var lowerSearchString = _searchString.ToLower();
+
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.FirstName != null && x.FirstName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.LastName != null && x.LastName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.MiddleName != null && x.MiddleName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.AccountId != null && x.AccountId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if ($"{x.Id}".ToLower().Contains(_searchString))
+            return true;
+
+        return false;
+    };
+    
+    void RowClicked(DataGridRowClickEventArgs<CharacterModel> args)
+    {
+        Navigation.NavigateTo(CharacterView.GetRedirectUrl(args.Item.Id.ToString()));
+    }
+}

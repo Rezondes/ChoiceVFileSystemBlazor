@@ -1,0 +1,123 @@
+﻿@page "/characters"
+
+@code {
+    private const string Url = "/characters";
+    public static string GetRedirectUrl() => Url;
+}
+
+<PageTitle>Character Übersicht</PageTitle>
+
+@if (_loading || !_isAuthorized || _shouldRedirect)
+{
+    <PageLoading/>
+}
+else
+{
+    <MudDataGrid 
+        T="CharacterModel" MultiSelection="true" 
+        Items="@_data" SortMode="SortMode.Multiple" Filterable="true" 
+        QuickFilter="@QuickFilter" RowClick="@RowClicked"
+        Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Character Übersicht</MudText>
+            <MudSpacer />
+            <MudTextField 
+                T="string" @bind-Value="_searchString" Placeholder="Search" 
+                Adornment="Adornment.Start" Immediate="true"
+                AdornmentIcon="@Icons.Material.Filled.Search" 
+                IconSize="Size.Medium" Class="mt-0"/>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
+            <PropertyColumn Property="x => x.AccountId" Title="AccountId" />
+            <PropertyColumn Property="x => x.FirstName" Title="FirstName" />
+            <PropertyColumn Property="x => x.MiddleName" Title="MiddleName" />
+            <PropertyColumn Property="x => x.LastName" Title="LastName" />
+            <PropertyColumn Property="x => x.Dimension" Title="Dimension" />
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="CharacterModel" />
+        </PagerContent>
+    </MudDataGrid>
+}
+
+@code {
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+    private bool _loading = true;
+
+    private string? _searchString;
+    
+    private List<CharacterModel> _data = [];
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _isAuthorized = MainLayout.HasRight(RightEnum.ViewSupportfiles);
+        _shouldRedirect = !_isAuthorized;
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        _loading = true;
+        StateHasChanged();
+        
+        var response = await CharacterApi.GetAllAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateToError();
+            return; 
+        }
+
+        _data = response.Content;
+        
+        _loading = false;
+        StateHasChanged();
+    }
+    
+    private Func<CharacterModel, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+        
+        var lowerSearchString = _searchString.ToLower();
+
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.FirstName != null && x.FirstName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.LastName != null && x.LastName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.MiddleName != null && x.MiddleName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.AccountId != null && x.AccountId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if ($"{x.Id}".ToLower().Contains(_searchString))
+            return true;
+
+        return false;
+    };
+    
+    void RowClicked(DataGridRowClickEventArgs<CharacterModel> args)
+    {
+        Navigation.NavigateTo(CharacterView.GetRedirectUrl(args.Item.Id.ToString()));
+    }
+}

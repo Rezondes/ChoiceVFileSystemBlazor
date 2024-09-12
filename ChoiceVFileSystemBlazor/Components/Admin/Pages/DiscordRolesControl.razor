@@ -1,0 +1,343 @@
+﻿@page "/admin/discordroles"
+@using ChoiceVFileSystemBlazor.Database.Discord.DbModels
+@using ChoiceVFileSystemBlazor.Database.Discord.DbModels.Partials
+
+@code {
+    private const string Url = "/admin/discordroles";
+    public static string GetRedirectUrl() => Url;
+}
+
+<PageTitle>DiscordRolesControl</PageTitle>
+
+@if (_loading || !_isAuthorized || _shouldRedirect)
+{
+    <PageLoading/>
+}
+else
+{
+    <MudDataGrid
+        T="DiscordRoleDbModel" MultiSelection="true"
+        Items="@_data" SortMode="SortMode.Multiple" Filterable="true"
+        QuickFilter="@QuickFilter"
+        Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">DiscordRolesControl</MudText>
+            <MudSpacer />
+
+            @if (MainLayout.HasRight(RightEnum.DiscordRoleCreate))
+            {
+                <MudTooltip Text="Discordrolle hinzufügen" Duration="@Constants.TOOLTIP_DURATION">
+                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Add" OnClick="() => CreateDiscordRoleEntry()"/>
+                </MudTooltip>
+            }
+            
+            <MudTextField
+                T="string" @bind-Value="_searchString" Placeholder="Search"
+                Adornment="Adornment.Start" Immediate="true"
+                AdornmentIcon="@Icons.Material.Filled.Search"
+                IconSize="Size.Medium" Class="mt-0"/>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.Id" Title="#" Filterable="false"/>
+            <PropertyColumn Property="x => x.Name" Title="Name" />
+            <PropertyColumn Property="x => x.DiscordRoleId" Title="DiscordRoleId" />
+            <PropertyColumn Property="x => x.AutomaticRank" Title="AutomaticRank"/>
+            @if (MainLayout.HasRight(RightEnum.DiscordRoleEdit) || MainLayout.HasRight(RightEnum.DiscordRoleDelete))
+            {
+                <TemplateColumn CellClass="d-flex justify-end">
+                    <CellTemplate>
+                        <MudStack Row>
+                            @if (MainLayout.HasRight(RightEnum.DiscordRoleEdit))
+                            {
+                                <MudTooltip Text="Bearbeiten" Duration="@Constants.TOOLTIP_DURATION">
+                                    <MudIconButton 
+                                        Size="@Size.Small" 
+                                        Variant="@Variant.Filled" 
+                                        Icon="@Icons.Material.Filled.Edit" 
+                                        Color="@Color.Primary"
+                                        OnClick="() => EditEntry(context.Item.Id)"/>
+                                </MudTooltip>
+                            }
+                            @if (MainLayout.HasRight(RightEnum.DiscordRoleDelete))
+                            {
+                                <MudTooltip Text="Löschen" Duration="@Constants.TOOLTIP_DURATION">
+                                    <MudIconButton 
+                                        Size="@Size.Small" 
+                                        Variant="@Variant.Filled" 
+                                        Icon="@Icons.Material.Filled.DeleteForever" 
+                                        Color="@Color.Error"
+                                        OnClick="() => DeleteEntry(context.Item.Id)"/>
+                                </MudTooltip>
+                            }
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            }
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="DiscordRoleDbModel" />
+        </PagerContent>
+    </MudDataGrid>
+}
+
+@code {
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+    private bool _loading;
+    private string? _searchString;
+    
+    private List<DiscordRoleDbModel> _data = [];
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        
+        _isAuthorized = MainLayout.HasRight(RightEnum.ViewDiscordRolesControl);
+        _shouldRedirect = !_isAuthorized;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+            
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        _data = await DiscordRolesProxy.GetAllAsync();
+
+        _loading = false;
+        StateHasChanged();
+    }
+    
+    private Func<DiscordRoleDbModel, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+        
+        var lowerSearchString = _searchString.ToLower();
+        
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.Name.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.DiscordRoleId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.AutomaticRank.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if ($"{x.Id}".ToLower().Contains(lowerSearchString))
+            return true;
+
+        return false;
+    };
+
+    private async Task CreateDiscordRoleEntry()
+    {
+        if (MainLayout.AccessModel is null) return;
+        if (!MainLayout.HasRight(RightEnum.DiscordRoleCreate)) return;
+        
+        const string title = "Discordrolle hinzufügen";
+        const string description = "Was möchtest du hinzufügen?";
+        const string submitButtonText = "Hinzufügen";
+
+        const string nameLabel = "Name";
+        const string discordRoleIdLabel = "DiscordRollenId";
+        const string automaticRankLabel = "AutomaticRankLabel";
+
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                nameLabel,
+                string.Empty,
+                "DiscordRole-Name"
+            ),
+            new(
+                InputTypes.Number,
+                discordRoleIdLabel,
+                "0",
+                "DiscordRole-Id"
+            ),
+            new(
+                InputTypes.Select,
+                automaticRankLabel,
+                RankEnum.None.ToString(),
+                "Welchen AccessRank?",
+                InputOptionModel.GetOptionsForRankEnum()
+            )
+        };
+
+        var parameter = new DialogParameters<SimpleMudDialog>
+        {
+            { x => x.Description, description },
+            { x => x.Inputs, inputs },
+            { x => x.SubmitButtonText, submitButtonText },
+        };
+
+        var dialog = await DialogService.ShowAsync<SimpleMudDialog>(title, parameter, new DialogOptions { FullWidth = true });
+        var dialogResult = await dialog.Result;
+
+        if (dialogResult != null && dialogResult.Canceled) return;
+
+        var data = (List<InputModel>)dialogResult.Data!;
+        var name = data.First(x => x.Label == nameLabel).Value;
+
+        if (string.IsNullOrEmpty(name))
+        {
+            Snackbar.Add("Es wurde kein Name eingetragen!", Severity.Error);
+            return;
+        }
+
+        var discordRoleIdString = data.First(x => x.Label == discordRoleIdLabel).Value;
+        if (!ulong.TryParse(discordRoleIdString, out var discordRoleId))
+        {
+            Snackbar.Add("Es wurde keine richtige DiscordRoleId eingetragen!", Severity.Error);
+            return;
+        }
+        
+        var rankString = data.First(x => x.Label == automaticRankLabel).Value;
+        if (!Enum.TryParse(rankString, out RankEnum automaticRank))
+        {
+            Snackbar.Add("Es wurde keine richtiger Rank ausgewählt!", Severity.Error);
+            return;
+        }
+        
+        var response = await DiscordRolesProxy.AddAsync(new DiscordRoleDbModel(name, discordRoleId, automaticRank), MainLayout.AccessModel.Id);
+        if (!response)
+        {
+            Snackbar.Add("DiscordRoleEntry konnte nicht hinzugefügt werden!", Severity.Error);
+            return;
+        }
+        
+        Snackbar.Add("DiscordRoleEntry wurde hinzugefügt!", Severity.Success);
+        await Load();
+    }
+
+    private async Task EditEntry(Ulid id)
+    {
+        if (MainLayout.AccessModel is null) return;
+        if (!MainLayout.HasRight(RightEnum.DiscordRoleCreate)) return;
+
+        var model = await DiscordRolesProxy.GetByIdAsync(id);
+        if (model is null)
+        {
+            Snackbar.Add("DiscordRoleEntry nicht gefunden", Severity.Error);
+            return;
+        }
+        
+        const string title = "Discordrolle hinzufügen";
+        const string description = "Was möchtest du hinzufügen?";
+        const string submitButtonText = "Hinzufügen";
+
+        const string nameLabel = "Name";
+        const string discordRoleIdLabel = "DiscordRollenId";
+        const string automaticRankLabel = "AutomaticRankLabel";
+
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                nameLabel,
+                model.Name,
+                "DiscordRole-Name"
+            ),
+            new(
+                InputTypes.Number,
+                discordRoleIdLabel,
+                model.DiscordRoleId.ToString(),
+                "DiscordRole-Id"
+            ),
+            new(
+                InputTypes.Select,
+                automaticRankLabel,
+                model.AutomaticRank.ToString(),
+                "Welchen AccessRank?",
+                InputOptionModel.GetOptionsForRankEnum()
+            )
+        };
+
+        var parameter = new DialogParameters<SimpleMudDialog>
+        {
+            { x => x.Description, description },
+            { x => x.Inputs, inputs },
+            { x => x.SubmitButtonText, submitButtonText },
+        };
+
+        var dialog = await DialogService.ShowAsync<SimpleMudDialog>(title, parameter, new DialogOptions { FullWidth = true });
+        var dialogResult = await dialog.Result;
+
+        if (dialogResult != null && dialogResult.Canceled) return;
+
+        var data = (List<InputModel>)dialogResult.Data!;
+        var name = data.First(x => x.Label == nameLabel).Value;
+
+        if (string.IsNullOrEmpty(name))
+        {
+            Snackbar.Add("Es wurde kein Name eingetragen!", Severity.Error);
+            return;
+        }
+
+        var discordRoleIdString = data.First(x => x.Label == discordRoleIdLabel).Value;
+        if (!ulong.TryParse(discordRoleIdString, out var discordRoleId))
+        {
+            Snackbar.Add("Es wurde keine richtige DiscordRoleId eingetragen!", Severity.Error);
+            return;
+        }
+        
+        var rankString = data.First(x => x.Label == automaticRankLabel).Value;
+        if (!Enum.TryParse(rankString, out RankEnum automaticRank))
+        {
+            Snackbar.Add("Es wurde keine richtiger Rank ausgewählt!", Severity.Error);
+            return;
+        }
+
+        var partial = new PartialDiscordRoleDbModel(name, discordRoleId, automaticRank);
+        
+        var response = await DiscordRolesProxy.UpdateToPartial(model, partial, MainLayout.AccessModel.Id);
+        if (!response)
+        {
+            Snackbar.Add("DiscordRoleEntry konnte nicht aktualisiert werden!", Severity.Error);
+            return;
+        }
+        
+        Snackbar.Add("DiscordRoleEntry wurde aktualisiert!", Severity.Success);
+        await Load();
+    }
+
+    private async Task  DeleteEntry(Ulid id)
+    {
+        if (MainLayout.AccessModel is null) return;
+        if (!MainLayout.HasRight(RightEnum.DiscordRoleDelete)) return;
+        
+        var result = await DialogService.ShowMessageBox(
+            "DiscordRoleEntry löschen", 
+            "Bist du dir sicher diese DiscordRoleEntry zu löschen? Dies kann nicht mehr rückgängig gemacht werden!", 
+            yesText:"Löschen!", cancelText:"Abbrechen"
+        );
+
+        if (result is null or false) return;
+
+        var response = await DiscordRolesProxy.RemoveAsync(id, MainLayout.AccessModel.Id);
+        if (!response)
+        {
+            Snackbar.Add("Diese DiscordRoleEntry konnte nicht gelöscht werden!");
+            return;
+        }
+        
+        Snackbar.Add("DiscordRoleEntry wurde gelöscht!", Severity.Success);
+        await Load();
+    }
+}

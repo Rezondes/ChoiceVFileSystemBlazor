@@ -1,0 +1,175 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="@_currentTheme" IsDarkMode="@_isDarkMode"/>
+<MudPopoverProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+@switch (_loading)
+{
+    case true:
+        <PageLoading/>
+        break;
+    case false when _shouldRedirect:
+        <NotAuthorized/>
+        break;
+    default:
+        <MudLayout Style="height: 100vh; overflow: hidden;">
+            @if (AuthorizationService.IsAuthenticated(MainLayout.AccessModel))
+            {
+                <MudAppBar>
+                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@(() => ToggleDrawer())"/>
+                    <MudText Typo="Typo.h5" Class="ml-3">ChoiceV Support Control Panel</MudText>
+                    <MudSpacer/>
+                    <MudButtonGroup Color="Color.Primary">
+                        <MudTooltip Text="Zur Cloud" Duration="@Constants.TOOLTIP_DURATION" Class="mr-5">
+                            <MudIconButton Icon="@Icons.Material.Filled.Cloud" Color="Color.Inherit" Href="@Constants.CLOUD_URL" Target="_blank"/>
+                        </MudTooltip>
+                        <ThemeModeToggle IsDarkMode="@_isDarkMode" OnDarkModeChanged="@ToggleDarkMode"/>
+                    </MudButtonGroup>
+                </MudAppBar>
+
+                <MudDrawer @bind-Open="@_open" ClipMode="_clipMode" Breakpoint="@_breakpoint" Variant="@DrawerVariant.Mini">
+                    <NavMenu/>
+                </MudDrawer>
+
+                <MudMainContent Style="height: 100%; overflow: hidden;">
+                    @Body
+                </MudMainContent>
+            }
+        </MudLayout>
+        break;
+}
+
+@code
+{
+    private bool _loading = true;
+    private bool _shouldRedirect;
+    
+    public static HubConnection? BaseHubConnection;
+    
+    private bool _open = true;
+    private bool _dense = false;
+    private Breakpoint _breakpoint = Breakpoint.Lg;
+    private DrawerClipMode _clipMode = DrawerClipMode.Always;
+    private MudTheme _currentTheme = new MudTheme();
+    private bool _isDarkMode = true;
+    
+    public static ClaimsPrincipal? User;
+    public static AccessDbModel? AccessModel;
+    public static RankEnum Rank = RankEnum.None;
+    public static List<RightEnum> Rights = [];
+
+    protected override async void OnInitialized()
+    {
+        await base.OnInitializedAsync();
+        
+        await LoadUserData();
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        
+        CheckRedirect();
+            
+        await StartHubConnection();
+    }
+
+    private void CheckRedirect()
+    {
+        if (!_shouldRedirect) return;
+
+        Navigation.NavigateToNotAuthorized();
+    }
+    
+    private async Task LoadUserData()
+    {
+        _loading = true;
+        StateHasChanged();
+        
+        var user = await AuthenticationStateProvider.GetUser();
+        if (user is null)
+        {
+            _shouldRedirect = true;
+            _loading = false;
+            return;
+        }
+        User = user;
+        
+        var account = await user.GetVerifiedUser(AccessProxy, AccountApi, DiscordRolesProxy);
+        if (account is null)
+        {
+            _shouldRedirect = true;
+            _loading = false;
+            return;
+        }
+        
+        AccessModel = account;
+
+        Rank = AccessModel.Rank;
+        if (Rank <= RankEnum.None)
+        {
+            _shouldRedirect = true;
+            _loading = false;
+            return;
+        }
+        
+        var rightToRankDbModels = await RankProxy.GetAllRightsAsync(Rank);
+        Rights = rightToRankDbModels.Select(x => x.Right).ToList();
+        
+        _loading = false;
+        StateHasChanged();
+    }
+    
+    private async Task StartHubConnection()
+    {
+        BaseHubConnection = HubHelper.GetHubConnection(Navigation, BaseHub.HubPattern);
+        
+        BaseHubConnection.On(BaseHubMethodEnum.UpdateAccess.ToString(), async (Ulid accessId) =>
+        {
+            try
+            {
+                if (AccessModel is null) return;
+                if (accessId != AccessModel.Id) return;
+
+                await InvokeAsync(LoadUserData);
+                CheckRedirect();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        });
+        
+        BaseHubConnection.On(BaseHubMethodEnum.UpdateRights.ToString(), async () =>
+        {
+            try
+            {
+                if (AccessModel is null) return;
+
+                await InvokeAsync(LoadUserData);
+                CheckRedirect();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        });
+        
+        await BaseHubConnection.StartAsync();
+    }
+
+    public static bool HasRight(RightEnum requiredRight)
+    {
+        return Rank == RankEnum.Admin || Rights.Contains(requiredRight);
+    }
+
+    public static bool HasAnyRights(RightEnum[] rights)
+    {
+        return Rank == RankEnum.Admin || rights.Any(x => Rights.Contains(x));
+    }
+
+    private void ToggleDrawer() => _open = !_open;
+    private void ToggleDarkMode(bool newValue) => _isDarkMode = newValue;
+}

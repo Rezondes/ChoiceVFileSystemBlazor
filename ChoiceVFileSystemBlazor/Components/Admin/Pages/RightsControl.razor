@@ -1,0 +1,166 @@
+﻿@page "/admin/rights"
+
+@code {
+    private const string Url = "/admin/rights";
+    public static string GetRedirectUrl() => Url;
+}
+
+<PageTitle>Rechteverteilungs</PageTitle>
+
+@if (!_isAuthorized || _loading)
+{
+    <PageLoading/>
+}
+else
+{
+    <style>
+        .fixed-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+    </style>
+    
+    <div style="height: 100%; overflow-y: auto;">
+        <div class="centered">
+            <h3>Rechteverteilungs</h3>
+        </div>
+
+        <MudTable Items="@_rightList" Striped="true" Bordered="true" FixedHeader>
+            <HeaderContent>
+                <MudTh>Rechtname</MudTh>
+                @foreach (var item in _ranksList)
+                {
+                    <MudTh>@item.Item2</MudTh>
+                }
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Rechtname">@context.Item2</MudTd>
+                @{
+                    foreach (var item in _ranksList)
+                    {
+                        var rank = (RankEnum)item.Item1;
+                        var right = (RightEnum)context.Item1;
+
+                        if (!_checkboxValues.ContainsKey((rank, right)))
+                        {
+                            _checkboxValues[(rank, right)] = _rankWithRights.First(x => x.Item1 == rank).Item2.Contains(right);
+                        }
+
+                        <MudTd>
+                            <MudCheckBox T="bool" @bind-Value="_checkboxValues[(rank, right)]" Color="Color.Primary" UncheckedColor="Color.Default"/>
+                        </MudTd>
+                    }
+                }
+            </RowTemplate>
+        </MudTable>
+
+        <MudFab StartIcon="@Icons.Material.Filled.Save" OnClick="SaveRights" Color="Color.Tertiary" Size="Size.Large" Class="fixed-button"/>
+    </div>
+}
+@code {
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+    
+    private bool _loading;
+    
+    private List<(int, string)> _ranksList = [];
+    private List<(int, string)> _rightList = [];
+    private List<(RankEnum, List<RightEnum>)> _rankWithRights = [];
+    
+    private Dictionary<(RankEnum, RightEnum), bool> _checkboxValues = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        
+        _isAuthorized = MainLayout.HasRight(RightEnum.ViewAdminRightsControl);
+        _shouldRedirect = !_isAuthorized;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+            
+        await Load();
+    }
+    
+    private async Task Load()
+    {
+        if (_loading) return;
+        
+        _loading = true;
+        StateHasChanged();
+        
+        LoadRankList();
+        LoadRightList();
+        await LoadRightsForRank();
+        
+        _loading = false;
+        StateHasChanged();
+    }
+
+    private void LoadRankList()
+    {
+        foreach (RankEnum rank in Enum.GetValues(typeof(RankEnum)))
+        {
+            _ranksList.Add(((int)rank, rank.ToString()));
+        }
+    }
+
+    private void LoadRightList()
+    {
+        foreach (RightEnum right in Enum.GetValues(typeof(RightEnum)))
+        {
+            _rightList.Add(((int)right, right.ToString()));
+        }
+    }
+
+    private async Task LoadRightsForRank()
+    {
+        foreach (RankEnum rank in Enum.GetValues(typeof(RankEnum)))
+        {
+            var rightToRankDb = await RankProxy.GetAllRightsAsync(rank);
+            var rights = rightToRankDb.Select(x => x.Right).ToList();
+            _rankWithRights.Add((rank, rights));
+        }
+    }
+
+    private async Task SaveRights()
+    {
+        if (MainLayout.BaseHubConnection is null) return;
+        
+        var result = await DialogService.ShowMessageBox(
+            "Rechte überspeichern", 
+            "Bist du dir sicher diese Rechte so speichern möchtest? Dies kann nicht mehr rückgängig gemacht werden!", 
+            yesText:"Speichern", cancelText:"Abbrechen"
+        );
+
+        if (result is null or false) return;
+
+        _loading = true;
+        StateHasChanged();
+        
+        var (updateCount, addedCount, removedCount) = await RankProxy.ChangeBulkAsync(_checkboxValues);
+        
+        await MainLayout.BaseHubConnection.SendAsync(BaseHubMethodEnum.UpdateRights.ToString());
+        
+        _loading = false;
+        StateHasChanged();
+
+        if (updateCount <= 0)
+        {
+            Snackbar.Add("Es bleibt alles so wies hier is!", Severity.Info);
+            return;
+        }
+        
+        Snackbar.Add($"{addedCount}x Rechte zu Rollen hinzugefügt und {removedCount}x Rechte von Rollen entfernt.", Severity.Success);
+    }
+}
