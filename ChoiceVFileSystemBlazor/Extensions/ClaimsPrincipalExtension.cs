@@ -32,44 +32,55 @@ public static class ClaimsPrincipalExtension
             var accessResponse = await accessProxy.GetAsync(discordId);
             if (accessResponse is null)
             {
+                AccessDbModel? newAccessModel;
+                
                 var accountResponse = await accountApi.GetByDiscordIdAsync(discordId);
-                if (!accountResponse.IsSuccessStatusCode) throw new Exception($"Unable to get account by DiscordId: {discordId}");
-
-                var account = accountResponse.Content;
-                var newAccessModel = new AccessDbModel(account.Id, account.DiscordId, account.Name);
+                if (accountResponse.IsSuccessStatusCode)
+                {
+                    var account = accountResponse.Content;
+                    newAccessModel = new AccessDbModel(account.Id, account.DiscordId, account.Name);
+                }
+                else
+                {
+                    newAccessModel = new AccessDbModel(-1, discordId, discordName);
+                }
                 
                 var addResponse = await accessProxy.AddAccessModelAsync(newAccessModel);
                 if (!addResponse)
                     throw new Exception($"Unable to add new Access: DiscordId {newAccessModel.DiscordId} | AccountId {newAccessModel.AccountId} | AccountName {newAccessModel.Name}");
                 
                 response = newAccessModel;
+            
+                if (response.AccountId >= 0)
+                {
+                    // Set Highest DiscordRole
+                    var discordRoleDbModels = await discordRolesProxy.GetAllAsync();
+                    var highestRank = RankEnum.None;
+                    foreach (var role in roles)
+                    {
+                        if (!ulong.TryParse(role, out var discordRoleId)) continue;
+
+                        var discordRoleDbModel = discordRoleDbModels.FirstOrDefault(x => x.DiscordRoleId == discordRoleId);
+                        if (discordRoleDbModel is null) continue;
+
+                        if (discordRoleDbModel.AutomaticRank > highestRank) 
+                            highestRank = discordRoleDbModel.AutomaticRank;
+                    }
+
+                    if (highestRank > response.Rank)
+                    {
+                        var updateRankResponse = await accessProxy.UpdateRankAsync(response.Id, highestRank, Ulid.Empty);
+                        if (!updateRankResponse)
+                        {
+                            Debug.WriteLine($"Unable to update rank: Id: {response.Id} | Rank: {highestRank}");
+                        }
+                        response.Rank = highestRank;
+                    }
+                }
             }
             else
             {
                 response = accessResponse;
-            }
-
-            var discordRoleDbModels = await discordRolesProxy.GetAllAsync();
-            var highestRank = RankEnum.None;
-            foreach (var role in roles)
-            {
-                if (!ulong.TryParse(role, out var discordRoleId)) continue;
-
-                var discordRoleDbModel = discordRoleDbModels.FirstOrDefault(x => x.DiscordRoleId == discordRoleId);
-                if (discordRoleDbModel is null) continue;
-
-                if (discordRoleDbModel.AutomaticRank > highestRank) 
-                    highestRank = discordRoleDbModel.AutomaticRank;
-            }
-
-            if (highestRank > response.Rank)
-            {
-                var updateRankResponse = await accessProxy.UpdateRankAsync(response.Id, highestRank, Ulid.Empty);
-                if (!updateRankResponse)
-                {
-                    Debug.WriteLine($"Unable to update rank: Id: {response.Id} | Rank: {highestRank}");
-                }
-                response.Rank = highestRank;
             }
         }
         catch (Exception ex)
