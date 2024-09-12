@@ -72,7 +72,7 @@ public static class ClaimsPrincipalExtension
                         var updateRankResponse = await accessProxy.UpdateRankAsync(response.Id, highestRank, Ulid.Empty);
                         if (!updateRankResponse)
                         {
-                            Debug.WriteLine($"Unable to update rank: Id: {response.Id} | Rank: {highestRank}");
+                            Console.WriteLine($"Unable to update rank: Id: {response.Id} | Rank: {highestRank}");
                         }
                         response.Rank = highestRank;
                     }
