@@ -63,13 +63,13 @@
     protected override async void OnInitialized()
     {
         await base.OnInitializedAsync();
-        
-        await LoadUserData();
     }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
+        
+        await LoadUserData();
         
         CheckRedirect();
             
