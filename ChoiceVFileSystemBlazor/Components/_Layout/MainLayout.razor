@@ -21,11 +21,14 @@
                     <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@(() => ToggleDrawer())"/>
                     <MudText Typo="Typo.h5" Class="ml-3">ChoiceV Support Control Panel</MudText>
                     <MudSpacer/>
-                    <MudButtonGroup Color="Color.Primary">
+                    <MudButtonGroup Color="Color.Inherit">
                         <MudTooltip Text="Zur Cloud" Duration="@Constants.TOOLTIP_DURATION" Class="mr-5">
                             <MudIconButton Icon="@Icons.Material.Filled.Cloud" Color="Color.Inherit" Href="@Constants.CLOUD_URL" Target="_blank"/>
                         </MudTooltip>
                         <ThemeModeToggle IsDarkMode="@_isDarkMode" OnDarkModeChanged="@ToggleDarkMode"/>
+                        <MudTooltip Text="Eigener Account" Duration="@Constants.TOOLTIP_DURATION">
+                            <MudIconButton Icon="@Icons.Material.Filled.AccountBox" Color="Color.Inherit" OnClick="OpenAccessPage"/>
+                        </MudTooltip>
                     </MudButtonGroup>
                 </MudAppBar>
 
@@ -172,4 +175,11 @@
 
     private void ToggleDrawer() => _open = !_open;
     private void ToggleDarkMode(bool newValue) => _isDarkMode = newValue;
+
+    private void OpenAccessPage()
+    {
+        if (AccessModel is null) return;
+        
+        Navigation.NavigateTo(AccessView.GetRedirectUrl(AccessModel.Id.ToString()));
+    }
 }

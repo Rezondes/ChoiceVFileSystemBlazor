@@ -240,6 +240,7 @@ else
     private async Task FetchSupportfileById()
     {
         _loading = true;
+        StateHasChanged();
         
         await LoadModel();
         

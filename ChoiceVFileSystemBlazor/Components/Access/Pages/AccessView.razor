@@ -1,0 +1,133 @@
+﻿@page "/access/view/{id}"
+
+@code {
+    private const string Url = "/access/view/";
+    public static string GetRedirectUrl(string id) => Url + id;
+}
+
+@if (MainLayout.AccessModel is null)
+{
+    <PageLoading/>
+}
+else
+{
+    <MudGrid Justify="Justify.Center" style="height: 100%; overflow-y: auto;">
+        <MudItem xs="12"> 
+            <MudPaper Elevation="25" Style="padding: 20px;">
+                <MudText>Id: @MainLayout.AccessModel.Id</MudText>
+                <MudText>Name: @MainLayout.AccessModel.Name</MudText>
+                <MudText>Rank: @MainLayout.AccessModel.Rank</MudText>
+                <MudText>AccountId: @MainLayout.AccessModel.AccountId</MudText>
+                <MudText>DiscordId: @MainLayout.AccessModel.DiscordId</MudText>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OverrideData">Namen aktualisieren</MudButton>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12">
+            <SupportfileOverviewDataGrid AccessId="@MainLayout.AccessModel.Id" Label="Erstellte Supportakten" @ref="_supportfileOverviewDataGrid"/>
+        </MudItem>
+    </MudGrid>    
+}
+
+@code {
+    [Parameter] public string Id { get; set; }
+    private bool _shouldRedirect;
+
+    private SupportfileOverviewDataGrid _supportfileOverviewDataGrid;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _shouldRedirect = MainLayout.AccessModel is null;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        if (MainLayout.AccessModel is null)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+        
+        if (!Ulid.TryParse(Id, out var accessId))
+        {
+            Snackbar.Add("Parsing failed", Severity.Error);
+            
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+
+        if (accessId != MainLayout.AccessModel.Id)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+        
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+
+        await _supportfileOverviewDataGrid.Load();
+    }
+
+    private async Task OverrideData()
+    {
+        if (MainLayout.BaseHubConnection is null) return;
+        if (MainLayout.AccessModel is null) return;
+        
+        var accessDbModel = MainLayout.AccessModel;
+        
+        const string title = "Namen ändern";
+        const string description = "";
+        const string submitButtonText = "Speichern";
+
+        const string nameLabel = "Name";
+        
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                nameLabel,
+                accessDbModel.Name,
+                "John Doe"
+            ),
+        };
+
+        var parameter = new DialogParameters<SimpleMudDialog>
+        {
+            { x => x.Description, description },
+            { x => x.Inputs, inputs },
+            { x => x.SubmitButtonText, submitButtonText },
+        };
+
+        var dialog = await DialogService.ShowAsync<SimpleMudDialog>(title, parameter, new DialogOptions { FullWidth = true });
+        var dialogResult = await dialog.Result;
+
+        if (dialogResult is null || dialogResult.Canceled) return;
+
+        var data = (List<InputModel>)dialogResult.Data!;
+        
+        var name = data.First(x => x.Label == nameLabel).Value;
+        if (string.IsNullOrEmpty(name))
+        {
+            Snackbar.Add("Es wurde kein Name eingetragen!", Severity.Error);
+            return;
+        }
+
+        var partialAccessModel = new PartialAccessModel(accessDbModel.AccountId, accessDbModel.DiscordId, name, accessDbModel.Rank);
+        var response = await AccessProxy.UpdateToPartial(accessDbModel, partialAccessModel, MainLayout.AccessModel.Id);
+        if (!response)
+        {
+            Snackbar.Add("Beim Aktualisieren ist ein Fehler aufgetreten oder es wurden keine andere Werte angegeben.", Severity.Error);
+            return;
+        }
+
+        await MainLayout.BaseHubConnection.SendAsync(BaseHubMethodEnum.UpdateAccess.ToString(), accessDbModel.Id);
+        
+        Snackbar.Add($"[{accessDbModel.Id}] {accessDbModel.Name} wurde aktualisiert.", Severity.Success);
+    }
+}

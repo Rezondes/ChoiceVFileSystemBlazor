@@ -1,5 +1,6 @@
 ﻿@page "/supportfiles"
 
+
 @code {
     private const string Url = "/supportfiles/";
     public static string GetRedirectUrl() => Url;
@@ -7,75 +8,14 @@
 
 <PageTitle>Supportakten Übersicht</PageTitle>
 
-@if (_loading)
-{
-    <PageLoading/>
-}
-else if (!_loading && _supportfiles is null)
-{
-    <MudAlert Severity="Severity.Error">Ein Fehler ist aufgetreten!</MudAlert>
-}
-else
-{
-    <MudDataGrid
-        T="SupportfileDbModel" MultiSelection="true"
-        Items="@_supportfiles" SortMode="SortMode.Multiple" Filterable="true"
-        QuickFilter="@QuickFilter" RowClick="@RowClicked"
-        Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">Supportakten Übersicht</MudText>
-            <MudSpacer />
-
-            @if (AuthorizationService.HasRight(MainLayout.Rights, MainLayout.Rank, RightEnum.ViewDeletedFiles))
-            {
-                @if (_showDeletedFiles)
-                {
-                    <MudTooltip Text="Gelöschte Akten ausblenden" Duration="@Constants.TOOLTIP_DURATION">
-                        <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" OnClick="() => ToggleShowDeletedFiles()"/>
-                    </MudTooltip>
-                }
-                else
-                {
-                    <MudTooltip Text="Gelöschte Akten anzeigen" Duration="@Constants.TOOLTIP_DURATION">
-                        <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Outlined.Delete" OnClick="() => ToggleShowDeletedFiles()"/>
-                    </MudTooltip>
-                }
-            }
-
-            <MudTextField
-                T="string" @bind-Value="_searchString" Placeholder="Search"
-                Adornment="Adornment.Start" Immediate="true"
-                AdornmentIcon="@Icons.Material.Filled.Search"
-                IconSize="Size.Medium" Class="mt-0"/>
-        </ToolBarContent>
-        <Columns>
-            <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
-            <PropertyColumn Property="x => x.Title" Title="Title" />
-            <PropertyColumn Property="x => x.Status" Title="Status" />
-                @if (AuthorizationService.HasRight(MainLayout.Rights, MainLayout.Rank, RightEnum.ViewDeletedFiles))
-                {
-                    <PropertyColumn Property="x => x.Deleted" Title="Deleted" />
-                }
-        </Columns>
-        <PagerContent>
-            <MudDataGridPager T="SupportfileDbModel" />
-        </PagerContent>
-    </MudDataGrid>
-}
+<SupportfileOverviewDataGrid @ref="_supportfileOverviewDataGrid"/>
 
 @code {
     private bool _isAuthorized;
     private bool _shouldRedirect;
 
-    private HubConnection? _hubConnection;
+    private SupportfileOverviewDataGrid _supportfileOverviewDataGrid;
     
-    private bool _loading = true;
-    private string? _searchString;
-
-    private bool _showDeletedFiles = false;
-    
-    private List<SupportfileDbModel>? _supportfiles = null;
-
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -93,75 +33,7 @@ else
             Navigation.NavigateToNotAuthorized();
             return;
         }
-            
-        await StartHubConnection();
-        
-        await Load();
-    }
 
-    private async Task Load()
-    {
-        _loading = true;
-        StateHasChanged();
-        
-        _supportfiles = null;
-
-        var response = await SupportfileProxy.GetAllAsync();
-
-        var filteredResponse = response.Where(x => x.MinRank <= MainLayout.Rank).ToList();
-        
-        _supportfiles = _showDeletedFiles ? filteredResponse : filteredResponse.Where(x => !x.Deleted).ToList();
-        
-        _loading = false;
-        StateHasChanged();
-    }
-    
-    private async Task StartHubConnection()
-    {
-        _hubConnection = HubHelper.GetHubConnection(Navigation, SupportfileHub.HubPattern);
-        
-        _hubConnection.On(SupportfileHubMethodEnum.EntryCreated.ToString(), async () =>
-        {
-            await InvokeAsync(Load);
-        });
-
-        _hubConnection.On<Ulid>(SupportfileHubMethodEnum.ToggleFileDeleted.ToString(), async (id) =>
-        {
-            await InvokeAsync(Load);
-        });
-        
-        await _hubConnection.StartAsync();
-    }
-    
-    private Func<SupportfileDbModel, bool> QuickFilter => x =>
-    {
-        if (_searchString == null) return true;
-        
-        var lowerSearchString = _searchString.ToLower();
-        
-        if (string.IsNullOrWhiteSpace(lowerSearchString))
-            return true;
-
-        if (x.Title.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        if (x.Status.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        
-        if ($"{x.Id}".ToLower().Contains(lowerSearchString))
-            return true;
-
-        return false;
-    };
-    
-    void RowClicked(DataGridRowClickEventArgs<SupportfileDbModel> args)
-    {
-        Navigation.NavigateTo(SupportfileView.GetRedirectUrl(args.Item.Id.ToString()));
-    }
-
-    private async Task ToggleShowDeletedFiles()
-    {
-        _showDeletedFiles = !_showDeletedFiles;
-        await Load();
+        await _supportfileOverviewDataGrid.Load();
     }
 }
