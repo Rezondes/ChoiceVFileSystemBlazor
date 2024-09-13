@@ -21,8 +21,12 @@ jobs:
     - name: Deploy via SSH
       run: |
         ssh -o StrictHostKeyChecking=no root@rezondes.net << 'EOF'
-          cd /path/to/your/app
-          git pull origin master
-          docker-compose down
-          docker-compose up -d --build
+          cd /root/choiceV/ChoiceVFileSystemBlazor
+          
+          git pull https://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@github.com/Rezondes/ChoiceVFileSystemBlazor.git && \
+          docker build -t blazor-app . && \
+          docker stop blazor-app-container && \
+          docker rm blazor-app-container && \
+          docker run -d -p 443:8080 --name blazor-app-container blazor-app
+
         EOF
