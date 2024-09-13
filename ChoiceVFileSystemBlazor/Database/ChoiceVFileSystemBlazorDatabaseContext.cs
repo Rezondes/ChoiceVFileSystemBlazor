@@ -50,6 +50,14 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
             .HasConversion(
                 v => v.ToString(),
                 v => Ulid.Parse(v));
+        modelBuilder.Entity<AccessLogsDbModel>()
+            .HasOne(s => s.AccessModel)
+            .WithMany(a => a.CreatedAccessLogs) 
+            .HasForeignKey(s => s.AccessId); 
+        modelBuilder.Entity<AccessLogsDbModel>()
+            .HasOne(s => s.TargetAccessModel)
+            .WithMany(a => a.TargetedAccessLogs) 
+            .HasForeignKey(s => s.TargetAccessId); 
         
         modelBuilder.Entity<AccessDbModel>()
             .Property(e => e.Id)

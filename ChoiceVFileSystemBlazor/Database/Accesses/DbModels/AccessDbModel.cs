@@ -29,4 +29,6 @@ public class AccessDbModel : PartialAccessModel
     public List<SupportfileDbModel> Supportfiles { get; set; } = [];
     public List<SupportfileLogsDbModel> SupportfileLogs { get; set; } = [];
     public List<SupportfileEntryDbModel> SupportfileEntrys { get; set; } = [];
+    public List<AccessLogsDbModel> CreatedAccessLogs { get; set; } = [];
+    public List<AccessLogsDbModel> TargetedAccessLogs { get; set; } = [];
 }

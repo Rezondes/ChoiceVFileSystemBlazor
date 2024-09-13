@@ -29,7 +29,10 @@ else
         </ToolBarContent>
         <Columns>
             <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" InitialDirection="SortDirection.Descending"/>
+            <PropertyColumn Property="x => x.TargetAccessModel.Name" Title="TargetAccessName" />
+            <PropertyColumn Property="x => x.TargetAccessId" Title="TargetAccessId" />
             <PropertyColumn Property="x => x.Content" Title="Content" />
+            <PropertyColumn Property="x => x.AccessModel.Name" Title="AccessName" />
             <PropertyColumn Property="x => x.AccessId" Title="AccessId" />
             <PropertyColumn Property="x => x.Type" Title="Type" />
             <PropertyColumn Property="x => x.CreatedAt" Title="CreatedAt" />

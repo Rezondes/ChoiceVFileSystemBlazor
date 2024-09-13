@@ -20,4 +20,8 @@ public class AccessLogsDbModel
     public Ulid AccessId { get; set; }
     public string Content { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    
+    // Navigation Properties
+    public AccessDbModel TargetAccessModel { get; set; }
+    public AccessDbModel AccessModel { get; set; }
 }

@@ -11,7 +11,11 @@ public class AccessLogsProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseCo
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
-        return await dbContext.AccessLogsDbModels.AsNoTracking().ToListAsync();
+        return await dbContext.AccessLogsDbModels
+            .AsNoTracking()
+            .Include(x => x.AccessModel)
+            .Include(x => x.TargetAccessModel)
+            .ToListAsync();
     }
 
     // Return null if adding failed
