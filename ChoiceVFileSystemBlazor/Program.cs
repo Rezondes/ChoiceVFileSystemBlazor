@@ -232,7 +232,7 @@ builder.Services.AddSingleton<AuthorizationService>();
 
 builder.Services.AddHttpsRedirection(options =>
 {
-    options.HttpsPort = 443;
+    options.HttpsPort = 8080;
 });
 
 builder.Services.AddSignalR();
