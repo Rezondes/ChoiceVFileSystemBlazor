@@ -38,7 +38,9 @@ public static class ClaimsPrincipalExtension
                 if (accountResponse.IsSuccessStatusCode)
                 {
                     var account = accountResponse.Content;
-                    newAccessModel = new AccessDbModel(account.Id, account.DiscordId, account.Name);
+                    // TODO change back on Api ready
+                    // newAccessModel = new AccessDbModel(account.Id, account.DiscordId, account.Name);
+                    newAccessModel = new AccessDbModel(-1, discordId, discordName);
                 }
                 else
                 {
