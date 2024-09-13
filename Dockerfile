@@ -1,18 +1,16 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-# Benutzer UID wird definiert
-USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-# Kopiere das Zertifikat
+# Kopiere das Zertifikat als Root
 COPY blazorapp.pfx /https/blazorapp.pfx
 
-# Ändere den Besitzer der Zertifikatsdatei auf den aktuellen Benutzer ($APP_UID)
-RUN chown $APP_UID /https/blazorapp.pfx
+# Ändere den Besitzer der Zertifikatsdatei auf den Benutzer, den du später festlegst
+RUN chown 1654 /https/blazorapp.pfx && chmod 600 /https/blazorapp.pfx
 
-# Setze Leserechte für den Benutzer auf das Zertifikat
-RUN chmod 600 /https/blazorapp.pfx
+# Wechsle nun zum nicht-Root-Benutzer
+USER $APP_UID
 
 # Umgebungsvariablen für HTTPS und Zertifikatspfad
 ENV ASPNETCORE_URLS="https://+:8080"
