@@ -13,20 +13,21 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up SSH
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Install sshpass
+      run: sudo apt-get install -y sshpass
 
     - name: Deploy via SSH
+      env:
+        SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+        SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
       run: |
-        ssh -o StrictHostKeyChecking=no root@85.114.132.133 << 'EOF'
+        sshpass -p $SSH_PASSWORD ssh -o StrictHostKeyChecking=no $SSH_USERNAME@85.114.132.133 << 'EOF'
           cd /root/choiceV/ChoiceVFileSystemBlazor
           
           git pull https://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@github.com/Rezondes/ChoiceVFileSystemBlazor.git && \
           docker build -t blazor-app . && \
-          docker stop blazor-app-container && \
-          docker rm blazor-app-container && \
+          docker stop blazor-app-container || true && \
+          docker rm blazor-app-container || true && \
           docker run -d -p 443:8080 --name blazor-app-container blazor-app
 
         EOF
