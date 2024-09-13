@@ -25,13 +25,13 @@ else if (_model is not null)
             <MudGrid Justify="Justify.FlexStart">
                 <MudItem xs="8">
                     <MudPaper Class="pa-4">
-                        <MudTextField Label="CreatedByAccessId" Variant="Variant.Outlined" ReadOnly Value="@(_creator is null ? _model.CreatedByAccessId.ToString() : _creator.Name)"/>
+                        <MudTextField Label="Ersteller" Variant="Variant.Outlined" ReadOnly Value="@_model.CreatorAccessModel.Name"/>
 
                         <MudDivider Style="@_dividerStyle"/>
-                        <MudTextField Label="Title" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditTitle))" @bind-Value="_model.Title"/>
+                        <MudTextField Label="Titel" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditTitle))" @bind-Value="_model.Title"/>
 
                         <MudDivider Style="@_dividerStyle"/>
-                        <MudTextField Label="Description" Lines="3" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditDescription))" @bind-Value="_model.Description"/>
+                        <MudTextField Label="Beschreibung" Lines="3" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditDescription))" @bind-Value="_model.Description"/>
 
                         <MudDivider Style="@_dividerStyle"/>
                         <MudSelect T="FileStatusEnum" Label="Status" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditStatus))" @bind-Value="_model.Status">
@@ -108,11 +108,9 @@ else if (_model is not null)
                 }
 
                 <MudPaper Square="true" style="height: 100%; overflow-y: auto;">
-                    <MudList T="Object">
+                    <MudList T="object">
                         @foreach (var entry in _entrys)
                         {
-                            var creator = _allAccessModels.FirstOrDefault(x => x.Id == entry.CreatedByAccessId);
-
                             if (entry != _entrys.First())
                             {
                                 <MudDivider/>
@@ -121,7 +119,7 @@ else if (_model is not null)
                             <MudCard>
                                 <MudCardHeader>
                                     <CardHeaderContent>
-                                        <MudText Typo="Typo.h5">[@entry.CreatedByAccessId] @(creator is null ? "ERROR" : creator.Name) am @entry.CreatedAt</MudText>
+                                        <MudText Typo="Typo.h5">@entry.CreatorAccessModel.Name am @entry.CreatedAt</MudText>
                                     </CardHeaderContent>
                                 </MudCardHeader>
                                 <MudCardContent>
@@ -165,17 +163,18 @@ else if (_model is not null)
                         <MudText Typo="Typo.h6">Logs für @_model.Id</MudText>
                         <MudSpacer />
                         <MudTextField
-                            T="string" @bind-Value="_logSearchString" Placeholder="Search"
+                            T="string" @bind-Value="_logSearchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
                             Adornment="Adornment.Start" Immediate="true"
                             AdornmentIcon="@Icons.Material.Filled.Search"
                             IconSize="Size.Medium" Class="mt-0"/>
                     </ToolBarContent>
                     <Columns>
-                        <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" InitialDirection="SortDirection.Descending"/>
-                        <PropertyColumn Property="x => x.Content" Title="Content" />
-                        <PropertyColumn Property="x => x.AccessId" Title="AccessId" />
+                        <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
+                        <PropertyColumn Property="x => x.Content" Title="Information" />
+                        <PropertyColumn Property="x => x.AccessModel.Name" Title="Ersteller" />
+                        <PropertyColumn Property="x => x.AccessId" Title="ErstellerId" />
                         <PropertyColumn Property="x => x.Type" Title="Type" />
-                        <PropertyColumn Property="x => x.CreatedAt" Title="CreatedAt" />
+                        <PropertyColumn Property="x => x.CreatedAt" Title="Datum" />
                     </Columns>
                     <PagerContent>
                         <MudDataGridPager T="SupportfileLogsDbModel" />
@@ -204,7 +203,6 @@ else
     private List<SupportfileLogsDbModel> _logs = [];
     private List<SupportfileEntryDbModel> _entrys = [];
     private List<AccessDbModel> _allAccessModels = [];
-    private AccessDbModel? _creator;
     
     private static string _dividerStyle = "margin: 10px 0; opacity: 0;";
     private string GetSupportfileTitle() => _model != null ? "Supportakte " + _model.Title : "Loading...";
@@ -277,7 +275,6 @@ else
         _checkModel = _model.CreateShallowCopy();
 
         _allAccessModels = await AccessProxy.GetAllAsync();
-        _creator = _allAccessModels.FirstOrDefault(x => x.Id == _model.CreatedByAccessId);
         
         await LoadEntrys();
         StateHasChanged();

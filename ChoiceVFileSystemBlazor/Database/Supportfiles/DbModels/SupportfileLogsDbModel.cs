@@ -1,4 +1,5 @@
-﻿using ChoiceVFileSystemBlazor.Database.Supportfiles.Enums;
+﻿using ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
+using ChoiceVFileSystemBlazor.Database.Supportfiles.Enums;
 
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 
@@ -20,4 +21,7 @@ public class SupportfileLogsDbModel
     public Ulid AccessId { get; set; }
     public string Content { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        
+    // Navigation Properties
+    public AccessDbModel AccessModel { get; set; }
 }

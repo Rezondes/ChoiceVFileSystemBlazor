@@ -11,14 +11,24 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
-        return await dbContext.SupportfileEntryDbModels.AsNoTracking().Where(x => x.SupportfileId == id).OrderByDescending(x => x.Id).ToListAsync();
+        var list = await dbContext.SupportfileEntryDbModels
+            .AsNoTracking()
+            .Include(x => x.CreatorAccessModel)
+            .Where(x => x.SupportfileId == id)
+            .OrderByDescending(x => x.Id)
+            .ToListAsync();
+
+        return list;
     }
 
     public async Task<SupportfileEntryDbModel?> GetAsync(Ulid id)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
-        return await dbContext.SupportfileEntryDbModels.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        return await dbContext.SupportfileEntryDbModels
+            .AsNoTracking()
+            .Include(x => x.CreatorAccessModel)
+            .FirstOrDefaultAsync(x => x.Id == id);
     }
 
     // Return null if adding failed

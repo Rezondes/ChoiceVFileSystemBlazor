@@ -9,6 +9,7 @@ public interface IAccessProxy
     public Task<List<AccessDbModel>> GetAllAsync();
     public Task<AccessDbModel?> GetAsync(string discordId);
     public Task<AccessDbModel?> GetAsync(Ulid id);
+    public Task<AccessDbModel?> GetFullAsync(Ulid id);
     public Task<bool> AddAccessModelAsync(AccessDbModel accessModel);
     public Task<bool> UpdateNameAsync(Ulid id, string newName, Ulid accessId);
     public Task<bool> UpdateAccountIdAsync(Ulid id, int accountId, Ulid accessId);

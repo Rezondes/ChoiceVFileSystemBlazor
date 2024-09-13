@@ -31,8 +31,9 @@ else
         @if (AuthorizationService.IsAuthenticated(MainLayout.AccessModel))
         {
             <MudAppBar>
-                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer"/>
-                <MudText Typo="Typo.h5" Class="ml-3">ChoiceV Support Control Panel</MudText>
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
+                <MudImage Src="choicev_logo_full.png" Alt="ChoiceV Logo" Style="width: 100px; margin-bottom: 15px;" />
+                <MudText Typo="Typo.h5" Style="color: white;">Support Control Panel</MudText>
                 <MudSpacer/>
                 <MudButtonGroup Color="Color.Inherit">
                     <MudTooltip Text="Zur Cloud" Duration="Constants.TOOLTIP_DURATION" Class="mr-5">
@@ -67,7 +68,19 @@ else
     private bool _dense = false;
     private Breakpoint _breakpoint = Breakpoint.Lg;
     private DrawerClipMode _clipMode = DrawerClipMode.Always;
-    private MudTheme _currentTheme = new MudTheme();
+
+    private MudTheme _currentTheme = new MudTheme()
+    {
+        PaletteDark = new PaletteDark()
+        {
+            Primary = "rgb(204, 138, 37)",
+        },
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "rgb(204, 138, 37)",
+            AppbarBackground = "rgb(90,90,100)",
+        }
+    };
     private bool _isDarkMode = true;
     
     public static ClaimsPrincipal? User;

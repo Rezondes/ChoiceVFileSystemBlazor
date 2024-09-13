@@ -47,6 +47,16 @@ public class AccessProxy : IAccessProxy
         return await dbContext.AccessDbModels.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
     }
 
+    public async Task<AccessDbModel?> GetFullAsync(Ulid id)
+    {
+        using var dbContext = await CreateDbContextAsync();
+        return await dbContext.AccessDbModels
+            .AsNoTracking()
+            .Include(x => x.SupportfileLogs)
+            .Include(x => x.SupportfileEntrys)
+            .FirstOrDefaultAsync(x => x.Id == id);
+    }
+    
     public async Task<bool> AddAccessModelAsync(AccessDbModel accessModel)
     {
         try

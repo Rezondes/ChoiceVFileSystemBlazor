@@ -3,6 +3,7 @@ using System;
 using ChoiceVFileSystemBlazor.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChoiceVFileSystemBlazor.Migrations
 {
     [DbContext(typeof(ChoiceVFileSystemBlazorDatabaseContext))]
-    partial class ChoiceVFileSystemBlazorDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240913152815_AddNavigationPropertysToSupportfileLogsAndEntrys")]
+    partial class AddNavigationPropertysToSupportfileLogsAndEntrys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -141,7 +144,7 @@ namespace ChoiceVFileSystemBlazor.Migrations
 
                     b.Property<string>("CreatedByAccessId")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("longtext");
 
                     b.Property<bool>("Deleted")
                         .HasColumnType("tinyint(1)");
@@ -162,8 +165,6 @@ namespace ChoiceVFileSystemBlazor.Migrations
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CreatedByAccessId");
 
                     b.ToTable("SupportfileDbModels");
                 });
@@ -196,7 +197,8 @@ namespace ChoiceVFileSystemBlazor.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CreatedByAccessId");
+                    b.HasIndex("CreatedByAccessId")
+                        .IsUnique();
 
                     b.ToTable("SupportfileEntryDbModels");
                 });
@@ -226,27 +228,17 @@ namespace ChoiceVFileSystemBlazor.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccessId");
+                    b.HasIndex("AccessId")
+                        .IsUnique();
 
                     b.ToTable("SupportfileLogsDbModels");
-                });
-
-            modelBuilder.Entity("ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels.SupportfileDbModel", b =>
-                {
-                    b.HasOne("ChoiceVFileSystemBlazor.Database.Accesses.DbModels.AccessDbModel", "CreatorAccessModel")
-                        .WithMany("Supportfiles")
-                        .HasForeignKey("CreatedByAccessId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatorAccessModel");
                 });
 
             modelBuilder.Entity("ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels.SupportfileEntryDbModel", b =>
                 {
                     b.HasOne("ChoiceVFileSystemBlazor.Database.Accesses.DbModels.AccessDbModel", "CreatorAccessModel")
-                        .WithMany("SupportfileEntrys")
-                        .HasForeignKey("CreatedByAccessId")
+                        .WithOne()
+                        .HasForeignKey("ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels.SupportfileEntryDbModel", "CreatedByAccessId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -256,21 +248,12 @@ namespace ChoiceVFileSystemBlazor.Migrations
             modelBuilder.Entity("ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels.SupportfileLogsDbModel", b =>
                 {
                     b.HasOne("ChoiceVFileSystemBlazor.Database.Accesses.DbModels.AccessDbModel", "AccessModel")
-                        .WithMany("SupportfileLogs")
-                        .HasForeignKey("AccessId")
+                        .WithOne()
+                        .HasForeignKey("ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels.SupportfileLogsDbModel", "AccessId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("AccessModel");
-                });
-
-            modelBuilder.Entity("ChoiceVFileSystemBlazor.Database.Accesses.DbModels.AccessDbModel", b =>
-                {
-                    b.Navigation("SupportfileEntrys");
-
-                    b.Navigation("SupportfileLogs");
-
-                    b.Navigation("Supportfiles");
                 });
 #pragma warning restore 612, 618
         }
