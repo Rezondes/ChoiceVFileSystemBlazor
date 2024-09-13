@@ -6,8 +6,6 @@ namespace ChoiceVApi.Account;
 
 public static class AccountController
 {
-    private static Random _random = new Random();
-    
     #region ApiHandle
 
     public static async Task<string> Handle(string httpMethod, string action, string data)
@@ -63,15 +61,12 @@ public static class AccountController
     // TODO Durch richtige Daten ersetzen
     private static async Task<List<AccountModel>> GetAllAccountsAsync()
     {
-        await Task.Delay(_random.Next(1000, 2000));
         return TestDataGenerator.GenerateList<AccountModel>(100); 
     }
 
     // TODO Durch richtige Daten ersetzen
     private static async Task<AccountModel> GetByIdAsync(int accountId)
     {
-        await Task.Delay(_random.Next(1000, 2000));
-        
         var account = TestDataGenerator.GenerateSingle<AccountModel>();
         account.Id = accountId;
         
@@ -81,8 +76,6 @@ public static class AccountController
     // TODO Durch richtige Daten ersetzen
     private static async Task<AccountModel> GetByDiscordIdAsync(string discordId)
     {
-        await Task.Delay(_random.Next(1000, 2000));
-        
         var account = TestDataGenerator.GenerateSingle<AccountModel>();
         account.DiscordId = discordId;
         

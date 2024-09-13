@@ -7,8 +7,6 @@ namespace ChoiceVApi.Inventory;
 
 public class InventoryController
 {
-    private static Random _random = new Random();
-    
     #region ApiHandle
 
     public static async Task<string> Handle(string httpMethod, string action, string data)
@@ -57,7 +55,6 @@ public class InventoryController
     // TODO Durch richtige Daten ersetzen
     private static async Task<InventoryModel> GetByCharacterId(int characterId)
     {
-        await Task.Delay(_random.Next(1000, 2000));
         return new InventoryModel
         {
             CharacterId = characterId,

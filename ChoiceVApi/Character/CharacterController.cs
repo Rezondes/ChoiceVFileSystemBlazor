@@ -6,8 +6,6 @@ namespace ChoiceVApi.Character;
 
 public class CharacterController
 {
-    private static Random _random = new Random();
-
     #region ApiHandle
     
     public static async Task<string> Handle(string httpMethod, string action, string data)
@@ -66,21 +64,18 @@ public class CharacterController
     // TODO Durch richtige Daten ersetzen
     private static async Task<List<CharacterModel>> GetAllCharactersAsync()
     {
-        await Task.Delay(_random.Next(1000, 2000));
         return TestDataGenerator.GenerateList<CharacterModel>(100); 
     }
 
     // TODO Durch richtige Daten ersetzen
     private static async Task<List<CharacterModel>> GetAllCharactersByAccountId(int accountId)
     {
-        await Task.Delay(_random.Next(1000, 2000));
         return TestDataGenerator.GenerateList<CharacterModel>(3); 
     }
 
     // TODO Durch richtige Daten ersetzen
     private static async Task<CharacterModel> GetCharacterById(int characterId)
     {
-        await Task.Delay(_random.Next(1000, 2000));
         return TestDataGenerator.GenerateSingle<CharacterModel>();
     }
 
