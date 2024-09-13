@@ -53,13 +53,6 @@ builder.Services.AddMudServices(config =>
 builder.Services.AddDistributedMemoryCache();
 
 #region Discord Authentication
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromHours(2);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", corsPolicyBuilder =>
@@ -68,6 +61,13 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod()
             .AllowAnyHeader();
     });
+});
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromHours(2);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
 });
 
 var jwtEncryptionKey = builder.Configuration.GetValue<string>("Jwt:EncryptionKey");
@@ -146,6 +146,7 @@ builder.Services.AddAuthentication(options =>
             }
             catch (Exception ex)
             {
+                Console.WriteLine("GetUserFailure: " + ex.Message);
                 Console.WriteLine(ex.Message);
             }
 
@@ -171,11 +172,13 @@ builder.Services.AddAuthentication(options =>
             }
             catch (Exception ex)
             {
+                Console.WriteLine("GetGuildUserFailure: " + ex.Message);
                 Console.WriteLine(ex.Message);
             }
         },
         OnRemoteFailure = context =>
         {
+            Console.WriteLine("OnRemoteFailure: " + context.Failure.Message);
             context.Response.Redirect($"{Error.GetRedirectUrl()}?failureMessage={context.Failure.Message}");
             context.HandleResponse();
             return Task.CompletedTask;
@@ -226,6 +229,11 @@ builder.Services.AddScoped<IDiscordRoleLogsProxy, DiscordRoleLogsProxy>();
 #endregion
 
 builder.Services.AddSingleton<AuthorizationService>();
+
+builder.Services.AddHttpsRedirection(options =>
+{
+    options.HttpsPort = 443;
+});
 
 builder.Services.AddSignalR();
 
