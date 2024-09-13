@@ -1,8 +1,7 @@
 ﻿<MudItem xs="12">
     <MudPaper Elevation="2" Style="height: 100%" Class="d-flex flex-column align-center justify-center mud-width-full">
         <MudText Typo="Typo.h5">Patchnotes</MudText>
-
-
+        
         @foreach (var patchnote in _patchnotes.OrderDescending())
         {
             <PatchnotesItem Label="@patchnote.Item1" Content="@patchnote.Item2"/>
@@ -11,21 +10,20 @@
 </MudItem>
 
 @code {
-
-    List<(string, List<string>)> _patchnotes = new() {
-        new("v13092024_1", new List<string>()
-        {
+    List<ValueTuple<string, List<string>>> _patchnotes =
+    [
+        new("v13092024_1", [
             "Absofort erhaltet ihr hier alle wichtigen Neuigkeiten vom Dev-Team in diesem Fenster!",
             "Bitte denkt daran, keine relevanten Daten bisher einzutragen da es sich hier nur um eine Pre-Pre-Version zum Testen handelt.",
-            "\n",
+            "",
             "Bei Fragen wendet euch einfach direkt an mich (@Rezondes)",
-            "\n",
+            "",
             "Änderungen:",
             "- Die aktuelle Version wird über den Schriftzug \"ChoiceV Support Control Panel\" angezeigt",
             "- Man kann nun seinen eigenen Account ansehen",
             "--> Namensänderung für das SCP sind eigenständig möglich",
             "--> Supportakten welche man selbst erstellt hat gibt es hier als Übersicht",
             "- Viele kleinere Fehler wurden behoben und Anpassungen wurden vorgenommen, welche die Entwicklung in der Zukunft beschleunigen werden."
-        }),
-    };  
+        ])
+    ];  
 }
