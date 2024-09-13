@@ -151,27 +151,6 @@ builder.Services.AddAuthentication(options =>
 
             try
             {
-                // Get Guilds
-                var guildsRequest =
-                    new HttpRequestMessage(HttpMethod.Get, "https://discord.com/api/v10/users/@me/guilds");
-                guildsRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                guildsRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
-
-                var guildsResponse = await context.Backchannel.SendAsync(guildsRequest,
-                    HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-                guildsResponse.EnsureSuccessStatusCode();
-
-                var guildsJson = await guildsResponse.Content.ReadAsStringAsync();
-                var guilds = JsonDocument.Parse(guildsJson).RootElement;
-                // TODO? Check if user is in Guild
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            
-            try
-            {
                 // Get Guild User
                 var guildId = builder.Configuration.GetValue<string>("Discord:GuildId");
                 Assert(string.IsNullOrEmpty(guildId), "Discord guild id is missing");
