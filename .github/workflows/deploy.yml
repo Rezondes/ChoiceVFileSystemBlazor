@@ -20,7 +20,7 @@ jobs:
 
     - name: Deploy via SSH
       run: |
-        ssh -o StrictHostKeyChecking=no root@rezondes.net << 'EOF'
+        ssh -o StrictHostKeyChecking=no root@85.114.132.133 << 'EOF'
           cd /root/choiceV/ChoiceVFileSystemBlazor
           
           git pull https://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@github.com/Rezondes/ChoiceVFileSystemBlazor.git && \
