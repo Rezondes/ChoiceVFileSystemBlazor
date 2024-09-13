@@ -64,8 +64,8 @@ public class AccessProxy : IAccessProxy
             using var dbContext = await CreateDbContextAsync();
             var checkDiscordId = await GetAsync(accessModel.DiscordId);
             if (checkDiscordId is not null) return false;
-            var checkAccountId = await GetAsync(accessModel.AccountId);
-            if (checkAccountId is not null) return false;
+            // var checkAccountId = await GetAsync(accessModel.AccountId);
+            // if (checkAccountId is not null) return false;
 
             await dbContext.AccessDbModels.AddAsync(accessModel);
             await _accessLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
