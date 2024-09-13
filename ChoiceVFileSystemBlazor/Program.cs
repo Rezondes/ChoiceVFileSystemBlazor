@@ -130,51 +130,35 @@ builder.Services.AddAuthentication(options =>
     {
         OnCreatingTicket = async context =>
         {
-            try
-            {
-                var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+            var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
 
-                var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead,
-                    context.HttpContext.RequestAborted);
-                response.EnsureSuccessStatusCode();
+            var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead,
+                context.HttpContext.RequestAborted);
+            response.EnsureSuccessStatusCode();
 
-                var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+            var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
 
-                context.RunClaimActions(user);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("GetUserFailure: " + ex.Message);
-                Console.WriteLine(ex.Message);
-            }
+            context.RunClaimActions(user);
 
-            try
-            {
-                // Get Guild User
-                var guildId = builder.Configuration.GetValue<string>("Discord:GuildId");
-                Assert(string.IsNullOrEmpty(guildId), "Discord guild id is missing");
+            // Get Guild User
+            var guildId = builder.Configuration.GetValue<string>("Discord:GuildId");
+            Assert(string.IsNullOrEmpty(guildId), "Discord guild id is missing");
 
-                var membersRequest = new HttpRequestMessage(HttpMethod.Get,
-                    $"https://discord.com/api/v10/users/@me/guilds/{guildId}/member");
-                membersRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                membersRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+            var membersRequest = new HttpRequestMessage(HttpMethod.Get,
+                $"https://discord.com/api/v10/users/@me/guilds/{guildId}/member");
+            membersRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            membersRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
 
-                var membersResponse = await context.Backchannel.SendAsync(membersRequest,
-                    HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-                membersResponse.EnsureSuccessStatusCode();
+            var membersResponse = await context.Backchannel.SendAsync(membersRequest,
+                HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
+            membersResponse.EnsureSuccessStatusCode();
 
-                var memberJson = await membersResponse.Content.ReadAsStringAsync();
-                var member = JsonDocument.Parse(memberJson).RootElement;
+            var memberJson = await membersResponse.Content.ReadAsStringAsync();
+            var member = JsonDocument.Parse(memberJson).RootElement;
 
-                context.RunClaimActions(member);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("GetGuildUserFailure: " + ex.Message);
-                Console.WriteLine(ex.Message);
-            }
+            context.RunClaimActions(member);
         },
         OnRemoteFailure = context =>
         {
