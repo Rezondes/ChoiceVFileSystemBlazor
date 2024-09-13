@@ -162,6 +162,10 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     options.MinimumSameSitePolicy = SameSiteMode.None;
     options.ConsentCookieValue = "yes";
 });
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.SameSite = SameSiteMode.None; // Für Cross-Origin-Anfragen
+});
 #endregion
 
 #region ChoiceV Api
