@@ -53,15 +53,6 @@ builder.Services.AddMudServices(config =>
 builder.Services.AddDistributedMemoryCache();
 
 #region Discord Authentication
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", corsPolicyBuilder =>
-    {
-        corsPolicyBuilder.AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-    });
-});
 
 builder.Services.AddSession(options =>
 {
@@ -159,13 +150,6 @@ builder.Services.AddAuthentication(options =>
             var member = JsonDocument.Parse(memberJson).RootElement;
 
             context.RunClaimActions(member);
-        },
-        OnRemoteFailure = context =>
-        {
-            Console.WriteLine("OnRemoteFailure: " + context.Failure.Message);
-            context.Response.Redirect($"{Error.GetRedirectUrl()}?failureMessage={context.Failure.Message}");
-            context.HandleResponse();
-            return Task.CompletedTask;
         }
     };
 });
@@ -176,7 +160,7 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     // cookies is needed for a given request.
     options.CheckConsentNeeded = context => true;
     options.MinimumSameSitePolicy = SameSiteMode.None;
-    options.ConsentCookieValue = "true";
+    options.ConsentCookieValue = "yes";
 });
 #endregion
 
