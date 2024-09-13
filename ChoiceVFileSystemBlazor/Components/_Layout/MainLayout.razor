@@ -9,7 +9,7 @@
 {
     <NotAuthorized/>
 }
-else if (_loading)
+else if (!_shouldRedirect && _loading)
 {
     <PageLoading/>
 }
@@ -121,6 +121,7 @@ else
         {
             _shouldRedirect = true;
             _loading = false;
+            StateHasChanged();
             return;
         }
         User = user;
@@ -130,6 +131,7 @@ else
         {
             _shouldRedirect = true;
             _loading = false;
+            StateHasChanged();
             return;
         }
         
@@ -140,6 +142,7 @@ else
         {
             _shouldRedirect = true;
             _loading = false;
+            StateHasChanged();
             return;
         }
         
