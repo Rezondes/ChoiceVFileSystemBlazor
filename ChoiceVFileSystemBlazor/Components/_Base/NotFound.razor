@@ -19,7 +19,6 @@
 
     protected override void OnInitialized()
     {
-        // Hole die Query-String-Parameter von der aktuellen URL
         var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
         var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 

@@ -5,43 +5,43 @@
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
-@switch (_loading)
+@if (_shouldRedirect)
 {
-    case true:
-        <PageLoading/>
-        break;
-    case false when _shouldRedirect:
-        <NotAuthorized/>
-        break;
-    default:
-        <MudLayout Style="height: 100vh; overflow: hidden;">
-            @if (AuthorizationService.IsAuthenticated(MainLayout.AccessModel))
-            {
-                <MudAppBar>
-                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@(() => ToggleDrawer())"/>
-                    <MudText Typo="Typo.h5" Class="ml-3">ChoiceV Support Control Panel</MudText>
-                    <MudSpacer/>
-                    <MudButtonGroup Color="Color.Inherit">
-                        <MudTooltip Text="Zur Cloud" Duration="@Constants.TOOLTIP_DURATION" Class="mr-5">
-                            <MudIconButton Icon="@Icons.Material.Filled.Cloud" Color="Color.Inherit" Href="@Constants.CLOUD_URL" Target="_blank"/>
-                        </MudTooltip>
-                        <ThemeModeToggle IsDarkMode="@_isDarkMode" OnDarkModeChanged="@ToggleDarkMode"/>
-                        <MudTooltip Text="Eigener Account" Duration="@Constants.TOOLTIP_DURATION">
-                            <MudIconButton Icon="@Icons.Material.Filled.AccountBox" Color="Color.Inherit" OnClick="OpenAccessPage"/>
-                        </MudTooltip>
-                    </MudButtonGroup>
-                </MudAppBar>
+    <NotAuthorized/>
+}
+else if (_loading)
+{
+    <PageLoading/>
+}
+else
+{
+    <MudLayout Style="height: 100vh; overflow: hidden;">
+        @if (AuthorizationService.IsAuthenticated(MainLayout.AccessModel))
+        {
+            <MudAppBar>
+                <MudIconButton Icon="Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="(() => ToggleDrawer())"/>
+                <MudText Typo="Typo.h5" Class="ml-3">ChoiceV Support Control Panel</MudText>
+                <MudSpacer/>
+                <MudButtonGroup Color="Color.Inherit">
+                    <MudTooltip Text="Zur Cloud" Duration="Constants.TOOLTIP_DURATION" Class="mr-5">
+                        <MudIconButton Icon="Icons.Material.Filled.Cloud" Color="Color.Inherit" Href="Constants.CLOUD_URL" Target="_blank"/>
+                    </MudTooltip>
+                    <ThemeModeToggle IsDarkMode="_isDarkMode" OnDarkModeChanged="ToggleDarkMode"/>
+                    <MudTooltip Text="Eigener Account" Duration="Constants.TOOLTIP_DURATION">
+                        <MudIconButton Icon="Icons.Material.Filled.AccountBox" Color="Color.Inherit" OnClick="OpenAccessPage"/>
+                    </MudTooltip>
+                </MudButtonGroup>
+            </MudAppBar>
 
-                <MudDrawer @bind-Open="@_open" ClipMode="_clipMode" Breakpoint="@_breakpoint" Variant="@DrawerVariant.Mini">
-                    <NavMenu/>
-                </MudDrawer>
+            <MudDrawer @bind-Open="_open" ClipMode="_clipMode" Breakpoint="_breakpoint" Variant="DrawerVariant.Mini">
+                <NavMenu/>
+            </MudDrawer>
 
-                <MudMainContent Style="height: 100%; overflow: hidden;">
-                    @Body
-                </MudMainContent>
-            }
-        </MudLayout>
-        break;
+            <MudMainContent Style="height: 100%; overflow: hidden;">
+                @Body
+            </MudMainContent>
+        }
+    </MudLayout>
 }
 
 @code

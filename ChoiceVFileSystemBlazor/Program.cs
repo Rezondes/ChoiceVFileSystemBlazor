@@ -60,6 +60,16 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", corsPolicyBuilder =>
+    {
+        corsPolicyBuilder.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 var jwtEncryptionKey = builder.Configuration.GetValue<string>("Jwt:EncryptionKey");
 Assert(string.IsNullOrEmpty(jwtEncryptionKey), $"JWT Encryption Key is missing");
 var jwlIssuer = builder.Configuration.GetValue<string>("Jwt:Issuer");
@@ -120,44 +130,76 @@ builder.Services.AddAuthentication(options =>
     {
         OnCreatingTicket = async context =>
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
+                request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
 
-            var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-            response.EnsureSuccessStatusCode();
+                var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead,
+                    context.HttpContext.RequestAborted);
+                response.EnsureSuccessStatusCode();
 
-            var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
+                var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
 
-            context.RunClaimActions(user);
+                context.RunClaimActions(user);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            try
+            {
+                // Get Guilds
+                var guildsRequest =
+                    new HttpRequestMessage(HttpMethod.Get, "https://discord.com/api/v10/users/@me/guilds");
+                guildsRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                guildsRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+
+                var guildsResponse = await context.Backchannel.SendAsync(guildsRequest,
+                    HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
+                guildsResponse.EnsureSuccessStatusCode();
+
+                var guildsJson = await guildsResponse.Content.ReadAsStringAsync();
+                var guilds = JsonDocument.Parse(guildsJson).RootElement;
+                // TODO? Check if user is in Guild
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             
-            // Get Guilds
-            var guildsRequest = new HttpRequestMessage(HttpMethod.Get, "https://discord.com/api/v10/users/@me/guilds");
-            guildsRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            guildsRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+            try
+            {
+                // Get Guild User
+                var guildId = builder.Configuration.GetValue<string>("Discord:GuildId");
+                Assert(string.IsNullOrEmpty(guildId), "Discord guild id is missing");
 
-            var guildsResponse = await context.Backchannel.SendAsync(guildsRequest, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-            guildsResponse.EnsureSuccessStatusCode();
+                var membersRequest = new HttpRequestMessage(HttpMethod.Get,
+                    $"https://discord.com/api/v10/users/@me/guilds/{guildId}/member");
+                membersRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                membersRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
 
-            var guildsJson = await guildsResponse.Content.ReadAsStringAsync();
-            var guilds = JsonDocument.Parse(guildsJson).RootElement;
-            // TODO? Check if user is in Guild
-            
-            // Get Guild User
-            var guildId = builder.Configuration.GetValue<string>("Discord:GuildId"); 
-            Assert(string.IsNullOrEmpty(guildId), "Discord guild id is missing");
-            
-            var membersRequest = new HttpRequestMessage(HttpMethod.Get, $"https://discord.com/api/v10/users/@me/guilds/{guildId}/member");
-            membersRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            membersRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
+                var membersResponse = await context.Backchannel.SendAsync(membersRequest,
+                    HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
+                membersResponse.EnsureSuccessStatusCode();
 
-            var membersResponse = await context.Backchannel.SendAsync(membersRequest, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-            membersResponse.EnsureSuccessStatusCode();
+                var memberJson = await membersResponse.Content.ReadAsStringAsync();
+                var member = JsonDocument.Parse(memberJson).RootElement;
 
-            var memberJson = await membersResponse.Content.ReadAsStringAsync();
-            var member = JsonDocument.Parse(memberJson).RootElement;
-            
-            context.RunClaimActions(member);
+                context.RunClaimActions(member);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        },
+        OnRemoteFailure = context =>
+        {
+            context.Response.Redirect($"{Error.GetRedirectUrl()}?failureMessage={context.Failure.Message}");
+            context.HandleResponse();
+            return Task.CompletedTask;
         }
     };
 });
