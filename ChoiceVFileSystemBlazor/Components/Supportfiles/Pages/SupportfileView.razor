@@ -101,7 +101,7 @@ else if (_model is not null)
                     }
                 }
 
-                <MudPaper Square="true" style="height: 100%; overflow-y: auto;">
+                <MudPaper Square="true" style="height: 70vh; overflow-y: auto;">
                     <MudList T="object">
                         @foreach (var entry in _entrys)
                         {
@@ -118,51 +118,77 @@ else if (_model is not null)
                                 </MudCardHeader>
                                 <MudCardContent>
                                     <MudTextField @bind-Value="entry.Content" ReadOnly Variant="Variant.Text" Lines="@_entryLines" AutoGrow MaxLines="10"/>
-                                    <MudSpacer/>
-
-                                    <MudTable Items="entry.FileUploads">
-                                        <HeaderContent>
-                                            <MudTh>Filename</MudTh>
-                                            <MudTh>Size</MudTh>
-                                            <MudTh>Upload Date</MudTh>
-                                            <MudTh Style="width: 350px;">Actions</MudTh>
-                                        </HeaderContent>
-                                        <RowTemplate>
-                                            <MudTd>@context.FileName</MudTd>
-                                            <MudTd>@context.SizeText</MudTd>
-                                            <MudTd>@context.UploadDate.ToString("g")</MudTd>
-                                            <MudTd>
-                                                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => DownloadFile(context)">Download</MudButton>
-                                                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => DeleteFile(context)">Löschen</MudButton>
-                                                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => RenameFile(context)">Rename</MudButton>
-                                            </MudTd>
-                                        </RowTemplate>
-                                    </MudTable>
+                                    
+                                    @if (MainLayout.HasRight(RightEnum.ViewUploadedFilesForEntrys) && entry.FileUploads.Any())
+                                    {
+                                        <MudTable Items="entry.FileUploads">
+                                            <HeaderContent>
+                                                <MudTh>Filename</MudTh>
+                                                <MudTh Style="width: 350px;">Size</MudTh>
+                                                <MudTh Style="width: 350px;">Upload Date</MudTh>
+                                                <MudTh Style="width: 200px;">Actions</MudTh>
+                                            </HeaderContent>
+                                            <RowTemplate>
+                                                <MudTd>@context.FileName</MudTd>
+                                                <MudTd>@context.SizeText</MudTd>
+                                                <MudTd>@context.UploadDate.ToString("g")</MudTd>
+                                                <MudTd>
+                                                    <MudButtonGroup Color="Color.Primary" Variant="Variant.Text">
+                                                        @if (MainLayout.HasRight(RightEnum.SupportfileDownloadFileForEntry))
+                                                        {
+                                                            <MudTooltip Text="Datei herunterladen" Duration="Constants.TOOLTIP_DURATION">
+                                                                <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Tertiary" OnClick="() => DownloadFile(context)"/>
+                                                            </MudTooltip>
+                                                        }
+                                                        @if (MainLayout.HasRight(RightEnum.SupportfileRenameFileForEntry))
+                                                        {
+                                                            <MudTooltip Text="Dateinamen ändern" Duration="Constants.TOOLTIP_DURATION">
+                                                                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => RenameFile(context)"/>
+                                                            </MudTooltip>
+                                                        }
+                                                        @if (MainLayout.HasRight(RightEnum.SupportfileDeleteFileForEntry))
+                                                        {
+                                                            <MudTooltip Text="Datei löschen" Duration="Constants.TOOLTIP_DURATION">
+                                                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" OnClick="() => DeleteFile(context)"/>
+                                                            </MudTooltip>
+                                                        }
+                                                    </MudButtonGroup>
+                                                </MudTd>
+                                            </RowTemplate>
+                                        </MudTable>
+                                    }
                                 </MudCardContent>
                                 <MudCardActions>
                                     <div class="d-flex align-center justify-space-between" style="width: 100%;">
                                         <MudText Style="opacity: 0.2" Typo="Typo.body2">@GetSublineText(entry)</MudText>
                                         <MudButtonGroup Color="Color.Primary" Variant="Variant.Text">
-                                            <MudFileUpload T="IBrowserFile" FilesChanged="(file) => UploadFiles(file, entry)">
-                                                <ActivatorContent>
-                                                    <MudButton Variant="Variant.Filled"
-                                                               Color="Color.Primary"
-                                                               StartIcon="@Icons.Material.Filled.CloudUpload">
-                                                        Dateien hochladen
-                                                    </MudButton>
-                                                </ActivatorContent>
-                                            </MudFileUpload>
+                                            @if (MainLayout.HasRight(RightEnum.SupportfileUploadFileForEntry))
+                                            {
+                                                <MudFileUpload T="IBrowserFile" FilesChanged="(file) => UploadFiles(file, entry)">
+                                                    <ActivatorContent>
+                                                        <MudTooltip Text="Datei hochladen" Duration="Constants.TOOLTIP_DURATION">
+                                                            <MudIconButton Icon="@Icons.Material.Filled.CloudUpload" Color="Color.Tertiary"/>
+                                                        </MudTooltip>
+                                                    </ActivatorContent>
+                                                </MudFileUpload>
+                                            }
                                             @if (MainLayout.HasRight(RightEnum.SupportfileEditEntrys))
                                             {
-                                                <MudIconButton Variant="Variant.Text" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" OnClick="() => EditEntry(entry)"/>
+                                                <MudTooltip Text="Eintrag bearbeiten" Duration="Constants.TOOLTIP_DURATION">
+                                                    <MudIconButton Variant="Variant.Text" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" OnClick="() => EditEntry(entry)"/>
+                                                </MudTooltip>
                                             }
                                             @if (!entry.Deleted && MainLayout.HasRight(RightEnum.SupportfileDeleteEntrys))
                                             {
-                                                <MudIconButton Variant="Variant.Text" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" OnClick="() => RemoveEntry(entry)"/>
+                                                <MudTooltip Text="Eintrag löschen" Duration="Constants.TOOLTIP_DURATION">
+                                                    <MudIconButton Variant="Variant.Text" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" OnClick="() => RemoveEntry(entry)"/>
+                                                </MudTooltip>
                                             }
                                             else if (entry.Deleted && MainLayout.HasRight(RightEnum.SupportfileRestoreEntrys))
                                             {
-                                                <MudIconButton Variant="Variant.Text" Color="Color.Success" Icon="@Icons.Material.Filled.RestoreFromTrash" OnClick="() => RestoreEntry(entry)"/>
+                                                <MudTooltip Text="Eintrag wiederherstellen" Duration="Constants.TOOLTIP_DURATION">
+                                                    <MudIconButton Variant="Variant.Text" Color="Color.Success" Icon="@Icons.Material.Filled.RestoreFromTrash" OnClick="() => RestoreEntry(entry)"/>
+                                                </MudTooltip>
                                             }
                                         </MudButtonGroup>
                                     </div>

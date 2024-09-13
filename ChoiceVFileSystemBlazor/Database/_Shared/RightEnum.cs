@@ -20,6 +20,11 @@ public enum RightEnum
     SupportfileEditEntrys = 1411,
     SupportfileDeleteEntrys = 1412,
     SupportfileRestoreEntrys = 1412,
+    ViewUploadedFilesForEntrys = 1500,
+    SupportfileUploadFileForEntry = 1510,
+    SupportfileDownloadFileForEntry = 1511,
+    SupportfileDeleteFileForEntry = 1512,
+    SupportfileRenameFileForEntry = 1513,
     
     ViewGroupingfilesArea = 2000,
     ViewGroupingfiles = 2001,
