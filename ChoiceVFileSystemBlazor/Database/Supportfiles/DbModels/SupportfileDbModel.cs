@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using ChoiceVFileSystemBlazor.Database._Shared;
+using ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
 
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 
@@ -44,4 +45,7 @@ public class SupportfileDbModel
     public RankEnum MinRank { get; set; } = RankEnum.Rank1;
 
     public bool Deleted { get; set; } = false;
+    
+    // Navigation Properties
+    public AccessDbModel CreatorAccessModel { get; set; }
 }

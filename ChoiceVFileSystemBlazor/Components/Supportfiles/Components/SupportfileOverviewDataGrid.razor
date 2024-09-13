@@ -41,11 +41,13 @@ else
         </ToolBarContent>
         <Columns>
             <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
-            <PropertyColumn Property="x => x.Title" Title="Title" />
+            <PropertyColumn Property="x => x.Title" Title="Titel" />
+            <PropertyColumn Property="x => x.CreatorAccessModel.Name" Title="Ersteller"/>
+            <PropertyColumn Property="x => x.CreatorAccessModel.Id" Title="ErstellerId"/>
             <PropertyColumn Property="x => x.Status" Title="Status" />
             @if (AuthorizationService.HasRight(MainLayout.Rights, MainLayout.Rank, RightEnum.ViewDeletedFiles))
             {
-                <PropertyColumn Property="x => x.Deleted" Title="Deleted" />
+                <PropertyColumn Property="x => x.Deleted" Title="Gelöscht" />
             }
         </Columns>
         <PagerContent>

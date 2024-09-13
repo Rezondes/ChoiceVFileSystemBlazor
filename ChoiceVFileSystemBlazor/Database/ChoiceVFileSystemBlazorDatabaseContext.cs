@@ -102,6 +102,10 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
             .HasConversion(
                 v => v.ToString(),
                 v => Ulid.Parse(v));
+        modelBuilder.Entity<SupportfileDbModel>()
+            .HasOne(s => s.CreatorAccessModel)
+            .WithMany(a => a.Supportfiles) 
+            .HasForeignKey(s => s.CreatedByAccessId); 
 
         modelBuilder.Entity<SupportfileLogsDbModel>()
             .Property(e => e.Id)
