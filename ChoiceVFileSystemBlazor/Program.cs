@@ -186,9 +186,18 @@ builder.Services.AddSingleton<AuthorizationService>();
 
 builder.Services.AddSignalR();
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(8080, listenOptions =>
+    {
+        listenOptions.UseHttps(); // HTTPS verwenden
+    });
+});
+
 var app = builder.Build();
 
 app.UseExceptionHandler(Error.GetRedirectUrl(), createScopeForErrors: true);
+app.UseHsts();
 
 app.UseHttpsRedirection();
 
