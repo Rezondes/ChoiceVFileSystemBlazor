@@ -27,7 +27,7 @@ public static class ClaimsPrincipalExtension
                 .Select(x => x.Value)
                 .ToList();
             
-            if (discordId is null || discordName is null || roles.Count == 0) throw new Exception("No Claims");
+            if (discordId is null || discordName is null) throw new Exception("No Claims");
 
             var accessResponse = await accessProxy.GetAsync(discordId);
             if (accessResponse is null)

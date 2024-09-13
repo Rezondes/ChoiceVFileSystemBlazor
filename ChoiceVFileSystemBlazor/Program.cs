@@ -132,24 +132,6 @@ builder.Services.AddAuthentication(options =>
             var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement;
 
             context.RunClaimActions(user);
-
-            // Get Guild User
-            var guildId = builder.Configuration.GetValue<string>("Discord:GuildId");
-            Assert(string.IsNullOrEmpty(guildId), "Discord guild id is missing");
-
-            var membersRequest = new HttpRequestMessage(HttpMethod.Get,
-                $"https://discord.com/api/v10/users/@me/guilds/{guildId}/member");
-            membersRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            membersRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
-
-            var membersResponse = await context.Backchannel.SendAsync(membersRequest,
-                HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
-            membersResponse.EnsureSuccessStatusCode();
-
-            var memberJson = await membersResponse.Content.ReadAsStringAsync();
-            var member = JsonDocument.Parse(memberJson).RootElement;
-
-            context.RunClaimActions(member);
         }
     };
 });
