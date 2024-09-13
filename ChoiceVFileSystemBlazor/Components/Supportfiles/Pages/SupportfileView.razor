@@ -163,7 +163,7 @@ else if (_model is not null)
                         <MudText Typo="Typo.h6">Logs für @_model.Id</MudText>
                         <MudSpacer />
                         <MudTextField
-                            T="string" @bind-Value="_logSearchString" Placeholder="Search"
+                            T="string" @bind-Value="_logSearchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
                             Adornment="Adornment.Start" Immediate="true"
                             AdornmentIcon="@Icons.Material.Filled.Search"
                             IconSize="Size.Medium" Class="mt-0"/>

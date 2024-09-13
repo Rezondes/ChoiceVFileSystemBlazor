@@ -23,7 +23,7 @@ else
             <MudText Typo="Typo.h6">Zugriffsverteilung</MudText>
             <MudSpacer />
             <MudTextField
-                T="string" @bind-Value="_searchString" Placeholder="Search"
+                T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
                 Adornment="Adornment.Start" Immediate="true"
                 AdornmentIcon="@Icons.Material.Filled.Search"
                 IconSize="Size.Medium" Class="mt-0"/>
