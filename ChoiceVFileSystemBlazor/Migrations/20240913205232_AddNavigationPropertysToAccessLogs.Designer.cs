@@ -3,6 +3,7 @@ using System;
 using ChoiceVFileSystemBlazor.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChoiceVFileSystemBlazor.Migrations
 {
     [DbContext(typeof(ChoiceVFileSystemBlazorDatabaseContext))]
-    partial class ChoiceVFileSystemBlazorDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240913205232_AddNavigationPropertysToAccessLogs")]
+    partial class AddNavigationPropertysToAccessLogs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -61,7 +64,7 @@ namespace ChoiceVFileSystemBlazor.Migrations
 
                     b.Property<string>("TargetAccessId")
                         .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
@@ -69,8 +72,6 @@ namespace ChoiceVFileSystemBlazor.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AccessId");
-
-                    b.HasIndex("TargetAccessId");
 
                     b.ToTable("AccessLogsDbModels");
                 });
@@ -205,37 +206,6 @@ namespace ChoiceVFileSystemBlazor.Migrations
                     b.ToTable("SupportfileEntryDbModels");
                 });
 
-            modelBuilder.Entity("ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels.SupportfileFileUploadDbModel", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<byte[]>("Data")
-                        .IsRequired()
-                        .HasColumnType("longblob");
-
-                    b.Property<string>("EntryId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTime>("UploadDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EntryId");
-
-                    b.ToTable("SupportfileFileUploadDbModels");
-                });
-
             modelBuilder.Entity("ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels.SupportfileLogsDbModel", b =>
                 {
                     b.Property<string>("Id")
@@ -269,20 +239,12 @@ namespace ChoiceVFileSystemBlazor.Migrations
             modelBuilder.Entity("ChoiceVFileSystemBlazor.Database.Accesses.DbModels.AccessLogsDbModel", b =>
                 {
                     b.HasOne("ChoiceVFileSystemBlazor.Database.Accesses.DbModels.AccessDbModel", "AccessModel")
-                        .WithMany("CreatedAccessLogs")
+                        .WithMany("AccessLogs")
                         .HasForeignKey("AccessId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ChoiceVFileSystemBlazor.Database.Accesses.DbModels.AccessDbModel", "TargetAccessModel")
-                        .WithMany("TargetedAccessLogs")
-                        .HasForeignKey("TargetAccessId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("AccessModel");
-
-                    b.Navigation("TargetAccessModel");
                 });
 
             modelBuilder.Entity("ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels.SupportfileDbModel", b =>
@@ -307,17 +269,6 @@ namespace ChoiceVFileSystemBlazor.Migrations
                     b.Navigation("CreatorAccessModel");
                 });
 
-            modelBuilder.Entity("ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels.SupportfileFileUploadDbModel", b =>
-                {
-                    b.HasOne("ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels.SupportfileEntryDbModel", "EntryModel")
-                        .WithMany("FileUploads")
-                        .HasForeignKey("EntryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("EntryModel");
-                });
-
             modelBuilder.Entity("ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels.SupportfileLogsDbModel", b =>
                 {
                     b.HasOne("ChoiceVFileSystemBlazor.Database.Accesses.DbModels.AccessDbModel", "AccessModel")
@@ -331,20 +282,13 @@ namespace ChoiceVFileSystemBlazor.Migrations
 
             modelBuilder.Entity("ChoiceVFileSystemBlazor.Database.Accesses.DbModels.AccessDbModel", b =>
                 {
-                    b.Navigation("CreatedAccessLogs");
+                    b.Navigation("AccessLogs");
 
                     b.Navigation("SupportfileEntrys");
 
                     b.Navigation("SupportfileLogs");
 
                     b.Navigation("Supportfiles");
-
-                    b.Navigation("TargetedAccessLogs");
-                });
-
-            modelBuilder.Entity("ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels.SupportfileEntryDbModel", b =>
-                {
-                    b.Navigation("FileUploads");
                 });
 #pragma warning restore 612, 618
         }

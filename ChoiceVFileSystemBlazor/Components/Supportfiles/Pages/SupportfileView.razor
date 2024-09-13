@@ -124,11 +124,40 @@ else if (_model is not null)
                                 </MudCardHeader>
                                 <MudCardContent>
                                     <MudTextField @bind-Value="entry.Content" ReadOnly Variant="Variant.Text" Lines="@_entryLines" AutoGrow MaxLines="10"/>
+                                    <MudSpacer/>
+
+                                    <MudTable Items="entry.FileUploads">
+                                        <HeaderContent>
+                                            <MudTh>Filename</MudTh>
+                                            <MudTh>Size</MudTh>
+                                            <MudTh>Upload Date</MudTh>
+                                            <MudTh Style="width: 350px;">Actions</MudTh>
+                                        </HeaderContent>
+                                        <RowTemplate>
+                                            <MudTd>@context.FileName</MudTd>
+                                            <MudTd>@context.SizeText</MudTd>
+                                            <MudTd>@context.UploadDate.ToString("g")</MudTd>
+                                            <MudTd>
+                                                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => DownloadFile(context)">Download</MudButton>
+                                                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => DeleteFile(context)">Löschen</MudButton>
+                                                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => RenameFile(context)">Rename</MudButton>
+                                            </MudTd>
+                                        </RowTemplate>
+                                    </MudTable>
                                 </MudCardContent>
                                 <MudCardActions>
                                     <div class="d-flex align-center justify-space-between" style="width: 100%;">
                                         <MudText Style="opacity: 0.2" Typo="Typo.body2">@GetSublineText(entry)</MudText>
                                         <MudButtonGroup Color="Color.Primary" Variant="Variant.Text">
+                                            <MudFileUpload T="IBrowserFile" FilesChanged="(file) => UploadFiles(file, entry)">
+                                                <ActivatorContent>
+                                                    <MudButton Variant="Variant.Filled"
+                                                               Color="Color.Primary"
+                                                               StartIcon="@Icons.Material.Filled.CloudUpload">
+                                                        Dateien hochladen
+                                                    </MudButton>
+                                                </ActivatorContent>
+                                            </MudFileUpload>
                                             @if (MainLayout.HasRight(RightEnum.SupportfileEditEntrys))
                                             {
                                                 <MudIconButton Variant="Variant.Text" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" OnClick="() => EditEntry(entry)"/>
@@ -183,6 +212,17 @@ else if (_model is not null)
             </MudTabPanel>
         }
     </MudTabs>
+
+    <script>
+        function downloadFile(fileName, base64Data, contentType) {
+            const link = document.createElement('a');
+            link.href = `data:${contentType};base64,${base64Data}`;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
 }
 else
 {
@@ -211,7 +251,153 @@ else
     private bool _showDeletedEntrys = false;
     
     private string? _logSearchString;
+    
+    private IBrowserFile _file;
+    private async Task UploadFiles(IBrowserFile file, SupportfileEntryDbModel entryDbModel)
+    {
+        if (_model is null) return;
+        if (MainLayout.AccessModel is null) return;
+        if (_hubConnection is null) return;
+        
+        _file = file;
+        
+        try
+        {
+            var fileData = new byte[_file.Size];
+            await _file.OpenReadStream().ReadAsync(fileData);
 
+            var fileUpload = new SupportfileFileUploadDbModel(entryDbModel.Id, _file.Name, _file.ContentType, fileData);
+
+            var result = await DialogService.ShowMessageBox(
+                "Datei hochladen", 
+                $"Bist du dir sicher die Datei {fileUpload.FileName} hochzuladen? \n Größe: {fileUpload.SizeText}", 
+                yesText:"Hochladen!", cancelText:"Abbrechen"
+            );
+            if (result is null or false) return;
+
+            var uploaded = await SupportfileEntryProxy.AddFileAsync(fileUpload, _model.Id, MainLayout.AccessModel.Id);
+            if (!uploaded)
+            {
+                Snackbar.Add("Ein Fehler beim Hochladen ist aufgetreten.", Severity.Error);
+                return;
+            }
+            
+            Snackbar.Add("Datei erfolgreich hochgeladen!", Severity.Success);
+            
+            await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), _model.Id);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fehler beim Hochladen der Datei: {ex.Message}", Severity.Error);
+        }
+    }
+    
+    private async Task DeleteFile(SupportfileFileUploadDbModel file)
+    {
+        if (_model is null) return;
+        if (MainLayout.AccessModel is null) return;
+        if (_hubConnection is null) return;
+        
+        var result = await DialogService.ShowMessageBox(
+            "Datei löschen", 
+            $"Bist du dir sicher die Datei {file.FileName} zu löschen?", 
+            yesText:"Löschen!", cancelText:"Abbrechen"
+        );
+        if (result is null or false) return;
+        
+        var isDeleted = await SupportfileEntryProxy.DeleteFileAsync(file.Id, _model.Id, MainLayout.AccessModel.Id);
+        if (!isDeleted)
+        {
+            Snackbar.Add("Datei konnte nicht gelöscht werden.", Severity.Error);
+            return;
+        }
+
+        Snackbar.Add("Datei wurde gelöscht.", Severity.Success);
+        await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), _model.Id);
+    }
+    
+    private async Task DownloadFile(SupportfileFileUploadDbModel file)
+    {
+        var result = await DialogService.ShowMessageBox(
+            "Datei herunterladen", 
+            $"Bist du dir sicher die Datei {file.FileName} herunterzuladen?", 
+            yesText:"Herunterladen!", cancelText:"Abbrechen"
+        );
+        if (result is null or false) return;
+        
+        var fileContent = new byte[file.Data.Length];
+        file.Data.CopyTo(fileContent, 0);
+
+        var base64File = Convert.ToBase64String(file.Data);
+        var fileName = file.FileName;
+        var contentType = file.ContentType;
+
+        await JS.InvokeVoidAsync("downloadFile", fileName, base64File, contentType);
+    }
+
+    private async Task RenameFile(SupportfileFileUploadDbModel file)
+    {
+        if (_model is null) return;
+        if (MainLayout.AccessModel is null) return;
+        if (_hubConnection is null) return;
+        
+        const string title = "Dateinamen bearbeiten";
+        var description = "";
+        const string submitButtonText = "Dateinamen überschreiben";
+
+        const string nameLabel = "Dateiname";
+
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                nameLabel,
+                file.FileName,
+                "Filename.pdf"
+            ),
+        };
+
+        var parameter = new DialogParameters<SimpleMudDialog>
+        {
+            { x => x.Description, description },
+            { x => x.Inputs, inputs },
+            { x => x.SubmitButtonText, submitButtonText },
+        };
+
+        var dialog = await DialogService.ShowAsync<SimpleMudDialog>(title, parameter, new DialogOptions { FullWidth = true });
+        var dialogResult = await dialog.Result;
+
+        if (dialogResult != null && dialogResult.Canceled) return;
+
+        var data = (List<InputModel>)dialogResult.Data!;
+        var name = data.First(x => x.Label == nameLabel).Value;
+
+        if (string.IsNullOrEmpty(name))
+        {
+            Snackbar.Add("Es wurde keine Name eingetragen!", Severity.Error);
+            return;
+        }
+
+        var fileEnding = file.FileName.Split(".").Last();
+        var newNameEnding = name.Split(".").Last();
+
+        if (fileEnding != newNameEnding)
+        {
+            Snackbar.Add("Du Hurensohn", Severity.Error);
+            return;
+        }
+
+        var saved = await SupportfileEntryProxy.RenameFileAsync(file.Id, name, _model.Id, MainLayout.AccessModel.Id);
+        if (!saved)
+        {
+            Snackbar.Add("Beim Überschreiben ist ein Fehler aufgetreten!", Severity.Error);
+            return;
+        }
+
+        Snackbar.Add("Dateiname wurde überschrieben!", Severity.Success);
+        await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), _model.Id);
+    }
+    
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();

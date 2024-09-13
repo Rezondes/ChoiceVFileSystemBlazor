@@ -1,6 +1,6 @@
 ﻿using ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 
-namespace ChoiceVFileSystemBlazor.Database.Supportfiles.Extension;
+namespace ChoiceVFileSystemBlazor.Database.Supportfiles.Extensions;
 
 public static class SupportfileDbModelExtension
 {

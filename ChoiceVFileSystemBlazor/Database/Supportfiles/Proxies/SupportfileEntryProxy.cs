@@ -14,6 +14,7 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
         var list = await dbContext.SupportfileEntryDbModels
             .AsNoTracking()
             .Include(x => x.CreatorAccessModel)
+            .Include(x => x.FileUploads)
             .Where(x => x.SupportfileId == id)
             .OrderByDescending(x => x.Id)
             .ToListAsync();
@@ -122,4 +123,95 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
         
         return changes > 0;
     }
+    
+    public async Task<SupportfileFileUploadDbModel?> GetFileAsync(Ulid id)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        return await dbContext.SupportfileFileUploadDbModels
+            .AsNoTracking()
+            .Include(x => x.EntryModel)
+            .FirstOrDefaultAsync(x => x.Id == id);
+    }
+
+    public int GetMaxFileSize() => 1048576 * 5;
+    
+    public async Task<bool> AddFileAsync(SupportfileFileUploadDbModel file, Ulid supportfileId, Ulid accessId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        switch (file.ContentType)
+        {
+            case "application/pdf":
+            case "image/png":
+            case "image/jpg":
+            case "image/jpeg":
+                break;
+            default:
+                return false;
+        }
+
+        if (file.Data.Length > GetMaxFileSize())
+        {
+            return false;
+        }
+        
+        await dbContext.SupportfileFileUploadDbModels.AddAsync(file);
+        await supportfileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+            supportfileId,
+            SupportfileLogTypeEnum.AddFileUpload,
+            accessId,
+            $"FileId: {file.Id} \n" +
+            $"FileName: {file.FileName} \n " +
+            $"ContentType: {file.ContentType} \n " +
+            $"FileSize: {file.SizeText}"
+        ));
+        var changes = await dbContext.SaveChangesAsync();
+        
+        return changes > 0;
+    }
+
+    public async Task<bool> RenameFileAsync(Ulid id, string newName, Ulid supportfileId, Ulid accessId)
+    {
+        var file = await GetFileAsync(id);
+        if (file is null) return false;
+        
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var oldName = file.FileName;
+        file.FileName = newName;
+        
+        dbContext.SupportfileFileUploadDbModels.Update(file);
+        await supportfileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+            supportfileId,
+            SupportfileLogTypeEnum.DeleteFileUpload,
+            accessId,
+            $"FileId: {file.Id} \n" +
+            $"OldName: {oldName} \n " +
+            $"NewName: {file.FileName} \n "
+        ));
+        var changes = await dbContext.SaveChangesAsync();
+        
+        return changes > 0;
+    }
+
+    public async Task<bool> DeleteFileAsync(Ulid id, Ulid supportfileId, Ulid accessId)
+    {
+        var file = await GetFileAsync(id);
+        if (file is null) return false;
+        
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        dbContext.SupportfileFileUploadDbModels.Remove(file);
+        await supportfileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+            supportfileId,
+            SupportfileLogTypeEnum.DeleteFileUpload,
+            accessId,
+            $"FileId: {file.Id} \n" +
+            $"FileName: {file.FileName} \n " +
+            $"ContentType: {file.ContentType} \n "
+        ));
+        var changes = await dbContext.SaveChangesAsync();
+        
+        return changes > 0;
+    } 
 }

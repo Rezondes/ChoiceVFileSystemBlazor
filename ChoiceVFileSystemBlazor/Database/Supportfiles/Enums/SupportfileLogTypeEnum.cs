@@ -14,4 +14,8 @@ public enum SupportfileLogTypeEnum
     RemoveEntry = 2001,
     ModifyEntry = 2002,
     RestoreEntry = 2003,
+    
+    AddFileUpload = 3000,
+    DeleteFileUpload = 3001,
+    RenameFileUpload = 3002,
 }

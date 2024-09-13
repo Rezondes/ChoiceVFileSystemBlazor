@@ -34,6 +34,8 @@ else
 
     private SupportfileOverviewDataGrid _supportfileOverviewDataGrid;
     
+    private PartialAccessModel? _checkModel;
+    
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -71,6 +73,7 @@ else
             return;
         }
 
+        _checkModel = MainLayout.AccessModel.CreateShallowCopy();
         await _supportfileOverviewDataGrid.Load();
     }
 
@@ -78,6 +81,7 @@ else
     {
         if (MainLayout.BaseHubConnection is null) return;
         if (MainLayout.AccessModel is null) return;
+        if (_checkModel is null) return;
         
         var accessDbModel = MainLayout.AccessModel;
         
@@ -117,6 +121,13 @@ else
             Snackbar.Add("Es wurde kein Name eingetragen!", Severity.Error);
             return;
         }
+
+        if (_checkModel.Name == name)
+        {
+            Snackbar.Add("Es wurde kein Name eingetragen!", Severity.Error);
+            return;
+        }
+        
 
         var partialAccessModel = new PartialAccessModel(accessDbModel.AccountId, accessDbModel.DiscordId, name, accessDbModel.Rank);
         var response = await AccessProxy.UpdateToPartial(accessDbModel, partialAccessModel, MainLayout.AccessModel.Id);

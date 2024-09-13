@@ -27,6 +27,7 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
     public DbSet<SupportfileDbModel> SupportfileDbModels { get; set; }
     public DbSet<SupportfileEntryDbModel> SupportfileEntryDbModels { get; set; }
     public DbSet<SupportfileLogsDbModel> SupportfileLogsDbModels  { get; set; }
+    public DbSet<SupportfileFileUploadDbModel> SupportfileFileUploadDbModels  { get; set; }
     #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -50,6 +51,14 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
             .HasConversion(
                 v => v.ToString(),
                 v => Ulid.Parse(v));
+        modelBuilder.Entity<AccessLogsDbModel>()
+            .HasOne(s => s.AccessModel)
+            .WithMany(a => a.CreatedAccessLogs) 
+            .HasForeignKey(s => s.AccessId); 
+        modelBuilder.Entity<AccessLogsDbModel>()
+            .HasOne(s => s.TargetAccessModel)
+            .WithMany(a => a.TargetedAccessLogs) 
+            .HasForeignKey(s => s.TargetAccessId); 
         
         modelBuilder.Entity<AccessDbModel>()
             .Property(e => e.Id)
@@ -147,6 +156,20 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
             .WithMany(a => a.SupportfileEntrys) 
             .HasForeignKey(s => s.CreatedByAccessId); 
         
+        modelBuilder.Entity<SupportfileFileUploadDbModel>()
+            .Property(e => e.Id)
+            .HasConversion(
+                v => v.ToString(),
+                v => Ulid.Parse(v));
+        modelBuilder.Entity<SupportfileFileUploadDbModel>()
+            .Property(e => e.EntryId)
+            .HasConversion(
+                v => v.ToString(),
+                v => Ulid.Parse(v));
+        modelBuilder.Entity<SupportfileFileUploadDbModel>()
+            .HasOne(s => s.EntryModel)
+            .WithMany(a => a.FileUploads) 
+            .HasForeignKey(s => s.EntryId); 
         #endregion
     }
 }
