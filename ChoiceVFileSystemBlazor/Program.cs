@@ -204,18 +204,25 @@ builder.Services.AddSingleton<AuthorizationService>();
 
 builder.Services.AddSignalR();
 
-builder.WebHost.ConfigureKestrel(options =>
+if (!builder.Environment.IsDevelopment())
 {
-    options.ListenAnyIP(8080, listenOptions =>
+    builder.WebHost.ConfigureKestrel(options =>
     {
-        listenOptions.UseHttps(); // HTTPS verwenden
+        options.ListenAnyIP(8080, listenOptions =>
+        {
+            listenOptions.UseHttps();
+        });
     });
-});
+    
+}
 
 var app = builder.Build();
 
-app.UseExceptionHandler(Error.GetRedirectUrl(), createScopeForErrors: true);
-app.UseHsts();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler(Error.GetRedirectUrl(), createScopeForErrors: true);
+    app.UseHsts();
+}
 
 app.UseHttpsRedirection();
 
