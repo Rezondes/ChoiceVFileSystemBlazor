@@ -117,7 +117,11 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
             .Property(e => e.AccessId)
             .HasConversion(
                 v => v.ToString(),
-                v => Ulid.Parse(v));
+                v => Ulid.Parse(v)); 
+        modelBuilder.Entity<SupportfileLogsDbModel>()
+            .HasOne(s => s.AccessModel)
+            .WithMany(a => a.SupportfileLogs) 
+            .HasForeignKey(s => s.AccessId); 
         
         modelBuilder.Entity<SupportfileEntryDbModel>()
             .Property(e => e.Id)
@@ -134,6 +138,10 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
             .HasConversion(
                 v => v.ToString(),
                 v => Ulid.Parse(v));
+        modelBuilder.Entity<SupportfileEntryDbModel>()
+            .HasOne(s => s.CreatorAccessModel)
+            .WithMany(a => a.SupportfileEntrys) 
+            .HasForeignKey(s => s.CreatedByAccessId); 
         
         #endregion
     }

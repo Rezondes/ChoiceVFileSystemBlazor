@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using ChoiceVFileSystemBlazor.Database._Shared;
 using ChoiceVFileSystemBlazor.Database.Accesses.DbModels.Partials;
+using ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 using ChoiceVSharedApiModels.Accounts;
 
 namespace ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
@@ -23,4 +24,8 @@ public class AccessDbModel : PartialAccessModel
     }
     
     public Ulid Id { get; set; } = Ulid.NewUlid();
+    
+    // Navigation Properties
+    public List<SupportfileLogsDbModel> SupportfileLogs { get; set; } = [];
+    public List<SupportfileEntryDbModel> SupportfileEntrys { get; set; } = [];
 }

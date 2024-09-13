@@ -9,8 +9,15 @@ public class SupportfileLogsProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatab
     public async Task<List<SupportfileLogsDbModel>> GetAllLogsForSupportfileIdAsync(Ulid id)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        
-        return await dbContext.SupportfileLogsDbModels.AsNoTracking().Where(x => x.SupportfileId == id).ToListAsync();
+
+        var list = await dbContext.SupportfileLogsDbModels
+            .Include(x => x.AccessModel)
+            .AsNoTracking()
+            .Where(x => x.SupportfileId == id)
+            .OrderByDescending(x => x.Id)
+            .ToListAsync();
+
+        return list;
     }
 
     // Return null if adding failed

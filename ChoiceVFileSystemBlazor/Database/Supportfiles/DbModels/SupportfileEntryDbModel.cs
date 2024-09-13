@@ -1,4 +1,6 @@
-﻿namespace ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
+﻿using ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
+
+namespace ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 
 public class SupportfileEntryDbModel
 {
@@ -18,4 +20,7 @@ public class SupportfileEntryDbModel
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
     public bool Deleted { get; set; } = false;
+    
+    // Navigation Properties
+    public AccessDbModel CreatorAccessModel { get; set; }
 }

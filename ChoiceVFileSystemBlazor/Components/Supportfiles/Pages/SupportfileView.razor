@@ -25,13 +25,13 @@ else if (_model is not null)
             <MudGrid Justify="Justify.FlexStart">
                 <MudItem xs="8">
                     <MudPaper Class="pa-4">
-                        <MudTextField Label="CreatedByAccessId" Variant="Variant.Outlined" ReadOnly Value="@(_creator is null ? _model.CreatedByAccessId.ToString() : _creator.Name)"/>
+                        <MudTextField Label="Ersteller" Variant="Variant.Outlined" ReadOnly Value="@(_creator is null ? _model.CreatedByAccessId.ToString() : _creator.Name)"/>
 
                         <MudDivider Style="@_dividerStyle"/>
-                        <MudTextField Label="Title" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditTitle))" @bind-Value="_model.Title"/>
+                        <MudTextField Label="Titel" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditTitle))" @bind-Value="_model.Title"/>
 
                         <MudDivider Style="@_dividerStyle"/>
-                        <MudTextField Label="Description" Lines="3" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditDescription))" @bind-Value="_model.Description"/>
+                        <MudTextField Label="Beschreibung" Lines="3" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditDescription))" @bind-Value="_model.Description"/>
 
                         <MudDivider Style="@_dividerStyle"/>
                         <MudSelect T="FileStatusEnum" Label="Status" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditStatus))" @bind-Value="_model.Status">
@@ -108,11 +108,9 @@ else if (_model is not null)
                 }
 
                 <MudPaper Square="true" style="height: 100%; overflow-y: auto;">
-                    <MudList T="Object">
+                    <MudList T="object">
                         @foreach (var entry in _entrys)
                         {
-                            var creator = _allAccessModels.FirstOrDefault(x => x.Id == entry.CreatedByAccessId);
-
                             if (entry != _entrys.First())
                             {
                                 <MudDivider/>
@@ -121,7 +119,7 @@ else if (_model is not null)
                             <MudCard>
                                 <MudCardHeader>
                                     <CardHeaderContent>
-                                        <MudText Typo="Typo.h5">[@entry.CreatedByAccessId] @(creator is null ? "ERROR" : creator.Name) am @entry.CreatedAt</MudText>
+                                        <MudText Typo="Typo.h5">@entry.CreatorAccessModel.Name am @entry.CreatedAt</MudText>
                                     </CardHeaderContent>
                                 </MudCardHeader>
                                 <MudCardContent>
@@ -171,9 +169,10 @@ else if (_model is not null)
                             IconSize="Size.Medium" Class="mt-0"/>
                     </ToolBarContent>
                     <Columns>
-                        <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" InitialDirection="SortDirection.Descending"/>
+                        <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
                         <PropertyColumn Property="x => x.Content" Title="Content" />
                         <PropertyColumn Property="x => x.AccessId" Title="AccessId" />
+                        <PropertyColumn Property="x => x.AccessModel.Name" Title="AccessName" />
                         <PropertyColumn Property="x => x.Type" Title="Type" />
                         <PropertyColumn Property="x => x.CreatedAt" Title="CreatedAt" />
                     </Columns>
