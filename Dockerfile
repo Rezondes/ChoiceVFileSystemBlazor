@@ -1,15 +1,25 @@
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+# Benutzer UID wird definiert
 USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+# Kopiere das Zertifikat
 COPY blazorapp.pfx /https/blazorapp.pfx
 
+# Ändere den Besitzer der Zertifikatsdatei auf den aktuellen Benutzer ($APP_UID)
+RUN chown $APP_UID /https/blazorapp.pfx
+
+# Setze Leserechte für den Benutzer auf das Zertifikat
+RUN chmod 600 /https/blazorapp.pfx
+
+# Umgebungsvariablen für HTTPS und Zertifikatspfad
 ENV ASPNETCORE_URLS="https://+:8080"
 ENV ASPNETCORE_Kestrel__Certificates__Default__Path=/https/blazorapp.pfx
 ENV ASPNETCORE_Kestrel__Certificates__Default__Password=187test
 
+# Build- und Publishing-Stufen
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
@@ -26,6 +36,7 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "ChoiceVFileSystemBlazor.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
+# Finales Image
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
