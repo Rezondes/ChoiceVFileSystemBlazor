@@ -15,6 +15,18 @@ else if (_loading)
 }
 else
 {
+    <MudText
+        Style="
+            opacity: 0.2;
+            position: absolute;
+            left: 395px;
+            top: 0;
+            z-index: 9999;
+            color: white;"
+        Typo="Typo.body2">
+        @Constants.VERSION
+    </MudText>
+    
     <MudLayout Style="height: 100vh; overflow: hidden;">
         @if (AuthorizationService.IsAuthenticated(MainLayout.AccessModel))
         {
