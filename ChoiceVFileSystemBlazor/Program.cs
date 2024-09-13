@@ -230,11 +230,6 @@ builder.Services.AddScoped<IDiscordRoleLogsProxy, DiscordRoleLogsProxy>();
 
 builder.Services.AddSingleton<AuthorizationService>();
 
-builder.Services.AddHttpsRedirection(options =>
-{
-    options.HttpsPort = 80;
-});
-
 builder.Services.AddSignalR();
 
 var app = builder.Build();
