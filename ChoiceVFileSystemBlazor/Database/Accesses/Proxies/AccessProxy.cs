@@ -52,8 +52,11 @@ public class AccessProxy : IAccessProxy
         using var dbContext = await CreateDbContextAsync();
         return await dbContext.AccessDbModels
             .AsNoTracking()
+            .Include(x => x.Supportfiles)
             .Include(x => x.SupportfileLogs)
             .Include(x => x.SupportfileEntrys)
+            .Include(x => x.CreatedAccessLogs)
+            .Include(x => x.TargetedAccessLogs)
             .FirstOrDefaultAsync(x => x.Id == id);
     }
     
@@ -64,16 +67,10 @@ public class AccessProxy : IAccessProxy
             using var dbContext = await CreateDbContextAsync();
             var checkDiscordId = await GetAsync(accessModel.DiscordId);
             if (checkDiscordId is not null) return false;
-            var checkAccountId = await GetAsync(accessModel.AccountId);
-            if (checkAccountId is not null) return false;
+            // var checkAccountId = await GetAsync(accessModel.AccountId);
+            // if (checkAccountId is not null) return false;
 
             await dbContext.AccessDbModels.AddAsync(accessModel);
-            await _accessLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
-                accessModel.Id,
-                AccessLogTypeEnum.ModifyAccountId,
-                Ulid.Empty,
-                string.Empty
-            ));
             var changes = await dbContext.SaveChangesAsync();
 
             return changes > 0;
@@ -158,12 +155,15 @@ public class AccessProxy : IAccessProxy
         accessDbModel.Rank = newRank;
 
         dbContext.AccessDbModels.Update(accessDbModel);
-        await _accessLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
-            accessDbModel.Id,
-            AccessLogTypeEnum.ModifyRank,
-            accessId,
-            $"OldRank: {oldRank} \nNewRank: {accessDbModel.Rank}"
-        ));
+        if (accessId != Ulid.Empty)
+        {
+            await _accessLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+                accessDbModel.Id,
+                AccessLogTypeEnum.ModifyRank,
+                accessId,
+                $"OldRank: {oldRank} \nNewRank: {accessDbModel.Rank}"
+            ));
+        }
         var changes = await dbContext.SaveChangesAsync();
 
         return changes > 0;

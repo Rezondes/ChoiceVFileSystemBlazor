@@ -53,7 +53,7 @@ public static class ClaimsPrincipalExtension
                 
                 response = newAccessModel;
             
-                if (response.AccountId >= 0)
+                if (roles.Count > 0)
                 {
                     // Set Highest DiscordRole
                     var discordRoleDbModels = await discordRolesProxy.GetAllAsync();
