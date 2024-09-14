@@ -50,27 +50,27 @@ else if (_model is not null)
                     <MudItem xs="4">
                         <MudPaper Class="pa-4">
                             <MudToolBar>
-                            @if (MainLayout.HasAnyRights([RightEnum.SupportfileEditTitle, RightEnum.SupportfileEditDescription, RightEnum.SupportfileEditStatus, RightEnum.SupportfileEditMinRank]))
-                            {
-                                <MudTooltip Text="Änderungen speichern" Duration="@Constants.TOOLTIP_DURATION">
-                                    <MudIconButton Variant="Variant.Text" Color="Color.Primary" Icon="@Icons.Material.Filled.Save" OnClick="() => SaveChanges()"/>
-                                </MudTooltip>
-                            }
+                                @if (MainLayout.HasAnyRights([RightEnum.SupportfileEditTitle, RightEnum.SupportfileEditDescription, RightEnum.SupportfileEditStatus, RightEnum.SupportfileEditMinRank]))
+                                {
+                                    <MudTooltip Text="Änderungen speichern" Duration="@Constants.TOOLTIP_DURATION">
+                                        <MudIconButton Variant="Variant.Text" Color="Color.Primary" Icon="@Icons.Material.Filled.Save" OnClick="() => SaveChanges()"/>
+                                    </MudTooltip>
+                                }
                             
-                            <MudSpacer />
+                                <MudSpacer />
 
-                            @if (_model.Deleted && MainLayout.HasRight(RightEnum.SupportfileRestore))
-                            {
-                                <MudTooltip Text="Supportakte wiederherstellen" Duration="@Constants.TOOLTIP_DURATION">
-                                    <MudIconButton Variant="Variant.Text" Color="Color.Success" Icon="@Icons.Material.Filled.RestoreFromTrash" OnClick="() => ToggleFileDeleted()"/>
-                                </MudTooltip>
-                            }
-                            else if (!_model.Deleted && MainLayout.HasRight(RightEnum.SupportfileDelete))
-                            {
-                                <MudTooltip Text="Supportakte löschen" Duration="@Constants.TOOLTIP_DURATION">
-                                    <MudIconButton Variant="Variant.Text" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" OnClick="() => ToggleFileDeleted()"/>
-                                </MudTooltip>
-                            }
+                                @if (_model.Deleted && MainLayout.HasRight(RightEnum.SupportfileRestore))
+                                {
+                                    <MudTooltip Text="Supportakte wiederherstellen" Duration="@Constants.TOOLTIP_DURATION">
+                                        <MudIconButton Variant="Variant.Text" Color="Color.Success" Icon="@Icons.Material.Filled.RestoreFromTrash" OnClick="() => ToggleFileDeleted()"/>
+                                    </MudTooltip>
+                                }
+                                else if (!_model.Deleted && MainLayout.HasRight(RightEnum.SupportfileDelete))
+                                {
+                                    <MudTooltip Text="Supportakte löschen" Duration="@Constants.TOOLTIP_DURATION">
+                                        <MudIconButton Variant="Variant.Text" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" OnClick="() => ToggleFileDeleted()"/>
+                                    </MudTooltip>
+                                }
                             </MudToolBar>
                         </MudPaper>
                     </MudItem>
@@ -134,6 +134,12 @@ else if (_model is not null)
                                                 <MudTd>@context.UploadDate.ToString("g")</MudTd>
                                                 <MudTd>
                                                     <MudButtonGroup Color="Color.Primary" Variant="Variant.Text">
+                                                        @if (MainLayout.HasRight(RightEnum.SupportfilePreviewFileForEntry))
+                                                        {
+                                                            <MudTooltip Text="Datei anschauen" Duration="Constants.TOOLTIP_DURATION">
+                                                                <MudIconButton Icon="@Icons.Material.Filled.Preview" Color="Color.Info" OnClick="() => PreviewFile(context)"/>
+                                                            </MudTooltip>
+                                                        }
                                                         @if (MainLayout.HasRight(RightEnum.SupportfileDownloadFileForEntry))
                                                         {
                                                             <MudTooltip Text="Datei herunterladen" Duration="Constants.TOOLTIP_DURATION">
@@ -164,7 +170,7 @@ else if (_model is not null)
                                         <MudButtonGroup Color="Color.Primary" Variant="Variant.Text">
                                             @if (MainLayout.HasRight(RightEnum.SupportfileUploadFileForEntry))
                                             {
-                                                <MudFileUpload T="IBrowserFile" FilesChanged="(file) => UploadFiles(file, entry)" Accept=".pdf, .png, .jpg, .jpeg">
+                                                <MudFileUpload T="IBrowserFile" FilesChanged="(file) => UploadFiles(file, entry)" Accept="application/pdf, image/png, image/jpg, image/jpeg">
                                                     <ActivatorContent>
                                                         <MudTooltip Text="Datei hochladen" Duration="Constants.TOOLTIP_DURATION">
                                                             <MudIconButton Icon="@Icons.Material.Filled.CloudUpload" Color="Color.Tertiary"/>
@@ -232,17 +238,8 @@ else if (_model is not null)
             </MudTabPanel>
         }
     </MudTabs>
-
-    <script>
-        function downloadFile(fileName, base64Data, contentType) {
-            const link = document.createElement('a');
-            link.href = `data:${contentType};base64,${base64Data}`;
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    </script>
+    
+    <FileUploadPreview @ref="_fileUploadPreview" Model="_model" HubConnection="_hubConnection" />
 }
 else
 {
@@ -272,150 +269,90 @@ else
     
     private string? _logSearchString;
     
-    private IBrowserFile _file;
-    private async Task UploadFiles(IBrowserFile file, SupportfileEntryDbModel entryDbModel)
+    private FileUploadPreview? _fileUploadPreview;
+    
+    private async Task UploadFiles(IBrowserFile? file, SupportfileEntryDbModel entryDbModel)
     {
         if (_model is null) return;
         if (MainLayout.AccessModel is null) return;
         if (_hubConnection is null) return;
+        if (_fileUploadPreview is null) return;
+        if (file is null) return;
+
+        var maxFileSize = SupportfileEntryProxy.GetMaxFileSize();
         
-        _file = file;
+        if (file.Size > maxFileSize)
+        {
+            Snackbar.Add("Datei ist zu groß!", Severity.Error);
+            return;
+        }
         
         try
         {
-            var fileData = new byte[_file.Size];
-            await _file.OpenReadStream().ReadAsync(fileData);
-
-            var fileUpload = new SupportfileFileUploadDbModel(entryDbModel.Id, _file.Name, _file.ContentType, fileData);
-
-            var result = await DialogService.ShowMessageBox(
-                "Datei hochladen", 
-                $"Bist du dir sicher die Datei {fileUpload.FileName} hochzuladen? \n Größe: {fileUpload.SizeText}", 
-                yesText:"Hochladen!", cancelText:"Abbrechen"
-            );
-            if (result is null or false) return;
-
-            var uploaded = await SupportfileEntryProxy.AddFileAsync(fileUpload, _model.Id, MainLayout.AccessModel.Id);
-            if (!uploaded)
+            if (file.ContentType == "image/png" || file.ContentType == "image/jpeg" || file.ContentType == "image/jpg")
             {
-                Snackbar.Add("Ein Fehler beim Hochladen ist aufgetreten.", Severity.Error);
-                return;
+                var fileUpload = await GetFileUploadDbModel(file, entryDbModel);
+
+                _fileUploadPreview.OpenFile(fileUpload, true);
             }
-            
-            Snackbar.Add("Datei erfolgreich hochgeladen!", Severity.Success);
-            
-            await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), _model.Id);
+            else if (file.ContentType == "application/pdf")
+            {
+                using var stream = file.OpenReadStream(maxFileSize); // max 10 MB
+                using var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+                var buffer = memoryStream.ToArray();
+                
+                var fileUpload = new SupportfileFileUploadDbModel(entryDbModel.Id, file.Name, file.ContentType, buffer);
+                _fileUploadPreview.OpenFile(fileUpload, true);
+            }
+            else
+            {
+                Snackbar.Add($"Dateiformat [{file.ContentType}] wird nicht unterstützt.", Severity.Error);
+            }
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Fehler beim Hochladen der Datei: {ex.Message}", Severity.Error);
         }
     }
-    
+
+    private async Task<SupportfileFileUploadDbModel> GetFileUploadDbModel(IBrowserFile file, SupportfileEntryDbModel entryDbModel)
+    {
+        var maxFileSize = SupportfileEntryProxy.GetMaxFileSize();
+        
+        var resizedFile = await file.RequestImageFileAsync(file.ContentType, 800, 600); // Rescale wenn nötig
+        using var stream = resizedFile.OpenReadStream(maxFileSize); // max 10 MB
+
+        // Nutze einen MemoryStream, um die Daten korrekt zu verarbeiten
+        using var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+        var buffer = memoryStream.ToArray(); 
+        
+        var fileUpload = new SupportfileFileUploadDbModel(entryDbModel.Id, file.Name, file.ContentType, buffer);
+        return fileUpload;
+    }
+
     private async Task DeleteFile(SupportfileFileUploadDbModel file)
     {
-        if (_model is null) return;
-        if (MainLayout.AccessModel is null) return;
-        if (_hubConnection is null) return;
-        
-        var result = await DialogService.ShowMessageBox(
-            "Datei löschen", 
-            $"Bist du dir sicher die Datei {file.FileName} zu löschen?", 
-            yesText:"Löschen!", cancelText:"Abbrechen"
-        );
-        if (result is null or false) return;
-        
-        var isDeleted = await SupportfileEntryProxy.DeleteFileAsync(file.Id, _model.Id, MainLayout.AccessModel.Id);
-        if (!isDeleted)
-        {
-            Snackbar.Add("Datei konnte nicht gelöscht werden.", Severity.Error);
-            return;
-        }
-
-        Snackbar.Add("Datei wurde gelöscht.", Severity.Success);
-        await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), _model.Id);
+        if (_fileUploadPreview is null) return;
+        await _fileUploadPreview.DeleteFile(file);
     }
     
     private async Task DownloadFile(SupportfileFileUploadDbModel file)
     {
-        var result = await DialogService.ShowMessageBox(
-            "Datei herunterladen", 
-            $"Bist du dir sicher die Datei {file.FileName} herunterzuladen?", 
-            yesText:"Herunterladen!", cancelText:"Abbrechen"
-        );
-        if (result is null or false) return;
-        
-        var fileContent = new byte[file.Data.Length];
-        file.Data.CopyTo(fileContent, 0);
-
-        var base64File = Convert.ToBase64String(file.Data);
-        var fileName = file.FileName;
-        var contentType = file.ContentType;
-
-        await JS.InvokeVoidAsync("downloadFile", fileName, base64File, contentType);
+        if (_fileUploadPreview is null) return;
+        await _fileUploadPreview.DownloadFile(file);
     }
 
     private async Task RenameFile(SupportfileFileUploadDbModel file)
     {
-        if (_model is null) return;
-        if (MainLayout.AccessModel is null) return;
-        if (_hubConnection is null) return;
-        
-        const string title = "Dateinamen bearbeiten";
-        var description = "";
-        const string submitButtonText = "Dateinamen überschreiben";
+        if (_fileUploadPreview is null) return;
+        await _fileUploadPreview.RenameFile(file);
+    }
 
-        const string nameLabel = "Dateiname";
-
-        var inputs = new List<InputModel>
-        {
-            new(
-                InputTypes.Text,
-                nameLabel,
-                file.FileName,
-                "Filename.pdf"
-            ),
-        };
-
-        var parameter = new DialogParameters<SimpleMudDialog>
-        {
-            { x => x.Description, description },
-            { x => x.Inputs, inputs },
-            { x => x.SubmitButtonText, submitButtonText },
-        };
-
-        var dialog = await DialogService.ShowAsync<SimpleMudDialog>(title, parameter, new DialogOptions { FullWidth = true });
-        var dialogResult = await dialog.Result;
-
-        if (dialogResult != null && dialogResult.Canceled) return;
-
-        var data = (List<InputModel>)dialogResult.Data!;
-        var name = data.First(x => x.Label == nameLabel).Value;
-
-        if (string.IsNullOrEmpty(name))
-        {
-            Snackbar.Add("Es wurde keine Name eingetragen!", Severity.Error);
-            return;
-        }
-
-        var fileEnding = file.FileName.Split(".").Last();
-        var newNameEnding = name.Split(".").Last();
-
-        if (fileEnding != newNameEnding)
-        {
-            Snackbar.Add("Du Hurensohn", Severity.Error);
-            return;
-        }
-
-        var saved = await SupportfileEntryProxy.RenameFileAsync(file.Id, name, _model.Id, MainLayout.AccessModel.Id);
-        if (!saved)
-        {
-            Snackbar.Add("Beim Überschreiben ist ein Fehler aufgetreten!", Severity.Error);
-            return;
-        }
-
-        Snackbar.Add("Dateiname wurde überschrieben!", Severity.Success);
-        await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), _model.Id);
+    private void PreviewFile(SupportfileFileUploadDbModel file)
+    {
+        _fileUploadPreview?.OpenFile(file, false);
     }
     
     protected override async Task OnInitializedAsync()

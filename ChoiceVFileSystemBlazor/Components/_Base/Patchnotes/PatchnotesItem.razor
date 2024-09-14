@@ -1,14 +1,8 @@
-﻿<MudPaper Elevation="20" Width="95%" Style="margin: 16px 0; padding: 16px;">
-    <MudText Class="d-flex flex-column align-center justify-center mud-width-full" Typo="Typo.h6">
-        @Label
-    </MudText>
-    @foreach (var text in Content)
-    {
-        <MudText Style="height: 25px">@text</MudText>
-    }
-</MudPaper>
+﻿@foreach (var text in Content)
+{
+    <MudText Style="height: 25px">@text</MudText>
+}
 
 @code {
-    [Parameter] public string Label { get; set; }
     [Parameter] public List<string> Content { get; set; }
 }

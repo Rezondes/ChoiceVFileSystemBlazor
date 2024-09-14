@@ -1,11 +1,15 @@
 ﻿<MudItem xs="12">
-    <MudPaper Elevation="2" Style="height: 100%" Class="d-flex flex-column align-center justify-center mud-width-full">
+    <MudPaper Elevation="2" Style="height: 100%; padding: 15px;" Class="d-flex flex-column align-center justify-center mud-width-full">
         <MudText Typo="Typo.h5">Patchnotes</MudText>
-        
-        @foreach (var patchnote in _patchnotes.OrderDescending())
-        {
-            <PatchnotesItem Label="@patchnote.Item1" Content="@patchnote.Item2"/>
-        }
+
+        <MudExpansionPanels MultiExpansion="true">
+            @foreach (var patchnote in _patchnotes.OrderDescending())
+            {
+                <MudExpansionPanel Text="@patchnote.Item1">
+                    <PatchnotesItem Content="@patchnote.Item2"/>
+                </MudExpansionPanel>
+            }
+        </MudExpansionPanels>
     </MudPaper>
 </MudItem>
 
@@ -49,6 +53,15 @@
             "--> Vorerst ungenutzte Felder wurden für eine bessere Übersicht entfernt",
             "- AccessLogs:",
             "--> TargetAccessName & AccessName werden nun angezeigt."
+        ]),
+        new("v14092024_2", [
+            "Änderungen:",
+            "- Supportakten:",
+            "--> Dateien können sich nun direkt im Browser angeschaut werden",
+            "--> Ein Fehler wurde behoben, durch welchen der Fileupload teilweise gar nicht funktionierte",
+            "- Dashboard:",
+            "--> Patchnotes werden jetzt anders angezeigt",
+            "--> Absofort können neue/aktuelle Informationen auf dem Dashboard angezeigt werden"
         ]),
     ];  
 }

@@ -25,6 +25,7 @@ public enum RightEnum
     SupportfileDownloadFileForEntry = 1511,
     SupportfileDeleteFileForEntry = 1512,
     SupportfileRenameFileForEntry = 1513,
+    SupportfilePreviewFileForEntry = 1514,
     
     ViewGroupingfilesArea = 2000,
     ViewGroupingfiles = 2001,

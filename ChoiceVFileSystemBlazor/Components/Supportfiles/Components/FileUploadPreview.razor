@@ -1,0 +1,263 @@
+﻿
+<style>
+    .mud-overlay-content {
+        height: 85%;
+        width: 95%;
+        margin-top: -10vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+<MudOverlay @bind-Visible="_visible" DarkBackground="true" ZIndex="99999" Absolute="true">
+@if (_file is null)
+{
+    <PageLoading/>
+}
+else
+{
+    @if (!string.IsNullOrEmpty(_imagePreviewUrl))
+    {
+        <h4 style="position: absolute; top: 15px;">Bildvorschau</h4>
+        <img src="@_imagePreviewUrl" alt="Image preview"/>
+    }
+    @if (!string.IsNullOrEmpty(_pdfPreviewUrl))
+    {
+        <h4 style="position: absolute; top: 15px;">Pdf</h4>
+        <iframe src="@_pdfPreviewUrl" width="100%" height="600px"></iframe>
+    }
+
+    <MudButtonGroup Color="Color.Primary" Variant="Variant.Text" Style="position: absolute; bottom: -100px;">
+        @if (!_newUpload)
+        {
+            <MudTooltip Text="Vorschau schließen" Duration="Constants.TOOLTIP_DURATION">
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Info" OnClick="() => Close()"/>
+            </MudTooltip>
+            @if (MainLayout.HasRight(RightEnum.SupportfileDownloadFileForEntry))
+            {
+                <MudTooltip Text="Datei herunterladen" Duration="Constants.TOOLTIP_DURATION">
+                    <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Tertiary" OnClick="() => DownloadFile(_file)"/>
+                </MudTooltip>
+            }
+            @if (MainLayout.HasRight(RightEnum.SupportfileRenameFileForEntry))
+            {
+                <MudTooltip Text="Dateinamen ändern" Duration="Constants.TOOLTIP_DURATION">
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => RenameFile(_file)"/>
+                </MudTooltip>
+            }
+            @if (MainLayout.HasRight(RightEnum.SupportfileDeleteFileForEntry))
+            {
+                <MudTooltip Text="Datei löschen" Duration="Constants.TOOLTIP_DURATION">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" OnClick="() => DeleteFile(_file)"/>
+                </MudTooltip>
+            }
+        }
+        else
+        {
+            <MudTooltip Text="Abbrechen" Duration="Constants.TOOLTIP_DURATION">
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Info" OnClick="() => Close()"/>
+            </MudTooltip>
+            <MudTooltip Text="Datei hochladen" Duration="Constants.TOOLTIP_DURATION">
+                <MudIconButton Icon="@Icons.Material.Filled.CloudUpload" Color="Color.Tertiary" OnClick="() => UploadFile()"/>
+            </MudTooltip>
+        }
+    </MudButtonGroup>
+}
+</MudOverlay>
+
+<script>
+    function downloadFile(fileName, base64Data, contentType) {
+        const link = document.createElement('a');
+        link.href = `data:${contentType};base64,${base64Data}`;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+@code {
+    [Parameter] public HubConnection? HubConnection { get; set; }
+    [Parameter] public SupportfileDbModel? Model { get; set; }
+    
+    private bool _visible;
+    private bool _newUpload;
+
+    private string? _imagePreviewUrl;
+    private string? _pdfPreviewUrl;
+
+    private SupportfileFileUploadDbModel? _file;
+    
+    private void Close()
+    {
+        _visible = false;
+        _newUpload = false;
+        _imagePreviewUrl = null;
+        _pdfPreviewUrl = null;
+    }
+
+    private async Task UploadFile()
+    {
+        if (MainLayout.AccessModel is null) return;
+        if (Model is null) return;
+        if (HubConnection is null) return;
+        if (_file is null) return;
+        
+        var uploaded = await SupportfileEntryProxy.AddFileAsync(_file, Model.Id, MainLayout.AccessModel.Id);
+        if (!uploaded)
+        {
+            Snackbar.Add("Ein Fehler beim Hochladen ist aufgetreten.", Severity.Error);
+            return;
+        }
+            
+        Snackbar.Add("Datei erfolgreich hochgeladen!", Severity.Success);
+        Close();
+            
+        await HubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), Model.Id);
+    }
+    
+    public void OpenFile(SupportfileFileUploadDbModel file, bool newUpload)
+    {
+        var base64Data = Convert.ToBase64String(file.Data);
+        
+        switch (file.ContentType)
+        {
+            case "image/png":
+            case "image/jpg":
+            case "image/jpeg":
+                _imagePreviewUrl = $"data:{file.ContentType};base64,{base64Data}";
+                break;
+            case "application/pdf":
+                _pdfPreviewUrl = $"data:application/pdf;base64,{base64Data}";
+                break;
+            default:
+                Snackbar.Add("Dateiformat ist nicht unterstützt.", Severity.Error);
+                _visible = false;
+                StateHasChanged();
+                return;
+        }
+        
+        _visible = true;
+        _newUpload = newUpload;
+        _file = file;
+        
+        StateHasChanged();
+    }
+    
+    public async Task DownloadFile(SupportfileFileUploadDbModel file)
+    {
+        Close();
+        
+        var result = await DialogService.ShowMessageBox(
+            "Datei herunterladen", 
+            $"Bist du dir sicher die Datei {file.FileName} herunterzuladen?", 
+            yesText:"Herunterladen!", cancelText:"Abbrechen"
+        );
+        if (result is null or false) return;
+        
+        var fileContent = new byte[file.Data.Length];
+        file.Data.CopyTo(fileContent, 0);
+
+        var base64File = Convert.ToBase64String(file.Data);
+        var fileName = file.FileName;
+        var contentType = file.ContentType;
+        
+        await JS.InvokeVoidAsync("downloadFile", fileName, base64File, contentType);
+        
+        Close();
+    }
+    
+    public async Task RenameFile(SupportfileFileUploadDbModel file)
+    {
+        if (MainLayout.AccessModel is null) return;
+        if (Model is null) return;
+        if (HubConnection is null) return;
+        
+        const string title = "Dateinamen bearbeiten";
+        var description = "";
+        const string submitButtonText = "Dateinamen überschreiben";
+
+        const string nameLabel = "Dateiname";
+
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                nameLabel,
+                file.FileName,
+                "Filename.pdf"
+            ),
+        };
+
+        var parameter = new DialogParameters<SimpleMudDialog>
+        {
+            { x => x.Description, description },
+            { x => x.Inputs, inputs },
+            { x => x.SubmitButtonText, submitButtonText },
+        };
+        
+        Close();
+        
+        var dialog = await DialogService.ShowAsync<SimpleMudDialog>(title, parameter, new DialogOptions { FullWidth = true });
+        var dialogResult = await dialog.Result;
+
+        if (dialogResult is null || dialogResult.Canceled) return;
+
+        var data = (List<InputModel>)dialogResult.Data!;
+        var name = data.First(x => x.Label == nameLabel).Value;
+
+        if (string.IsNullOrEmpty(name))
+        {
+            Snackbar.Add("Es wurde keine Name eingetragen!", Severity.Error);
+            return;
+        }
+
+        var fileEnding = file.FileName.Split(".").Last();
+        var newNameEnding = name.Split(".").Last();
+
+        if (fileEnding != newNameEnding)
+        {
+            Snackbar.Add("Du Hurensohn", Severity.Error);
+            return;
+        }
+
+        var saved = await SupportfileEntryProxy.RenameFileAsync(file.Id, name, Model.Id, MainLayout.AccessModel.Id);
+        if (!saved)
+        {
+            Snackbar.Add("Beim Überschreiben ist ein Fehler aufgetreten!", Severity.Error);
+            return;
+        }
+
+        Snackbar.Add("Dateiname wurde überschrieben!", Severity.Success);
+        await HubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), Model.Id);
+    }
+
+    public async Task DeleteFile(SupportfileFileUploadDbModel file)
+    {
+        if (MainLayout.AccessModel is null) return;
+        if (Model is null) return;
+        if (HubConnection is null) return;
+        
+        Close();
+        
+        var result = await DialogService.ShowMessageBox(
+            "Datei löschen", 
+            $"Bist du dir sicher die Datei {file.FileName} zu löschen?", 
+            yesText:"Löschen!", cancelText:"Abbrechen"
+        );
+        if (result is null or false) return;
+        
+        var isDeleted = await SupportfileEntryProxy.DeleteFileAsync(file.Id, Model.Id, MainLayout.AccessModel.Id);
+        if (!isDeleted)
+        {
+            Snackbar.Add("Datei konnte nicht gelöscht werden.", Severity.Error);
+            return;
+        }
+
+        Snackbar.Add("Datei wurde gelöscht.", Severity.Success);
+        await HubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), Model.Id);
+    }
+
+}
