@@ -165,8 +165,6 @@ else
         var contentType = file.ContentType;
         
         await JS.InvokeVoidAsync("downloadFile", fileName, base64File, contentType);
-        
-        Close();
     }
     
     public async Task RenameFile(SupportfileFileUploadDbModel file)
