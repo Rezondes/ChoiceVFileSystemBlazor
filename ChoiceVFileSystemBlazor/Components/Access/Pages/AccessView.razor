@@ -5,7 +5,7 @@
     public static string GetRedirectUrl(string id) => Url + id;
 }
 
-@if (MainLayout.AccessModel is null)
+@if (UserAccessService.GetUserAccess().Result is null)
 {
     <PageLoading/>
 }
@@ -14,21 +14,22 @@ else
     <MudGrid Justify="Justify.Center" style="height: 100%; overflow-y: auto;">
         <MudItem xs="12"> 
             <MudPaper Elevation="25" Style="padding: 20px;">
-                <MudText>Id: @MainLayout.AccessModel.Id</MudText>
-                <MudText>Name: @MainLayout.AccessModel.Name</MudText>
-                <MudText>Rank: @MainLayout.AccessModel.Rank</MudText>
-                <MudText>AccountId: @MainLayout.AccessModel.AccountId</MudText>
-                <MudText>DiscordId: @MainLayout.AccessModel.DiscordId</MudText>
+                <MudText>Id: @UserAccessService.GetUserAccess().Result!.Id</MudText>
+                <MudText>Name: @UserAccessService.GetUserAccess().Result!.Name</MudText>
+                <MudText>Rank: @UserAccessService.GetUserAccess().Result!.Rank</MudText>
+                <MudText>AccountId: @UserAccessService.GetUserAccess().Result!.AccountId</MudText>
+                <MudText>DiscordId: @UserAccessService.GetUserAccess().Result!.DiscordId</MudText>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OverrideData">Namen aktualisieren</MudButton>
             </MudPaper>
         </MudItem>
         <MudItem xs="12">
-            <SupportfileOverviewDataGrid AccessId="@MainLayout.AccessModel.Id" Label="Erstellte Supportakten" @ref="_supportfileOverviewDataGrid"/>
+            <SupportfileOverviewDataGrid AccessId="@UserAccessService.GetUserAccess().Result!.Id" Label="Erstellte Supportakten" @ref="_supportfileOverviewDataGrid"/>
         </MudItem>
     </MudGrid>    
 }
 
 @code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     [Parameter] public string Id { get; set; }
     private bool _shouldRedirect;
 
@@ -40,14 +41,18 @@ else
     {
         await base.OnInitializedAsync();
 
-        _shouldRedirect = MainLayout.AccessModel is null;
+        var access = await UserAccessService.GetUserAccess();
+        
+        _shouldRedirect = access is null;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
 
-        if (MainLayout.AccessModel is null)
+        var access = await UserAccessService.GetUserAccess();
+        
+        if (access is null)
         {
             Navigation.NavigateToNotAuthorized();
             return;
@@ -61,7 +66,7 @@ else
             return;
         }
 
-        if (accessId != MainLayout.AccessModel.Id)
+        if (accessId != access!.Id)
         {
             Navigation.NavigateToNotAuthorized();
             return;
@@ -73,17 +78,18 @@ else
             return;
         }
 
-        _checkModel = MainLayout.AccessModel.CreateShallowCopy();
+        _checkModel = access!.CreateShallowCopy();
         await _supportfileOverviewDataGrid.Load();
     }
 
     private async Task OverrideData()
     {
+        var access = await UserAccessService.GetUserAccess();
         if (MainLayout.BaseHubConnection is null) return;
-        if (MainLayout.AccessModel is null) return;
+        if (access is null) return;
         if (_checkModel is null) return;
         
-        var accessDbModel = MainLayout.AccessModel;
+        var accessDbModel = await UserAccessService.GetUserAccess()!;
         
         const string title = "Namen ändern";
         const string description = "";
@@ -127,10 +133,11 @@ else
             Snackbar.Add("Es wurde kein Name eingetragen!", Severity.Error);
             return;
         }
+
         
 
         var partialAccessModel = new PartialAccessModel(accessDbModel.AccountId, accessDbModel.DiscordId, name, accessDbModel.Rank);
-        var response = await AccessProxy.UpdateToPartial(accessDbModel, partialAccessModel, MainLayout.AccessModel.Id);
+        var response = await AccessProxy.UpdateToPartial(accessDbModel, partialAccessModel, access!.Id);
         if (!response)
         {
             Snackbar.Add("Beim Aktualisieren ist ein Fehler aufgetreten oder es wurden keine andere Werte angegeben.", Severity.Error);

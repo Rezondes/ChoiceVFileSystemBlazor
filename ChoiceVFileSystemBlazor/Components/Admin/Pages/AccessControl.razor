@@ -42,6 +42,7 @@ else
 }
 
 @code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     private bool _isAuthorized;
     private bool _shouldRedirect;
 
@@ -53,19 +54,18 @@ else
     {
         base.OnInitialized();
         
-        _isAuthorized = MainLayout.HasRight(RightEnum.ViewAdminAccessControl);
+        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewAdminAccessControl);
         _shouldRedirect = !_isAuthorized;
     }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            if (_shouldRedirect)
-                Navigation.NavigateToNotAuthorized();
+        if (!firstRender)  return;
+        
+        if (_shouldRedirect)
+            Navigation.NavigateToNotAuthorized();
 
-            await Load();
-        }
+        await Load();
     }
 
     private async Task Load()
@@ -108,8 +108,9 @@ else
     
     async Task RowClicked(DataGridRowClickEventArgs<AccessDbModel> args)
     {
+        var access = await UserAccessService.GetUserAccess();
         if (MainLayout.BaseHubConnection is null) return;
-        if (MainLayout.AccessModel is null) return;
+        if (access is null) return;
         
         var accessDbModel = args.Item;
         
@@ -161,7 +162,7 @@ else
         var dialog = await DialogService.ShowAsync<SimpleMudDialog>(title, parameter, new DialogOptions { FullWidth = true });
         var dialogResult = await dialog.Result;
 
-        if (dialogResult != null && dialogResult.Canceled) return;
+        if (dialogResult is null || dialogResult.Canceled) return;
 
         var data = (List<InputModel>)dialogResult.Data!;
         
@@ -194,7 +195,7 @@ else
         }
 
         var partialAccessModel = new PartialAccessModel(accountId, discordId, name, accountRank);
-        var response = await AccessProxy.UpdateToPartial(accessDbModel, partialAccessModel, MainLayout.AccessModel.Id);
+        var response = await AccessProxy.UpdateToPartial(accessDbModel, partialAccessModel, access.Id);
         if (!response)
         {
             Snackbar.Add("Beim Aktualisieren ist ein Fehler aufgetreten oder es wurden keine andere Werte angegeben.", Severity.Error);

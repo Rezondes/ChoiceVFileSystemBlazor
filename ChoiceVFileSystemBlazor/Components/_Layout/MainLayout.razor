@@ -28,37 +28,35 @@ else
     </MudText>
     
     <MudLayout Style="height: 100vh; overflow: hidden;">
-        @if (AuthorizationService.IsAuthenticated(MainLayout.AccessModel))
-        {
-            <MudAppBar>
-                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
-                <MudImage Src="choicev_logo_full.png" Alt="ChoiceV Logo" Style="width: 100px; margin-bottom: 15px;" />
-                <MudText Typo="Typo.h5" Style="color: white;">Support Control Panel</MudText>
-                <MudSpacer/>
-                <MudButtonGroup Color="Color.Inherit">
-                    <MudTooltip Text="Zur Cloud" Duration="Constants.TOOLTIP_DURATION" Class="mr-5">
-                        <MudIconButton Icon="@Icons.Material.Filled.Cloud" Color="Color.Inherit" Href="@Constants.CLOUD_URL" Target="_blank"/>
-                    </MudTooltip>
-                    <ThemeModeToggle IsDarkMode="_isDarkMode" OnDarkModeChanged="ToggleDarkMode"/>
-                    <MudTooltip Text="Eigener Account" Duration="Constants.TOOLTIP_DURATION">
-                        <MudIconButton Icon="@Icons.Material.Filled.AccountBox" Color="Color.Inherit" OnClick="OpenAccessPage"/>
-                    </MudTooltip>
-                </MudButtonGroup>
-            </MudAppBar>
+        <MudAppBar> 
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
+            <MudImage Src="choicev_logo_full.png" Alt="ChoiceV Logo" Style="width: 100px; margin-bottom: 15px;" />
+            <MudText Typo="Typo.h5" Style="color: white;">Support Control Panel</MudText>
+            <MudSpacer/>
+            <MudButtonGroup Color="Color.Inherit">
+                <MudTooltip Text="Zur Cloud" Duration="Constants.TOOLTIP_DURATION" Class="mr-5">
+                    <MudIconButton Icon="@Icons.Material.Filled.Cloud" Color="Color.Inherit" Href="@Constants.CLOUD_URL" Target="_blank"/>
+                </MudTooltip>
+                <ThemeModeToggle IsDarkMode="_isDarkMode" OnDarkModeChanged="ToggleDarkMode"/>
+                <MudTooltip Text="Eigener Account" Duration="Constants.TOOLTIP_DURATION">
+                    <MudIconButton Icon="@Icons.Material.Filled.AccountBox" Color="Color.Inherit" OnClick="OpenAccessPage"/>
+                </MudTooltip>
+            </MudButtonGroup>
+        </MudAppBar>
 
-            <MudDrawer @bind-Open="_open" ClipMode="_clipMode" Breakpoint="_breakpoint" Variant="DrawerVariant.Mini">
-                <NavMenu/>
-            </MudDrawer>
+        <MudDrawer @bind-Open="_open" ClipMode="_clipMode" Breakpoint="_breakpoint" Variant="DrawerVariant.Mini">
+            <NavMenu/>
+        </MudDrawer>
 
-            <MudMainContent Style="height: 100%; overflow: hidden;">
-                @Body
-            </MudMainContent>
-        }
+        <MudMainContent Style="height: 100%; overflow: hidden;">
+            @Body
+        </MudMainContent>
     </MudLayout>
 }
 
 @code
 {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     private bool _loading = true;
     private bool _shouldRedirect;
     
@@ -83,12 +81,7 @@ else
     };
     private bool _isDarkMode = true;
     
-    public static ClaimsPrincipal? User;
-    public static AccessDbModel? AccessModel;
-    public static RankEnum Rank = RankEnum.None;
-    public static List<RightEnum> Rights = [];
-
-    protected override async void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
     }
@@ -96,12 +89,30 @@ else
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
+
+        var access = await UserAccessService.GetUserAccess();
         
-        await LoadUserData();
+        if (access is null)
+        {
+            _shouldRedirect = true;
+            _loading = false;
+            StateHasChanged();
+            return;
+        }
+        
+        if (access.Rank <= RankEnum.None)
+        {
+            _shouldRedirect = true;
+            StateHasChanged();
+            return;
+        }
         
         CheckRedirect();
-            
+        
         await StartHubConnection();
+            
+        _loading = false;
+        StateHasChanged();
     }
 
     private void CheckRedirect()
@@ -109,48 +120,6 @@ else
         if (!_shouldRedirect) return;
 
         Navigation.NavigateToNotAuthorized();
-    }
-    
-    private async Task LoadUserData()
-    {
-        _loading = true;
-        StateHasChanged();
-        
-        var user = await AuthenticationStateProvider.GetUser();
-        if (user is null)
-        {
-            _shouldRedirect = true;
-            _loading = false;
-            StateHasChanged();
-            return;
-        }
-        User = user;
-        
-        var account = await user.GetVerifiedUser(AccessProxy, AccountApi, DiscordRolesProxy);
-        if (account is null)
-        {
-            _shouldRedirect = true;
-            _loading = false;
-            StateHasChanged();
-            return;
-        }
-        
-        AccessModel = account;
-
-        Rank = AccessModel.Rank;
-        if (Rank <= RankEnum.None)
-        {
-            _shouldRedirect = true;
-            _loading = false;
-            StateHasChanged();
-            return;
-        }
-        
-        var rightToRankDbModels = await RankProxy.GetAllRightsAsync(Rank);
-        Rights = rightToRankDbModels.Select(x => x.Right).ToList();
-        
-        _loading = false;
-        StateHasChanged();
     }
     
     private async Task StartHubConnection()
@@ -161,10 +130,11 @@ else
         {
             try
             {
-                if (AccessModel is null) return;
-                if (accessId != AccessModel.Id) return;
+                var acces = await UserAccessService.GetUserAccess();
+                if (acces is null) return;
+                if (accessId != acces.Id) return;
 
-                await InvokeAsync(LoadUserData);
+                await InvokeAsync(UserAccessService.ReloadUserAccessAsync);
                 CheckRedirect();
             }
             catch (Exception ex)
@@ -177,9 +147,9 @@ else
         {
             try
             {
-                if (AccessModel is null) return;
+                if (UserAccessService.GetUserAccess() is null) return;
 
-                await InvokeAsync(LoadUserData);
+                await InvokeAsync(UserAccessService.ReloadUserAccessAsync);
                 CheckRedirect();
             }
             catch (Exception ex)
@@ -191,23 +161,13 @@ else
         await BaseHubConnection.StartAsync();
     }
 
-    public static bool HasRight(RightEnum requiredRight)
-    {
-        return Rank == RankEnum.Admin || Rights.Contains(requiredRight);
-    }
-
-    public static bool HasAnyRights(RightEnum[] rights)
-    {
-        return Rank == RankEnum.Admin || rights.Any(x => Rights.Contains(x));
-    }
-
     private void ToggleDrawer() => _open = !_open;
     private void ToggleDarkMode(bool newValue) => _isDarkMode = newValue;
 
     private void OpenAccessPage()
     {
-        if (AccessModel is null) return;
+        if (UserAccessService.GetUserAccess() is null) return;
         
-        Navigation.NavigateTo(AccessView.GetRedirectUrl(AccessModel.Id.ToString()));
+        Navigation.NavigateTo(AccessView.GetRedirectUrl(UserAccessService.GetUserAccess()!.Id.ToString()));
     }
 }

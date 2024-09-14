@@ -24,7 +24,7 @@ else
             <MudText Typo="Typo.h6">DiscordRolesControl</MudText>
             <MudSpacer />
 
-            @if (MainLayout.HasRight(RightEnum.DiscordRoleCreate))
+            @if (UserAccessService.HasRight(RightEnum.DiscordRoleCreate))
             {
                 <MudTooltip Text="Discordrolle hinzufügen" Duration="@Constants.TOOLTIP_DURATION">
                     <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Add" OnClick="() => CreateDiscordRoleEntry()"/>
@@ -42,12 +42,12 @@ else
             <PropertyColumn Property="x => x.Name" Title="Name" />
             <PropertyColumn Property="x => x.DiscordRoleId" Title="DiscordRoleId" />
             <PropertyColumn Property="x => x.AutomaticRank" Title="AutomaticRank"/>
-            @if (MainLayout.HasRight(RightEnum.DiscordRoleEdit) || MainLayout.HasRight(RightEnum.DiscordRoleDelete))
+            @if (UserAccessService.HasRight(RightEnum.DiscordRoleEdit) || UserAccessService.HasRight(RightEnum.DiscordRoleDelete))
             {
                 <TemplateColumn CellClass="d-flex justify-end">
                     <CellTemplate>
                         <MudStack Row>
-                            @if (MainLayout.HasRight(RightEnum.DiscordRoleEdit))
+                            @if (UserAccessService.HasRight(RightEnum.DiscordRoleEdit))
                             {
                                 <MudTooltip Text="Bearbeiten" Duration="@Constants.TOOLTIP_DURATION">
                                     <MudIconButton 
@@ -58,7 +58,7 @@ else
                                         OnClick="() => EditEntry(context.Item.Id)"/>
                                 </MudTooltip>
                             }
-                            @if (MainLayout.HasRight(RightEnum.DiscordRoleDelete))
+                            @if (UserAccessService.HasRight(RightEnum.DiscordRoleDelete))
                             {
                                 <MudTooltip Text="Löschen" Duration="@Constants.TOOLTIP_DURATION">
                                     <MudIconButton 
@@ -81,6 +81,7 @@ else
 }
 
 @code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     private bool _isAuthorized;
     private bool _shouldRedirect;
     private bool _loading;
@@ -92,7 +93,7 @@ else
     {
         await base.OnInitializedAsync();
         
-        _isAuthorized = MainLayout.HasRight(RightEnum.ViewDiscordRolesControl);
+        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewDiscordRolesControl);
         _shouldRedirect = !_isAuthorized;
     }
 
@@ -146,8 +147,9 @@ else
 
     private async Task CreateDiscordRoleEntry()
     {
-        if (MainLayout.AccessModel is null) return;
-        if (!MainLayout.HasRight(RightEnum.DiscordRoleCreate)) return;
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
+        if (!UserAccessService.HasRight(RightEnum.DiscordRoleCreate)) return;
         
         const string title = "Discordrolle hinzufügen";
         const string description = "Was möchtest du hinzufügen?";
@@ -215,7 +217,7 @@ else
             return;
         }
         
-        var response = await DiscordRolesProxy.AddAsync(new DiscordRoleDbModel(name, discordRoleId, automaticRank), MainLayout.AccessModel.Id);
+        var response = await DiscordRolesProxy.AddAsync(new DiscordRoleDbModel(name, discordRoleId, automaticRank), access.Id);
         if (!response)
         {
             Snackbar.Add("DiscordRoleEntry konnte nicht hinzugefügt werden!", Severity.Error);
@@ -228,8 +230,9 @@ else
 
     private async Task EditEntry(Ulid id)
     {
-        if (MainLayout.AccessModel is null) return;
-        if (!MainLayout.HasRight(RightEnum.DiscordRoleCreate)) return;
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
+        if (!UserAccessService.HasRight(RightEnum.DiscordRoleCreate)) return;
 
         var model = await DiscordRolesProxy.GetByIdAsync(id);
         if (model is null)
@@ -306,7 +309,7 @@ else
 
         var partial = new PartialDiscordRoleDbModel(name, discordRoleId, automaticRank);
         
-        var response = await DiscordRolesProxy.UpdateToPartial(model, partial, MainLayout.AccessModel.Id);
+        var response = await DiscordRolesProxy.UpdateToPartial(model, partial, access.Id);
         if (!response)
         {
             Snackbar.Add("DiscordRoleEntry konnte nicht aktualisiert werden!", Severity.Error);
@@ -319,8 +322,9 @@ else
 
     private async Task  DeleteEntry(Ulid id)
     {
-        if (MainLayout.AccessModel is null) return;
-        if (!MainLayout.HasRight(RightEnum.DiscordRoleDelete)) return;
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
+        if (!UserAccessService.HasRight(RightEnum.DiscordRoleDelete)) return;
         
         var result = await DialogService.ShowMessageBox(
             "DiscordRoleEntry löschen", 
@@ -330,7 +334,7 @@ else
 
         if (result is null or false) return;
 
-        var response = await DiscordRolesProxy.RemoveAsync(id, MainLayout.AccessModel.Id);
+        var response = await DiscordRolesProxy.RemoveAsync(id, access.Id);
         if (!response)
         {
             Snackbar.Add("Diese DiscordRoleEntry konnte nicht gelöscht werden!");

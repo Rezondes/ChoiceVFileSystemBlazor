@@ -11,6 +11,7 @@
 <SupportfileOverviewDataGrid @ref="_supportfileOverviewDataGrid"/>
 
 @code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     private bool _isAuthorized;
     private bool _shouldRedirect;
 
@@ -20,7 +21,7 @@
     {
         await base.OnInitializedAsync();
 
-        _isAuthorized = MainLayout.HasRight(RightEnum.ViewSupportfiles);
+        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewSupportfiles);
         _shouldRedirect = !_isAuthorized;
     }
     

@@ -35,19 +35,19 @@ else
             <MudTooltip Text="Vorschau schließen" Duration="Constants.TOOLTIP_DURATION">
                 <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Info" OnClick="() => Close()"/>
             </MudTooltip>
-            @if (MainLayout.HasRight(RightEnum.SupportfileDownloadFileForEntry))
+            @if (UserAccessService.HasRight(RightEnum.SupportfileDownloadFileForEntry))
             {
                 <MudTooltip Text="Datei herunterladen" Duration="Constants.TOOLTIP_DURATION">
                     <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Tertiary" OnClick="() => DownloadFile(_file)"/>
                 </MudTooltip>
             }
-            @if (MainLayout.HasRight(RightEnum.SupportfileRenameFileForEntry))
+            @if (UserAccessService.HasRight(RightEnum.SupportfileRenameFileForEntry))
             {
                 <MudTooltip Text="Dateinamen ändern" Duration="Constants.TOOLTIP_DURATION">
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => RenameFile(_file)"/>
                 </MudTooltip>
             }
-            @if (MainLayout.HasRight(RightEnum.SupportfileDeleteFileForEntry))
+            @if (UserAccessService.HasRight(RightEnum.SupportfileDeleteFileForEntry))
             {
                 <MudTooltip Text="Datei löschen" Duration="Constants.TOOLTIP_DURATION">
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" OnClick="() => DeleteFile(_file)"/>
@@ -79,6 +79,7 @@ else
 </script>
 
 @code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     [Parameter] public HubConnection? HubConnection { get; set; }
     [Parameter] public SupportfileDbModel? Model { get; set; }
     
@@ -100,12 +101,13 @@ else
 
     private async Task UploadFile()
     {
-        if (MainLayout.AccessModel is null) return;
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
         if (Model is null) return;
         if (HubConnection is null) return;
         if (_file is null) return;
         
-        var uploaded = await SupportfileEntryProxy.AddFileAsync(_file, Model.Id, MainLayout.AccessModel.Id);
+        var uploaded = await SupportfileEntryProxy.AddFileAsync(_file, Model.Id, access.Id);
         if (!uploaded)
         {
             Snackbar.Add("Ein Fehler beim Hochladen ist aufgetreten.", Severity.Error);
@@ -165,13 +167,12 @@ else
         var contentType = file.ContentType;
         
         await JS.InvokeVoidAsync("downloadFile", fileName, base64File, contentType);
-        
-        Close();
     }
     
     public async Task RenameFile(SupportfileFileUploadDbModel file)
     {
-        if (MainLayout.AccessModel is null) return;
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
         if (Model is null) return;
         if (HubConnection is null) return;
         
@@ -223,7 +224,7 @@ else
             return;
         }
 
-        var saved = await SupportfileEntryProxy.RenameFileAsync(file.Id, name, Model.Id, MainLayout.AccessModel.Id);
+        var saved = await SupportfileEntryProxy.RenameFileAsync(file.Id, name, Model.Id, access.Id);
         if (!saved)
         {
             Snackbar.Add("Beim Überschreiben ist ein Fehler aufgetreten!", Severity.Error);
@@ -236,7 +237,8 @@ else
 
     public async Task DeleteFile(SupportfileFileUploadDbModel file)
     {
-        if (MainLayout.AccessModel is null) return;
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
         if (Model is null) return;
         if (HubConnection is null) return;
         
@@ -249,7 +251,7 @@ else
         );
         if (result is null or false) return;
         
-        var isDeleted = await SupportfileEntryProxy.DeleteFileAsync(file.Id, Model.Id, MainLayout.AccessModel.Id);
+        var isDeleted = await SupportfileEntryProxy.DeleteFileAsync(file.Id, Model.Id, access.Id);
         if (!isDeleted)
         {
             Snackbar.Add("Datei konnte nicht gelöscht werden.", Severity.Error);

@@ -17,7 +17,7 @@ else
             <MudText Typo="Typo.h6">@(Label ?? "Supportakten Übersicht")</MudText>
             <MudSpacer />
 
-            @if (AuthorizationService.HasRight(MainLayout.Rights, MainLayout.Rank, RightEnum.ViewDeletedFiles))
+            @if (UserAccessService.HasRight(RightEnum.ViewDeletedFiles))
             {
                 @if (_showDeletedFiles)
                 {
@@ -45,7 +45,7 @@ else
             <PropertyColumn Property="x => x.CreatorAccessModel.Name" Title="Ersteller"/>
             <PropertyColumn Property="x => x.CreatorAccessModel.Id" Title="ErstellerId"/>
             <PropertyColumn Property="x => x.Status" Title="Status" />
-            @if (AuthorizationService.HasRight(MainLayout.Rights, MainLayout.Rank, RightEnum.ViewDeletedFiles))
+            @if (UserAccessService.HasRight(RightEnum.ViewDeletedFiles))
             {
                 <PropertyColumn Property="x => x.Deleted" Title="Gelöscht" />
             }
@@ -57,6 +57,7 @@ else
 }
 
 @code {  
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     [Parameter] public Ulid? AccessId { get; set; }
     [Parameter] public string? Label { get; set; }
     
@@ -94,6 +95,9 @@ else
 
     public async Task Load()
     {
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
+        
         _loading = true;
         StateHasChanged();
         
@@ -106,7 +110,7 @@ else
             response = response.Where(x => x.CreatedByAccessId == AccessId).ToList();
         }
         
-        var filteredResponse = response.Where(x => x.MinRank <= MainLayout.Rank).ToList();
+        var filteredResponse = response.Where(x => x.MinRank <= access.Rank).ToList();
         
         _supportfiles = _showDeletedFiles ? filteredResponse : filteredResponse.Where(x => !x.Deleted).ToList();
         

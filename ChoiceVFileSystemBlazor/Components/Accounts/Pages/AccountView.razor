@@ -64,6 +64,7 @@ else
     </MudGrid>
 }
 @code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     private bool _isAuthorized;
     private bool _shouldRedirect;
     private bool _loading = true;
@@ -80,7 +81,7 @@ else
     {
         await base.OnInitializedAsync();
 
-        _isAuthorized = MainLayout.HasRight(RightEnum.ViewAccounts);
+        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewAccounts);
         _shouldRedirect = !_isAuthorized;
     }
     
