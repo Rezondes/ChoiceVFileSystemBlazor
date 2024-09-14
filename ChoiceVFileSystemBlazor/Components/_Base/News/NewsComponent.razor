@@ -1,0 +1,28 @@
+﻿<MudItem xs="12" Style="min-height: 300px;">
+    <MudPaper Elevation="2" Style="height: 100%; padding: 15px;" Class="d-flex flex-column align-center mud-width-full">
+        <MudText Typo="Typo.h5">Aktuelle Informationen</MudText>
+
+        <MudContainer Class="d-flex align-center justify-content-center mud-height-full flex-column">
+            @if (_newsList.Any())
+            {
+                @foreach (var news in _newsList.OrderDescending())
+                {
+                    <NewsItem Label="@news.Item1" Content="@news.Item2"/>
+                }
+            }
+            else
+            {
+                <MudText Style="height: 25px">Derzeit gibt es keine Informationen</MudText>
+            }
+        </MudContainer>
+    </MudPaper>
+</MudItem>
+
+@code {
+    List<ValueTuple<string, List<string>>> _newsList = [];
+    
+    protected override async Task OnInitializedAsync()
+    {
+        
+    }
+}
