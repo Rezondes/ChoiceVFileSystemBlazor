@@ -133,7 +133,7 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public int GetMaxFileSize() => 1048576 * 5;
+    public int GetMaxFileSize() => 512000;
     
     public async Task<bool> AddFileAsync(SupportfileFileUploadDbModel file, Ulid supportfileId, Ulid accessId)
     {
