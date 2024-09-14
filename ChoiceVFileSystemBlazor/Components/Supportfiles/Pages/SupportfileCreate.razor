@@ -63,20 +63,25 @@ else
 }
 
 @code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     private bool _isAuthorized;
     private bool _shouldRedirect;
     
     private HubConnection?_hubConnection;
-    
-    private SupportfileDbModel _model = new(MainLayout.AccessModel!.Id);
+
+    private SupportfileDbModel? _model;
     private bool _success;
     private MudForm _form = null!;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+
+        var access = await UserAccessService.GetUserAccess();
         
-        _isAuthorized = MainLayout.HasRight(RightEnum.SupportfileCreate);
+        _model = new SupportfileDbModel(access!.Id);
+        
+        _isAuthorized = UserAccessService.HasRight(RightEnum.SupportfileCreate);
         _shouldRedirect = !_isAuthorized;
         StateHasChanged();
     }
@@ -96,6 +101,8 @@ else
 
     private async Task OnSubmit()
     {
+        if (_model is null) return;
+        
         await _form.Validate();
         if (!_form.IsValid)
         {

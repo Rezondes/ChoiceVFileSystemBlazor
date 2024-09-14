@@ -22,13 +22,13 @@ else if (_model is not null)
                         <MudTextField Label="Ersteller" Variant="Variant.Outlined" ReadOnly Value="@_model.CreatorAccessModel.Name"/>
 
                         <MudDivider Style="@_dividerStyle"/>
-                        <MudTextField Label="Titel" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditTitle))" @bind-Value="_model.Title"/>
+                        <MudTextField Label="Titel" Variant="Variant.Outlined" ReadOnly="@(!UserAccessService.HasRight(RightEnum.SupportfileEditTitle))" @bind-Value="_model.Title"/>
 
                         <MudDivider Style="@_dividerStyle"/>
-                        <MudTextField Label="Beschreibung" Lines="3" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditDescription))" @bind-Value="_model.Description"/>
+                        <MudTextField Label="Beschreibung" Lines="3" Variant="Variant.Outlined" ReadOnly="@(!UserAccessService.HasRight(RightEnum.SupportfileEditDescription))" @bind-Value="_model.Description"/>
 
                         <MudDivider Style="@_dividerStyle"/>
-                        <MudSelect T="FileStatusEnum" Label="Status" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditStatus))" @bind-Value="_model.Status">
+                        <MudSelect T="FileStatusEnum" Label="Status" Variant="Variant.Outlined" ReadOnly="@(!UserAccessService.HasRight(RightEnum.SupportfileEditStatus))" @bind-Value="_model.Status">
                             @foreach (FileStatusEnum status in Enum.GetValues(typeof(FileStatusEnum)))
                             {
                                 <MudSelectItem Value="@(status)"/>
@@ -36,7 +36,7 @@ else if (_model is not null)
                         </MudSelect>
 
                         <MudDivider Style="@_dividerStyle"/>
-                        <MudSelect T="RankEnum" Label="MinRank" Variant="Variant.Outlined" ReadOnly="@(!MainLayout.HasRight(RightEnum.SupportfileEditMinRank))" @bind-Value="_model.MinRank">
+                        <MudSelect T="RankEnum" Label="MinRank" Variant="Variant.Outlined" ReadOnly="@(!UserAccessService.HasRight(RightEnum.SupportfileEditMinRank))" @bind-Value="_model.MinRank">
                             @foreach (RankEnum status in Enum.GetValues(typeof(RankEnum)))
                             {
                                 <MudSelectItem Value="@(status)"/>
@@ -45,12 +45,12 @@ else if (_model is not null)
                     </MudPaper>
                 </MudItem>
 
-                @if (MainLayout.HasRight(RightEnum.SupportfileActions))
+                @if (UserAccessService.HasRight(RightEnum.SupportfileActions))
                 {
                     <MudItem xs="4">
                         <MudPaper Class="pa-4">
                             <MudToolBar>
-                                @if (MainLayout.HasAnyRights([RightEnum.SupportfileEditTitle, RightEnum.SupportfileEditDescription, RightEnum.SupportfileEditStatus, RightEnum.SupportfileEditMinRank]))
+                                @if (UserAccessService.HasAnyRights([RightEnum.SupportfileEditTitle, RightEnum.SupportfileEditDescription, RightEnum.SupportfileEditStatus, RightEnum.SupportfileEditMinRank]))
                                 {
                                     <MudTooltip Text="Änderungen speichern" Duration="@Constants.TOOLTIP_DURATION">
                                         <MudIconButton Variant="Variant.Text" Color="Color.Primary" Icon="@Icons.Material.Filled.Save" OnClick="() => SaveChanges()"/>
@@ -59,13 +59,13 @@ else if (_model is not null)
                             
                                 <MudSpacer />
 
-                                @if (_model.Deleted && MainLayout.HasRight(RightEnum.SupportfileRestore))
+                                @if (_model.Deleted && UserAccessService.HasRight(RightEnum.SupportfileRestore))
                                 {
                                     <MudTooltip Text="Supportakte wiederherstellen" Duration="@Constants.TOOLTIP_DURATION">
                                         <MudIconButton Variant="Variant.Text" Color="Color.Success" Icon="@Icons.Material.Filled.RestoreFromTrash" OnClick="() => ToggleFileDeleted()"/>
                                     </MudTooltip>
                                 }
-                                else if (!_model.Deleted && MainLayout.HasRight(RightEnum.SupportfileDelete))
+                                else if (!_model.Deleted && UserAccessService.HasRight(RightEnum.SupportfileDelete))
                                 {
                                     <MudTooltip Text="Supportakte löschen" Duration="@Constants.TOOLTIP_DURATION">
                                         <MudIconButton Variant="Variant.Text" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" OnClick="() => ToggleFileDeleted()"/>
@@ -78,14 +78,14 @@ else if (_model is not null)
             </MudGrid>
         </MudTabPanel>
         
-        @if (MainLayout.HasRight(RightEnum.ViewSupportfileEntrys))
+        @if (UserAccessService.HasRight(RightEnum.ViewSupportfileEntrys))
         {
             <MudTabPanel Text="Einträge" Icon="@Icons.Custom.FileFormats.FileDocument">
-                @if (MainLayout.HasRight(RightEnum.SupportfileCreateEntrys))
+                @if (UserAccessService.HasRight(RightEnum.SupportfileCreateEntrys))
                 {
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="() => OnClickCreate()">Eintrag hinzufügen</MudButton>
                 }
-                @if (MainLayout.HasRight(RightEnum.ViewSupportfileDeletedEntrys))
+                @if (UserAccessService.HasRight(RightEnum.ViewSupportfileDeletedEntrys))
                 {
                     @if (_showDeletedEntrys)
                     {
@@ -119,7 +119,7 @@ else if (_model is not null)
                                 <MudCardContent>
                                     <MudTextField @bind-Value="entry.Content" ReadOnly Variant="Variant.Text" Lines="@_entryLines" AutoGrow MaxLines="10"/>
                                     
-                                    @if (MainLayout.HasRight(RightEnum.ViewUploadedFilesForEntrys) && entry.FileUploads.Any())
+                                    @if (UserAccessService.HasRight(RightEnum.ViewUploadedFilesForEntrys) && entry.FileUploads.Any())
                                     {
                                         <MudTable Items="entry.FileUploads">
                                             <HeaderContent>
@@ -134,25 +134,25 @@ else if (_model is not null)
                                                 <MudTd>@context.UploadDate.ToString("g")</MudTd>
                                                 <MudTd>
                                                     <MudButtonGroup Color="Color.Primary" Variant="Variant.Text">
-                                                        @if (MainLayout.HasRight(RightEnum.SupportfilePreviewFileForEntry))
+                                                        @if (UserAccessService.HasRight(RightEnum.SupportfilePreviewFileForEntry))
                                                         {
                                                             <MudTooltip Text="Datei anschauen" Duration="Constants.TOOLTIP_DURATION">
                                                                 <MudIconButton Icon="@Icons.Material.Filled.Preview" Color="Color.Info" OnClick="() => PreviewFile(context)"/>
                                                             </MudTooltip>
                                                         }
-                                                        @if (MainLayout.HasRight(RightEnum.SupportfileDownloadFileForEntry))
+                                                        @if (UserAccessService.HasRight(RightEnum.SupportfileDownloadFileForEntry))
                                                         {
                                                             <MudTooltip Text="Datei herunterladen" Duration="Constants.TOOLTIP_DURATION">
                                                                 <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Tertiary" OnClick="() => DownloadFile(context)"/>
                                                             </MudTooltip>
                                                         }
-                                                        @if (MainLayout.HasRight(RightEnum.SupportfileRenameFileForEntry))
+                                                        @if (UserAccessService.HasRight(RightEnum.SupportfileRenameFileForEntry))
                                                         {
                                                             <MudTooltip Text="Dateinamen ändern" Duration="Constants.TOOLTIP_DURATION">
                                                                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => RenameFile(context)"/>
                                                             </MudTooltip>
                                                         }
-                                                        @if (MainLayout.HasRight(RightEnum.SupportfileDeleteFileForEntry))
+                                                        @if (UserAccessService.HasRight(RightEnum.SupportfileDeleteFileForEntry))
                                                         {
                                                             <MudTooltip Text="Datei löschen" Duration="Constants.TOOLTIP_DURATION">
                                                                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" OnClick="() => DeleteFile(context)"/>
@@ -168,7 +168,7 @@ else if (_model is not null)
                                     <div class="d-flex align-center justify-space-between" style="width: 100%;">
                                         <MudText Style="opacity: 0.2" Typo="Typo.body2">@GetSublineText(entry)</MudText>
                                         <MudButtonGroup Color="Color.Primary" Variant="Variant.Text">
-                                            @if (MainLayout.HasRight(RightEnum.SupportfileUploadFileForEntry))
+                                            @if (UserAccessService.HasRight(RightEnum.SupportfileUploadFileForEntry))
                                             {
                                                 <MudFileUpload T="IBrowserFile" FilesChanged="(file) => UploadFiles(file, entry)" Accept="application/pdf, image/png, image/jpg, image/jpeg">
                                                     <ActivatorContent>
@@ -178,19 +178,19 @@ else if (_model is not null)
                                                     </ActivatorContent>
                                                 </MudFileUpload>
                                             }
-                                            @if (MainLayout.HasRight(RightEnum.SupportfileEditEntrys))
+                                            @if (UserAccessService.HasRight(RightEnum.SupportfileEditEntrys))
                                             {
                                                 <MudTooltip Text="Eintrag bearbeiten" Duration="Constants.TOOLTIP_DURATION">
                                                     <MudIconButton Variant="Variant.Text" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" OnClick="() => EditEntry(entry)"/>
                                                 </MudTooltip>
                                             }
-                                            @if (!entry.Deleted && MainLayout.HasRight(RightEnum.SupportfileDeleteEntrys))
+                                            @if (!entry.Deleted && UserAccessService.HasRight(RightEnum.SupportfileDeleteEntrys))
                                             {
                                                 <MudTooltip Text="Eintrag löschen" Duration="Constants.TOOLTIP_DURATION">
                                                     <MudIconButton Variant="Variant.Text" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" OnClick="() => RemoveEntry(entry)"/>
                                                 </MudTooltip>
                                             }
-                                            else if (entry.Deleted && MainLayout.HasRight(RightEnum.SupportfileRestoreEntrys))
+                                            else if (entry.Deleted && UserAccessService.HasRight(RightEnum.SupportfileRestoreEntrys))
                                             {
                                                 <MudTooltip Text="Eintrag wiederherstellen" Duration="Constants.TOOLTIP_DURATION">
                                                     <MudIconButton Variant="Variant.Text" Color="Color.Success" Icon="@Icons.Material.Filled.RestoreFromTrash" OnClick="() => RestoreEntry(entry)"/>
@@ -206,7 +206,7 @@ else if (_model is not null)
             </MudTabPanel>
         }
         
-        @if (MainLayout.HasRight(RightEnum.SupportfileViewLogs))
+        @if (UserAccessService.HasRight(RightEnum.SupportfileViewLogs))
         {
             <MudTabPanel Text="Logs" Icon="@Icons.Material.Filled.ScreenSearchDesktop">
                 <MudDataGrid
@@ -247,6 +247,7 @@ else
 }
 
 @code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     [Parameter] public string Id { get; set; }
     private HubConnection? _hubConnection;
     private bool _loading = true;
@@ -274,7 +275,6 @@ else
     private async Task UploadFiles(IBrowserFile? file, SupportfileEntryDbModel entryDbModel)
     {
         if (_model is null) return;
-        if (MainLayout.AccessModel is null) return;
         if (_hubConnection is null) return;
         if (_fileUploadPreview is null) return;
         if (file is null) return;
@@ -359,7 +359,7 @@ else
     {
         await base.OnInitializedAsync();
 
-        _isAuthorized = MainLayout.HasRight(RightEnum.ViewSupportfiles);
+        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewSupportfiles);
         _shouldRedirect = !_isAuthorized;
     }
     
@@ -391,6 +391,9 @@ else
 
     private async Task LoadModel()
     {
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
+        
         if (!Ulid.TryParse(Id, out var fileId))
         {
             Snackbar.Add("Parsing failed", Severity.Error);
@@ -406,7 +409,7 @@ else
             return;
         }
 
-        if (MainLayout.Rank < model.MinRank)
+        if (access.Rank < model.MinRank)
         {
             Navigation.NavigateToNotAuthorized();
             return;
@@ -427,13 +430,13 @@ else
     {
         if (_model is null) return;
         
-        @if (MainLayout.HasRight(RightEnum.ViewSupportfileEntrys))
+        @if (UserAccessService.HasRight(RightEnum.ViewSupportfileEntrys))
         {
             var entrys = await SupportfileEntryProxy.GetAllEntrysForSupportfileIdAsync(_model.Id);
             _entrys = _showDeletedEntrys ? entrys : entrys.Where(x => !x.Deleted).ToList();
         }
         
-        @if (MainLayout.HasRight(RightEnum.SupportfileViewLogs))
+        @if (UserAccessService.HasRight(RightEnum.SupportfileViewLogs))
         {
             _logs = await SupportfileLogsProxy.GetAllLogsForSupportfileIdAsync(_model.Id);
         }
@@ -443,9 +446,10 @@ else
 
     private async Task OnClickCreate()
     {
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
         if (_model is null) return;
-        if (MainLayout.AccessModel is null) return;
-        if (!MainLayout.HasRight(RightEnum.SupportfileCreateEntrys)) return;
+        if (!UserAccessService.HasRight(RightEnum.SupportfileCreateEntrys)) return;
         
         const string title = "Eintrag hinzufügen";
         const string description = "Welche Information möchtest du hinzufügen?";
@@ -485,7 +489,7 @@ else
             return;
         }
 
-        var response = await SupportfileEntryProxy.AddEntryAsync(new SupportfileEntryDbModel(_model.Id, message, MainLayout.AccessModel.Id));
+        var response = await SupportfileEntryProxy.AddEntryAsync(new SupportfileEntryDbModel(_model.Id, message, access.Id));
         if (response is null)
         {
             Snackbar.Add("Nachricht konnte nicht hinzugefügt werden!", Severity.Error);
@@ -546,9 +550,10 @@ else
 
     private async Task EditEntry(SupportfileEntryDbModel entry)
     {
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
         if (_model is null) return;
-        if (MainLayout.AccessModel is null) return;
-        if (!MainLayout.HasRight(RightEnum.SupportfileEditEntrys)) return;
+        if (!UserAccessService.HasRight(RightEnum.SupportfileEditEntrys)) return;
         
         const string title = "Eintrag bearbeiten";
         var description = "Wie möchtest du den Eintrag bearbeiten?";
@@ -588,7 +593,7 @@ else
             return;
         }
 
-        var response = await SupportfileEntryProxy.UpdateEntryContentAsync(entry.Id, message, MainLayout.AccessModel.Id);
+        var response = await SupportfileEntryProxy.UpdateEntryContentAsync(entry.Id, message, access.Id);
         if (!response)
         {
             Snackbar.Add("Nachricht konnte nicht bearbeitet werden!", Severity.Error);
@@ -600,9 +605,10 @@ else
 
     private async Task RemoveEntry(SupportfileEntryDbModel entry)
     {
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
         if (_model is null) return;
-        if (MainLayout.AccessModel is null) return;
-        if (!MainLayout.HasRight(RightEnum.SupportfileDeleteEntrys)) return;
+        if (!UserAccessService.HasRight(RightEnum.SupportfileDeleteEntrys)) return;
         
         var result = await DialogService.ShowMessageBox(
             "Eintrag löschen", 
@@ -612,7 +618,7 @@ else
 
         if (result is null or false) return;
 
-        var response = await SupportfileEntryProxy.RemoveEntryAsync(entry.Id, MainLayout.AccessModel.Id);
+        var response = await SupportfileEntryProxy.RemoveEntryAsync(entry.Id, access.Id);
         if (!response)
         {
             Snackbar.Add("Dieser Eintrag konnte nicht gelöscht werden!");
@@ -624,9 +630,10 @@ else
 
     private async Task RestoreEntry(SupportfileEntryDbModel entry)
     {
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
         if (_model is null) return;
-        if (MainLayout.AccessModel is null) return;
-        if (!MainLayout.HasRight(RightEnum.SupportfileDeleteEntrys)) return;
+        if (!UserAccessService.HasRight(RightEnum.SupportfileDeleteEntrys)) return;
         
         var result = await DialogService.ShowMessageBox(
             "Eintrag wiederherstellen", 
@@ -636,7 +643,7 @@ else
 
         if (result is null or false) return;
 
-        var response = await SupportfileEntryProxy.RestoreEntryAsync(entry.Id, MainLayout.AccessModel.Id);
+        var response = await SupportfileEntryProxy.RestoreEntryAsync(entry.Id, access.Id);
         if (!response)
         {
             Snackbar.Add("Dieser Eintrag konnte nicht gelöscht werden!");
@@ -678,12 +685,13 @@ else
 
     private async Task ToggleFileDeleted()
     {
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
         if (_model is null) return;
         if (_hubConnection is null) return;
-        if (MainLayout.AccessModel is null) return;
 
-        if (_model.Deleted && !MainLayout.HasRight(RightEnum.SupportfileRestore)) return;
-        if (!_model.Deleted && !MainLayout.HasRight(RightEnum.SupportfileDelete)) return;
+        if (_model.Deleted && !UserAccessService.HasRight(RightEnum.SupportfileRestore)) return;
+        if (!_model.Deleted && !UserAccessService.HasRight(RightEnum.SupportfileDelete)) return;
 
         var title = _model.Deleted ? "Supportakte wiederherstellen" : "Supportakte löschen";
         var message = _model.Deleted ? 
@@ -699,7 +707,7 @@ else
 
         if (result is null or false) return;
 
-        var response = await SupportfileProxy.ToggleDeletedAsync(_model.Id, MainLayout.AccessModel.Id);
+        var response = await SupportfileProxy.ToggleDeletedAsync(_model.Id, access.Id);
         if (!response)
         {
             Snackbar.Add("Dieser Eintrag konnte nicht gelöscht/wiederhergestellt werden!");
@@ -711,9 +719,11 @@ else
 
     private async Task SaveChanges()
     {
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
         if (_hubConnection is null) return; 
         
-        if (_model is null || _checkModel is null || MainLayout.AccessModel is null)
+        if (_model is null || _checkModel is null || access is null)
         {
             Snackbar.Add("Mögliche Änderungen konnte nicht aktualisiert werden.", Severity.Error);
             return;
@@ -721,9 +731,9 @@ else
 
         var shouldReload = false;
         
-        if (_checkModel.Title != _model.Title && MainLayout.HasRight(RightEnum.SupportfileEditTitle))
+        if (_checkModel.Title != _model.Title && UserAccessService.HasRight(RightEnum.SupportfileEditTitle))
         {
-            var updateResponse = await SupportfileProxy.UpdateTitleAsync(_model.Id, _model.Title, MainLayout.AccessModel.Id);
+            var updateResponse = await SupportfileProxy.UpdateTitleAsync(_model.Id, _model.Title, access.Id);
             if (!updateResponse)
             {
                 Snackbar.Add("Title konnte nicht aktualisiert werden.", Severity.Error);
@@ -735,9 +745,9 @@ else
             }
         }
         
-        if (_checkModel.Description != _model.Description && MainLayout.HasRight(RightEnum.SupportfileEditDescription))
+        if (_checkModel.Description != _model.Description && UserAccessService.HasRight(RightEnum.SupportfileEditDescription))
         {
-            var updateResponse = await SupportfileProxy.UpdateDescriptionAsync(_model.Id, _model.Description, MainLayout.AccessModel.Id);
+            var updateResponse = await SupportfileProxy.UpdateDescriptionAsync(_model.Id, _model.Description, access.Id);
             if (!updateResponse)
             {
                 Snackbar.Add("Description konnte nicht aktualisiert werden.", Severity.Error);
@@ -749,9 +759,9 @@ else
             }
         }
         
-        if (_checkModel.Status != _model.Status && MainLayout.HasRight(RightEnum.SupportfileEditStatus))
+        if (_checkModel.Status != _model.Status && UserAccessService.HasRight(RightEnum.SupportfileEditStatus))
         {
-            var updateResponse = await SupportfileProxy.UpdateStatusAsync(_model.Id, _model.Status, MainLayout.AccessModel.Id);
+            var updateResponse = await SupportfileProxy.UpdateStatusAsync(_model.Id, _model.Status, access.Id);
             if (!updateResponse)
             {
                 Snackbar.Add("Status konnte nicht aktualisiert werden.", Severity.Error);
@@ -763,9 +773,9 @@ else
             }
         }
         
-        if (_checkModel.MinRank != _model.MinRank && MainLayout.HasRight(RightEnum.SupportfileEditMinRank))
+        if (_checkModel.MinRank != _model.MinRank && UserAccessService.HasRight(RightEnum.SupportfileEditMinRank))
         {
-            var updateResponse = await SupportfileProxy.UpdateMinRankAsync(_model.Id, _model.MinRank, MainLayout.AccessModel.Id);
+            var updateResponse = await SupportfileProxy.UpdateMinRankAsync(_model.Id, _model.MinRank, access.Id);
             if (!updateResponse)
             {
                 Snackbar.Add("MinRank konnte nicht aktualisiert werden.", Severity.Error);

@@ -60,6 +60,7 @@ else
     </div>
 }
 @code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     private bool _isAuthorized;
     private bool _shouldRedirect;
     
@@ -75,7 +76,7 @@ else
     {
         await base.OnInitializedAsync();
         
-        _isAuthorized = MainLayout.HasRight(RightEnum.ViewAdminRightsControl);
+        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewAdminRightsControl);
         _shouldRedirect = !_isAuthorized;
     }
 

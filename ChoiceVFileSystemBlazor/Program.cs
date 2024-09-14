@@ -200,6 +200,8 @@ builder.Services.AddScoped<IDiscordRolesProxy, DiscordRoleProxy>();
 builder.Services.AddScoped<IDiscordRoleLogsProxy, DiscordRoleLogsProxy>();
 #endregion
 
+builder.Services.AddScoped<UserAccessService>();
+
 builder.Services.AddSingleton<AuthorizationService>();
 
 builder.Services.AddSignalR();

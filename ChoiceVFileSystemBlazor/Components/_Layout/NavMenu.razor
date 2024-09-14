@@ -9,73 +9,77 @@
 <MudNavMenu Style="height: 100%;">
     <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.SpaceDashboard">Dashboard</MudNavLink>
 
-    @if (MainLayout.HasRight(RightEnum.ViewSupportfilesArea))
+    @if (UserAccessService.HasRight(RightEnum.ViewSupportfilesArea))
     {
         <MudNavGroup Icon="@Icons.Material.Filled.SupportAgent" Title="Supportakten">
-            @if (MainLayout.HasRight(RightEnum.SupportfileCreate))
+            @if (UserAccessService.HasRight(RightEnum.SupportfileCreate))
             {
                 <MudNavLink Icon="@Icons.Material.Filled.Create" Href="@SupportfileCreate.GetRedirectUrl()">Erstellen</MudNavLink>
             }
-            @if (MainLayout.HasRight(RightEnum.ViewSupportfiles))
+            @if (UserAccessService.HasRight(RightEnum.ViewSupportfiles))
             {
                 <MudNavLink Icon="@Icons.Material.Filled.TableView" Href="@SupportfileOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix">Übersicht</MudNavLink>
             }
         </MudNavGroup>
     }
 
-    @if (MainLayout.HasRight(RightEnum.ViewGroupingfilesArea))
+    @if (UserAccessService.HasRight(RightEnum.ViewGroupingfilesArea))
     {
         <MudNavGroup Icon="@Icons.Material.Filled.Groups" Title="Gruppierungsakten">
-            @if (MainLayout.HasRight(RightEnum.GroupingfileCreate))
+            @if (UserAccessService.HasRight(RightEnum.GroupingfileCreate))
             {
                 <MudNavLink Icon="@Icons.Material.Filled.Create" Href="@GroupingfilesCreate.GetRedirectUrl()">Erstellen</MudNavLink>
             }
-            @if (MainLayout.HasRight(RightEnum.ViewGroupingfiles))
+            @if (UserAccessService.HasRight(RightEnum.ViewGroupingfiles))
             {
                 <MudNavLink Icon="@Icons.Material.Filled.TableView" Href="@GroupingfilesOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix">Übersicht</MudNavLink>
             }
         </MudNavGroup>
     }
 
-    @if (MainLayout.HasRight(RightEnum.ViewGameserverArea))
+    @if (UserAccessService.HasRight(RightEnum.ViewGameserverArea))
     {
         <MudNavGroup Icon="@Icons.Material.Filled.ElectricalServices" Title="Gameserver">
-            @if (MainLayout.HasRight(RightEnum.ViewAccountsArea))
+            @if (UserAccessService.HasRight(RightEnum.ViewAccountsArea))
             {
                 <MudNavLink Href="@AccountOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox">Accountübersicht</MudNavLink>
             }
-            @if (MainLayout.HasRight(RightEnum.ViewCharactersArea))
+            @if (UserAccessService.HasRight(RightEnum.ViewCharactersArea))
             {
                 <MudNavLink Href="@CharacterOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountCircle">Characterübersicht</MudNavLink>
             }
-            @if (MainLayout.HasRight(RightEnum.ViewSupportKeyLogsArea))
+            @if (UserAccessService.HasRight(RightEnum.ViewSupportKeyLogsArea))
             {
                 <MudNavLink Href="@SupportkeylogsOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.KeyboardHide">Supporttastenlogs</MudNavLink>
             }
         </MudNavGroup>
     }
     
-    @if (MainLayout.HasRight(RightEnum.ViewAdminPanelArea))
+    @if (UserAccessService.HasRight(RightEnum.ViewAdminPanelArea))
     {
         <MudNavGroup Icon="@Icons.Material.Filled.AdminPanelSettings" Title="Admin">
-            @if (MainLayout.HasRight(RightEnum.ViewAdminAccessControl))
+            @if (UserAccessService.HasRight(RightEnum.ViewAdminAccessControl))
             {
                 <MudNavLink Href="@AccessControl.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ViewList">Zugriffverteilung</MudNavLink>
             }
-            @if (MainLayout.HasRight(RightEnum.ViewAdminRightsControl))
+            @if (UserAccessService.HasRight(RightEnum.ViewAdminRightsControl))
             {
                 <MudNavLink Href="@RightsControl.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Pageview">Rechteverteilung</MudNavLink>
             }
-            @if (MainLayout.HasRight(RightEnum.ViewAdminAccessLogs))
+            @if (UserAccessService.HasRight(RightEnum.ViewAdminAccessLogs))
             {
                 <MudNavLink Href="@AccessLogs.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ScreenSearchDesktop">Accesslogs</MudNavLink>
             }
-            @if (MainLayout.HasRight(RightEnum.ViewDiscordRolesControl))
+            @if (UserAccessService.HasRight(RightEnum.ViewDiscordRolesControl))
             {
-            <MudNavLink Href="@DiscordRolesControl.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Custom.Brands.Discord">Discordrollen</MudNavLink>
+                <MudNavLink Href="@DiscordRolesControl.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Custom.Brands.Discord">Discordrollen</MudNavLink>
             }
         </MudNavGroup>
     }
 
     <MudNavLink Href="https://github.com/Rezondes" Icon="@Icons.Custom.Brands.GitHub" Style="position: absolute; bottom: 5px;">Created by Rezondes</MudNavLink>
 </MudNavMenu>
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+}

@@ -44,6 +44,7 @@ else
 }
 
 @code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     private bool _isAuthorized;
     private bool _shouldRedirect;
     private bool _loading = true;
@@ -56,7 +57,7 @@ else
     {
         await base.OnInitializedAsync();
         
-        _isAuthorized = MainLayout.HasRight(RightEnum.ViewAdminAccessLogs);
+        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewAdminAccessLogs);
         _shouldRedirect = !_isAuthorized;
     }
 
