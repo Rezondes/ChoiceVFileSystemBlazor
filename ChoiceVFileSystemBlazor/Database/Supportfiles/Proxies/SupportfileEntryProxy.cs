@@ -133,7 +133,7 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
-    public int GetMaxFileSize() => 512000;
+    public long GetMaxFileSize() => 10 * 1024 * 1024;
     
     public async Task<bool> AddFileAsync(SupportfileFileUploadDbModel file, Ulid supportfileId, Ulid accessId)
     {
@@ -141,10 +141,10 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
         
         switch (file.ContentType)
         {
-            case "application/pdf":
             case "image/png":
             case "image/jpg":
             case "image/jpeg":
+            case "application/pdf":
                 break;
             default:
                 return false;

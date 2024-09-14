@@ -271,34 +271,67 @@ else
     
     private FileUploadPreview? _fileUploadPreview;
     
-    private async Task UploadFiles(IBrowserFile file, SupportfileEntryDbModel entryDbModel)
+    private async Task UploadFiles(IBrowserFile? file, SupportfileEntryDbModel entryDbModel)
     {
         if (_model is null) return;
         if (MainLayout.AccessModel is null) return;
         if (_hubConnection is null) return;
         if (_fileUploadPreview is null) return;
+        if (file is null) return;
+
+        var maxFileSize = SupportfileEntryProxy.GetMaxFileSize();
+        
+        if (file.Size > maxFileSize)
+        {
+            Snackbar.Add("Datei ist zu groß!", Severity.Error);
+            return;
+        }
         
         try
         {
-            var fileData = new byte[file.Size];
-            var _ = await file.OpenReadStream().ReadAsync(fileData);
-
-            var fileUpload = new SupportfileFileUploadDbModel(entryDbModel.Id, file.Name, file.ContentType, fileData);
-
-            if (fileUpload.Size > SupportfileEntryProxy.GetMaxFileSize())
+            if (file.ContentType == "image/png" || file.ContentType == "image/jpeg" || file.ContentType == "image/jpg")
             {
-                Snackbar.Add("Datei ist zu groß!", Severity.Error);
-                return;
+                var fileUpload = await GetFileUploadDbModel(file, entryDbModel);
+
+                _fileUploadPreview.OpenFile(fileUpload, true);
             }
-            
-            _fileUploadPreview.OpenFile(fileUpload, true);
+            else if (file.ContentType == "application/pdf")
+            {
+                using var stream = file.OpenReadStream(maxFileSize); // max 10 MB
+                using var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+                var buffer = memoryStream.ToArray();
+                
+                var fileUpload = new SupportfileFileUploadDbModel(entryDbModel.Id, file.Name, file.ContentType, buffer);
+                _fileUploadPreview.OpenFile(fileUpload, true);
+            }
+            else
+            {
+                Snackbar.Add($"Dateiformat [{file.ContentType}] wird nicht unterstützt.", Severity.Error);
+            }
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Fehler beim Hochladen der Datei: {ex.Message}", Severity.Error);
         }
     }
-    
+
+    private async Task<SupportfileFileUploadDbModel> GetFileUploadDbModel(IBrowserFile file, SupportfileEntryDbModel entryDbModel)
+    {
+        var maxFileSize = SupportfileEntryProxy.GetMaxFileSize();
+        
+        var resizedFile = await file.RequestImageFileAsync(file.ContentType, 800, 600); // Rescale wenn nötig
+        using var stream = resizedFile.OpenReadStream(maxFileSize); // max 10 MB
+
+        // Nutze einen MemoryStream, um die Daten korrekt zu verarbeiten
+        using var memoryStream = new MemoryStream();
+        await stream.CopyToAsync(memoryStream);
+        var buffer = memoryStream.ToArray(); 
+        
+        var fileUpload = new SupportfileFileUploadDbModel(entryDbModel.Id, file.Name, file.ContentType, buffer);
+        return fileUpload;
+    }
+
     private async Task DeleteFile(SupportfileFileUploadDbModel file)
     {
         if (_fileUploadPreview is null) return;

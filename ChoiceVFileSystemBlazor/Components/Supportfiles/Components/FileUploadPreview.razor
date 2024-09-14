@@ -20,14 +20,13 @@ else
 {
     @if (!string.IsNullOrEmpty(_imagePreviewUrl))
     {
-        <h4 style="position: absolute; top: 15px;">Bildvorschau:</h4>
+        <h4 style="position: absolute; top: 15px;">Bildvorschau</h4>
         <img src="@_imagePreviewUrl" alt="Image preview"/>
     }
-
     @if (!string.IsNullOrEmpty(_pdfPreviewUrl))
     {
-        <h4 style="position: absolute; top: 15px;">PDF Vorschau:</h4>
-        <iframe src="@_pdfPreviewUrl" style="margin-top: 60px"></iframe>
+        <h4 style="position: absolute; top: 15px;">Pdf</h4>
+        <iframe src="@_pdfPreviewUrl" width="100%" height="600px"></iframe>
     }
 
     <MudButtonGroup Color="Color.Primary" Variant="Variant.Text" Style="position: absolute; bottom: -100px;">
@@ -97,7 +96,6 @@ else
         _newUpload = false;
         _imagePreviewUrl = null;
         _pdfPreviewUrl = null;
-        _file = null;
     }
 
     private async Task UploadFile()
@@ -122,18 +120,22 @@ else
     
     public void OpenFile(SupportfileFileUploadDbModel file, bool newUpload)
     {
+        var base64Data = Convert.ToBase64String(file.Data);
+        
         switch (file.ContentType)
         {
-            case "application/pdf":
-                _pdfPreviewUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(file.Data)}";
-                break;
             case "image/png":
+            case "image/jpg":
             case "image/jpeg":
-                _imagePreviewUrl = $"data:application/pdf;base64,{Convert.ToBase64String(file.Data)}";
+                _imagePreviewUrl = $"data:{file.ContentType};base64,{base64Data}";
+                break;
+            case "application/pdf":
+                _pdfPreviewUrl = $"data:application/pdf;base64,{base64Data}";
                 break;
             default:
                 Snackbar.Add("Dateiformat ist nicht unterstützt.", Severity.Error);
                 _visible = false;
+                StateHasChanged();
                 return;
         }
         
@@ -146,6 +148,8 @@ else
     
     public async Task DownloadFile(SupportfileFileUploadDbModel file)
     {
+        Close();
+        
         var result = await DialogService.ShowMessageBox(
             "Datei herunterladen", 
             $"Bist du dir sicher die Datei {file.FileName} herunterzuladen?", 
@@ -159,8 +163,10 @@ else
         var base64File = Convert.ToBase64String(file.Data);
         var fileName = file.FileName;
         var contentType = file.ContentType;
-
+        
         await JS.InvokeVoidAsync("downloadFile", fileName, base64File, contentType);
+        
+        Close();
     }
     
     public async Task RenameFile(SupportfileFileUploadDbModel file)
@@ -191,7 +197,9 @@ else
             { x => x.Inputs, inputs },
             { x => x.SubmitButtonText, submitButtonText },
         };
-
+        
+        Close();
+        
         var dialog = await DialogService.ShowAsync<SimpleMudDialog>(title, parameter, new DialogOptions { FullWidth = true });
         var dialogResult = await dialog.Result;
 
@@ -231,6 +239,8 @@ else
         if (MainLayout.AccessModel is null) return;
         if (Model is null) return;
         if (HubConnection is null) return;
+        
+        Close();
         
         var result = await DialogService.ShowMessageBox(
             "Datei löschen", 
