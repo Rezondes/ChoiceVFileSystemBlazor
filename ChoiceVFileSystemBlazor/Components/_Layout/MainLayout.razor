@@ -130,9 +130,9 @@ else
         {
             try
             {
-                var acces = await UserAccessService.GetUserAccess();
-                if (acces is null) return;
-                if (accessId != acces.Id) return;
+                var access = await UserAccessService.GetUserAccess();
+                if (access is null) return;
+                if (accessId != access.Id) return;
 
                 await InvokeAsync(UserAccessService.ReloadUserAccessAsync);
                 CheckRedirect();
@@ -147,7 +147,8 @@ else
         {
             try
             {
-                if (UserAccessService.GetUserAccess() is null) return;
+                var access = await UserAccessService.GetUserAccess();
+                if (access is null) return;
 
                 await InvokeAsync(UserAccessService.ReloadUserAccessAsync);
                 CheckRedirect();
@@ -164,10 +165,11 @@ else
     private void ToggleDrawer() => _open = !_open;
     private void ToggleDarkMode(bool newValue) => _isDarkMode = newValue;
 
-    private void OpenAccessPage()
+    private async Task OpenAccessPage()
     {
-        if (UserAccessService.GetUserAccess() is null) return;
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
         
-        Navigation.NavigateTo(AccessView.GetRedirectUrl(UserAccessService.GetUserAccess()!.Id.ToString()));
+        Navigation.NavigateTo(AccessView.GetRedirectUrl(access.Id.ToString()));
     }
 }
