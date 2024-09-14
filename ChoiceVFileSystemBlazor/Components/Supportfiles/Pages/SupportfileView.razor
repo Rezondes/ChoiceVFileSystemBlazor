@@ -164,7 +164,7 @@ else if (_model is not null)
                                         <MudButtonGroup Color="Color.Primary" Variant="Variant.Text">
                                             @if (MainLayout.HasRight(RightEnum.SupportfileUploadFileForEntry))
                                             {
-                                                <MudFileUpload T="IBrowserFile" FilesChanged="(file) => UploadFiles(file, entry)">
+                                                <MudFileUpload T="IBrowserFile" FilesChanged="(file) => UploadFiles(file, entry)" Accept=".pdf, .png, .jpg, .jpeg">
                                                     <ActivatorContent>
                                                         <MudTooltip Text="Datei hochladen" Duration="Constants.TOOLTIP_DURATION">
                                                             <MudIconButton Icon="@Icons.Material.Filled.CloudUpload" Color="Color.Tertiary"/>
