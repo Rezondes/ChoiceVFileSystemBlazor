@@ -202,8 +202,6 @@ builder.Services.AddScoped<IDiscordRoleLogsProxy, DiscordRoleLogsProxy>();
 
 builder.Services.AddScoped<UserAccessService>();
 
-builder.Services.AddSingleton<AuthorizationService>();
-
 builder.Services.AddSignalR();
 
 if (!builder.Environment.IsDevelopment())
