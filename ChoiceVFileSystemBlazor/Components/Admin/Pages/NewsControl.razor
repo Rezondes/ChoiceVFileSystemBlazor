@@ -1,0 +1,347 @@
+@page "/admin/news"
+@using ChoiceVFileSystemBlazor.Database.News.DbModels
+
+@code {
+    private const string Url = "/admin/news";
+    public static string GetRedirectUrl() => Url;
+}
+
+<PageTitle>NewsControl</PageTitle>
+
+@if (_loading || !_isAuthorized || _shouldRedirect)
+{
+    <PageLoading/>
+}
+else
+{
+    <MudDataGrid
+        T="NewsDbModel" MultiSelection="true"
+        Items="@_data" SortMode="SortMode.Multiple" Filterable="true"
+        QuickFilter="@QuickFilter"
+        Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">News Übersicht</MudText>
+            <MudSpacer />
+
+            @if (UserAccessService.HasRight(RightEnum.NewsCreate))
+            {
+                <MudTooltip Text="News hinzufügen" Duration="@Constants.TOOLTIP_DURATION">
+                    <MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.Add" OnClick="() => CreateNewsEntry()"/>
+                </MudTooltip>
+            }
+            
+            <MudTextField
+                T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+                Adornment="Adornment.Start" Immediate="true"
+                AdornmentIcon="@Icons.Material.Filled.Search"
+                IconSize="Size.Medium" Class="mt-0"/>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.Id" Title="#" Filterable="false"/>
+            <PropertyColumn Property="x => x.Title" Title="Title" />
+            <PropertyColumn Property="x => x.ContentString" Title="Content" />
+            <PropertyColumn Property="x => x.CreatorId" Title="CreatorId" />
+            <PropertyColumn Property="x => x.Creator.Name" Title="CreatorName" />
+            <PropertyColumn Property="x => x.Created" Title="Created" />
+            @if (UserAccessService.HasRight(RightEnum.NewsEdit) || UserAccessService.HasRight(RightEnum.NewsDelete))
+            {
+            <TemplateColumn CellClass="d-flex justify-end">
+                <CellTemplate>
+                    <MudStack Row>
+                        @if (UserAccessService.HasRight(RightEnum.NewsEdit))
+                        {
+                            <MudTooltip Text="Bearbeiten" Duration="@Constants.TOOLTIP_DURATION">
+                                <MudIconButton
+                                    Size="@Size.Small"
+                                    Variant="@Variant.Filled"
+                                    Icon="@Icons.Material.Filled.Edit"
+                                    Color="@Color.Primary"
+                                    OnClick="() => EditEntry(context.Item)"/>
+                            </MudTooltip>
+                        }
+                        @if (UserAccessService.HasRight(RightEnum.NewsDelete))
+                        {
+                            <MudTooltip Text="Löschen" Duration="@Constants.TOOLTIP_DURATION">
+                                <MudIconButton
+                                    Size="@Size.Small"
+                                    Variant="@Variant.Filled"
+                                    Icon="@Icons.Material.Filled.DeleteForever"
+                                    Color="@Color.Error"
+                                    OnClick="() => DeleteEntry(context.Item)"/>
+                            </MudTooltip>
+                        }
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
+            }
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="NewsDbModel" />
+        </PagerContent>
+    </MudDataGrid>
+}
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+    private bool _loading;
+    private string? _searchString;
+
+    private List<NewsDbModel> _data = [];
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        
+        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewAdminRightsControl);
+        _shouldRedirect = !_isAuthorized;
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+            
+        await Load();
+    }
+    
+    private async Task Load()
+    {
+        if (_loading) return;
+        
+        _loading = true;
+        StateHasChanged();
+
+        _data = await NewsProxy.GetAllAsync();
+        
+        _loading = false;
+        StateHasChanged();
+    }
+    
+    private Func<NewsDbModel, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+        
+        var lowerSearchString = _searchString.ToLower();
+        
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.Title.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (string.Join(", ", x.Content).ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.CreatorId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.Creator.Name.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if ($"{x.Id}".ToLower().Contains(lowerSearchString))
+            return true;
+
+        return false;
+    };
+
+    private async Task CreateNewsEntry()
+    {
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
+        if (!UserAccessService.HasRight(RightEnum.NewsCreate)) return;
+        
+        const string title = "News hinzufügen";
+        const string description = "Was möchtest du hinzufügen?";
+        const string submitButtonText = "Hinzufügen";
+
+        const string titleLabel = "Titel";
+        const string conentLabel = "Content";
+        
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                titleLabel,
+                string.Empty,
+                "Die Schlagzeile des Jahres!"
+            ),
+            new(
+                InputTypes.Text,
+                conentLabel,
+                string.Empty,
+                "Die Welt ist kaputt lol", 
+                5
+            ),
+        };
+
+        var parameter = new DialogParameters<SimpleMudDialog>
+        {
+            { x => x.Description, description },
+            { x => x.Inputs, inputs },
+            { x => x.SubmitButtonText, submitButtonText },
+        };
+
+        var dialog = await DialogService.ShowAsync<SimpleMudDialog>(title, parameter, new DialogOptions { FullWidth = true });
+        var dialogResult = await dialog.Result;
+
+        if (dialogResult is null || dialogResult.Canceled) return;
+
+        var data = (List<InputModel>)dialogResult.Data!;
+        var titleString = data.First(x => x.Label == titleLabel).Value;
+        if (string.IsNullOrEmpty(titleString))
+        {
+            Snackbar.Add("Es wurde kein Label eingetragen!", Severity.Error);
+            return;
+        }
+        
+        var contentString = data.First(x => x.Label == conentLabel).Value;
+        if (string.IsNullOrEmpty(contentString))
+        {
+            Snackbar.Add("Es wurde kein Content eingetragen!", Severity.Error);
+            return;
+        }
+        var content = contentString.Split(new[] { '\n' }, StringSplitOptions.None)
+            .Select(line => line.Trim())
+            .ToList();
+        
+        var news = new NewsDbModel(titleString, content, access.Id);
+        var response = await NewsProxy.AddAsync(news);
+        if (response is null)
+        {
+            Snackbar.Add("News konnte nicht hinzugefügt werden!", Severity.Error);
+            return;
+        }
+        
+        Snackbar.Add("News wurde aktualisiert!", Severity.Success);
+        await Load();
+    }
+
+    private async Task EditEntry(NewsDbModel contextItem)
+    {
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
+        if (!UserAccessService.HasRight(RightEnum.NewsEdit)) return;
+        
+        const string title = "News bearbeiten";
+        const string description = "Wie möchtest du die News bearbeiten?";
+        const string submitButtonText = "Aktualisieren";
+
+        const string titleLabel = "Titel";
+        const string conentLabel = "Content";
+        
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                titleLabel,
+                contextItem.Title,
+                "Die Schlagzeile des Jahres!"
+            ),
+            new(
+                InputTypes.Text,
+                conentLabel,
+                contextItem.ContentString,
+                "Die Welt ist kaputt lol", 
+                5
+            ),
+        };
+
+        var parameter = new DialogParameters<SimpleMudDialog>
+        {
+            { x => x.Description, description },
+            { x => x.Inputs, inputs },
+            { x => x.SubmitButtonText, submitButtonText },
+        };
+
+        var dialog = await DialogService.ShowAsync<SimpleMudDialog>(title, parameter, new DialogOptions { FullWidth = true });
+        var dialogResult = await dialog.Result;
+
+        if (dialogResult is null || dialogResult.Canceled) return;
+
+        var data = (List<InputModel>)dialogResult.Data!;
+        var titleString = data.First(x => x.Label == titleLabel).Value;
+        if (string.IsNullOrEmpty(titleString))
+        {
+            Snackbar.Add("Es wurde kein Label eingetragen!", Severity.Error);
+            return;
+        }
+        
+        var contentString = data.First(x => x.Label == conentLabel).Value;
+        if (string.IsNullOrEmpty(contentString))
+        {
+            Snackbar.Add("Es wurde kein Content eingetragen!", Severity.Error);
+            return;
+        }
+
+        var shouldReload = true;
+
+        if (titleString != contextItem.Title)
+        {
+            var response = await NewsProxy.UpdateTitleAsync(contextItem.Id, titleString, access.Id);
+            if (!response)
+            {
+                Snackbar.Add("Fehler beim aktualisieren vom Titel!", Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add("Titel wurde aktualisiert!", Severity.Success);
+                shouldReload = true;
+            }
+        }
+
+        if (contentString != contextItem.ContentString)
+        {
+            var content = contentString.Split(new[] { '\n' }, StringSplitOptions.None)
+                .Select(line => line.Trim())
+                .ToList();
+
+            var response = await NewsProxy.UpdateContentAsync(contextItem.Id, content, access.Id);
+            if (!response)
+            {
+                Snackbar.Add("Fehler beim aktualisieren vom Content!", Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add("Content wurde aktualisiert!", Severity.Success);
+                shouldReload = true;
+            }
+        }
+
+        if (!shouldReload) return;
+
+        await Load();
+    }
+
+    private async Task DeleteEntry(NewsDbModel contextItem)
+    {
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
+        if (!UserAccessService.HasRight(RightEnum.NewsDelete)) return;
+        
+        var result = await DialogService.ShowMessageBox(
+            "News löschen", 
+            "Bist du dir sicher diese News zu löschen? Dies kann nicht mehr rückgängig gemacht werden!", 
+            yesText:"Löschen!", cancelText:"Abbrechen"
+        );
+
+        if (result is null or false) return;
+
+        var response = await NewsProxy.DeleteAsync(contextItem.Id, access.Id);
+        if (!response)
+        {
+            Snackbar.Add("Diese News konnte nicht gelöscht werden!");
+            return;
+        }
+        
+        Snackbar.Add("News wurde gelöscht!", Severity.Success);
+        await Load();
+    }
+
+}

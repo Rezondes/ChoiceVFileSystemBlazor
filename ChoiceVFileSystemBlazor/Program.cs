@@ -11,6 +11,8 @@ using ChoiceVFileSystemBlazor.Database.Accesses.Proxies;
 using ChoiceVFileSystemBlazor.Database.Accesses.Proxies.Interfaces;
 using ChoiceVFileSystemBlazor.Database.Discord.Proxies;
 using ChoiceVFileSystemBlazor.Database.Discord.Proxies.Interfaces;
+using ChoiceVFileSystemBlazor.Database.News.Proxies;
+using ChoiceVFileSystemBlazor.Database.News.Proxies.Interfaces;
 using ChoiceVFileSystemBlazor.Database.Ranks.Proxies;
 using ChoiceVFileSystemBlazor.Database.Ranks.Proxies.Intefaces;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies;
@@ -198,6 +200,7 @@ builder.Services.AddScoped<IAccessProxy, AccessProxy>();
 builder.Services.AddScoped<IAccessLogsProxy, AccessLogsProxy>();
 builder.Services.AddScoped<IDiscordRolesProxy, DiscordRoleProxy>();
 builder.Services.AddScoped<IDiscordRoleLogsProxy, DiscordRoleLogsProxy>();
+builder.Services.AddScoped<INewsProxy, NewsProxy>();
 #endregion
 
 builder.Services.AddScoped<UserAccessService>();

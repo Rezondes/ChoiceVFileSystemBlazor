@@ -1,5 +1,6 @@
 ﻿using ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
 using ChoiceVFileSystemBlazor.Database.Discord.DbModels;
+using ChoiceVFileSystemBlazor.Database.News.DbModels;
 using ChoiceVFileSystemBlazor.Database.Ranks.DbModels;
 using ChoiceVFileSystemBlazor.Database.Supportfiles;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
@@ -17,6 +18,10 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
     #region Discord
     public DbSet<DiscordRoleDbModel> DiscordRoleDbModels { get; set; }
     public DbSet<DiscordRoleLogsDbModel> DiscordRoleLogsDbModels { get; set; }
+    #endregion
+    
+    #region News
+    public DbSet<NewsDbModel> NewsDbModels { get; set; }
     #endregion
     
     #region Ranks
@@ -86,6 +91,26 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
             .HasConversion(
                 v => v.ToString(),
                 v => Ulid.Parse(v));
+        
+        #endregion
+        
+        #region News
+        
+        modelBuilder.Entity<NewsDbModel>()
+            .Property(e => e.Id)
+            .HasConversion(
+                v => v.ToString(),
+                v => Ulid.Parse(v));
+        modelBuilder.Entity<NewsDbModel>()
+            .Property(e => e.CreatorId)
+            .HasConversion(
+                v => v.ToString(),
+                v => Ulid.Parse(v));
+        
+        modelBuilder.Entity<NewsDbModel>()
+            .HasOne(s => s.Creator)
+            .WithMany(a => a.NewsDbModels) 
+            .HasForeignKey(s => s.CreatorId); 
         
         #endregion
         

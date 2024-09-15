@@ -74,6 +74,10 @@
             {
                 <MudNavLink Href="@DiscordRolesControl.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Custom.Brands.Discord">Discordrollen</MudNavLink>
             }
+            @if (UserAccessService.HasRight(RightEnum.ViewNewsControl))
+            {
+                <MudNavLink Href="@NewsControl.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Newspaper">News</MudNavLink>
+            }
         </MudNavGroup>
     }
 

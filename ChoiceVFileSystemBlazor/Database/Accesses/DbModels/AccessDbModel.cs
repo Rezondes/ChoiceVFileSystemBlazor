@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using ChoiceVFileSystemBlazor.Database._Shared;
 using ChoiceVFileSystemBlazor.Database.Accesses.DbModels.Partials;
+using ChoiceVFileSystemBlazor.Database.News.DbModels;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 using ChoiceVSharedApiModels.Accounts;
 
@@ -31,4 +32,5 @@ public class AccessDbModel : PartialAccessModel
     public List<SupportfileEntryDbModel> SupportfileEntrys { get; set; } = [];
     public List<AccessLogsDbModel> CreatedAccessLogs { get; set; } = [];
     public List<AccessLogsDbModel> TargetedAccessLogs { get; set; } = [];
+    public List<NewsDbModel> NewsDbModels { get; set; } = [];
 }

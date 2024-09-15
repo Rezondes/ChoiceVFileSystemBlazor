@@ -27,7 +27,7 @@ else
             @if (UserAccessService.HasRight(RightEnum.DiscordRoleCreate))
             {
                 <MudTooltip Text="Discordrolle hinzufügen" Duration="@Constants.TOOLTIP_DURATION">
-                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Add" OnClick="() => CreateDiscordRoleEntry()"/>
+                    <MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.Add" OnClick="() => CreateDiscordRoleEntry()"/>
                 </MudTooltip>
             }
             
@@ -192,7 +192,7 @@ else
         var dialog = await DialogService.ShowAsync<SimpleMudDialog>(title, parameter, new DialogOptions { FullWidth = true });
         var dialogResult = await dialog.Result;
 
-        if (dialogResult != null && dialogResult.Canceled) return;
+        if (dialogResult is null || dialogResult.Canceled) return;
 
         var data = (List<InputModel>)dialogResult.Data!;
         var name = data.First(x => x.Label == nameLabel).Value;

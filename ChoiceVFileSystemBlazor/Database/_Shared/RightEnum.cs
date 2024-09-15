@@ -51,4 +51,8 @@ public enum RightEnum
     DiscordRoleCreate = 9310,
     DiscordRoleDelete = 9320,
     DiscordRoleEdit = 9330,
+    ViewNewsControl = 9400,
+    NewsCreate = 9410,
+    NewsDelete = 9420,
+    NewsEdit = 9430,
 }

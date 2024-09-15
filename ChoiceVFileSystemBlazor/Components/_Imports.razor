@@ -42,6 +42,7 @@
 @using ChoiceVFileSystemBlazor.Database.Accesses.DbModels.Partials
 @using ChoiceVFileSystemBlazor.Database.Accesses.Proxies.Interfaces
 @using ChoiceVFileSystemBlazor.Database.Discord.Proxies.Interfaces
+@using ChoiceVFileSystemBlazor.Database.News.Proxies.Interfaces
 @using ChoiceVFileSystemBlazor.Database.Ranks.Proxies
 @using ChoiceVFileSystemBlazor.Database.Ranks.Proxies.Intefaces
 @using ChoiceVFileSystemBlazor.Database.Supportfiles
@@ -77,6 +78,8 @@
 
 @inject IDiscordRolesProxy DiscordRolesProxy
 @inject IDiscordRoleLogsProxy DiscordRoleLogsProxy
+
+@inject INewsProxy NewsProxy
 
 @inject ISupportfileProxy SupportfileProxy
 @inject ISupportfileLogsProxy SupportfileLogsProxy
