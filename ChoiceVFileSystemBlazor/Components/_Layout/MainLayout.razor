@@ -102,8 +102,6 @@ else
 
     private async Task CheckRedirect()
     {
-        StateHasChanged();
-
         _navMenu?.Reload();
         
         var relativePath = Navigation.ToBaseRelativePath(Navigation.Uri);
