@@ -35,7 +35,7 @@ else
             <PropertyColumn Property="x => x.AccessModel.Name" Title="AccessName" />
             <PropertyColumn Property="x => x.AccessId" Title="AccessId" />
             <PropertyColumn Property="x => x.Type" Title="Type" />
-            <PropertyColumn Property="x => x.CreatedAt" Title="CreatedAt" />
+            <PropertyColumn Property="x => x.CreatedAtLocal" Title="CreatedAt" />
         </Columns>
         <PagerContent>
             <MudDataGridPager T="AccessLogsDbModel" />
@@ -100,7 +100,7 @@ else
         if (x.Type.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
-        if (x.CreatedAt.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.CreatedAtLocal.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
         if ($"{x.Id}".ToLower().Contains(lowerSearchString))

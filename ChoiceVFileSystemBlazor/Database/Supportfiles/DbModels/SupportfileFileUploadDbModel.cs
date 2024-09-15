@@ -1,4 +1,6 @@
-﻿namespace ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 
 public class SupportfileFileUploadDbModel
 {
@@ -18,6 +20,9 @@ public class SupportfileFileUploadDbModel
     public string ContentType { get; set; }
     public byte[] Data { get; set; }
     public DateTime UploadDate { get; set; } = DateTime.UtcNow;
+    
+    [NotMapped]
+    public DateTime UploadDateLocal => UploadDate.ToLocalTime();
 
     public int Size => Data.Length;
 

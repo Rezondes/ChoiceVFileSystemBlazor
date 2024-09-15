@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using ChoiceVFileSystemBlazor.Database._Shared;
 using ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 
@@ -37,6 +39,10 @@ public class SupportfileDbModel
     [MaxLength(150, ErrorMessage = "Description must be at most 150 characters long.")]
     public string Description { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    
+    [NotMapped]
+    public DateTime CreatedAtLocal => CreatedAt.ToLocalTime();
+    
     public Ulid CreatedByAccessId { get; set; }
     [Required]
     public FileStatusEnum Status { get; set; }

@@ -42,7 +42,7 @@ else
             <PropertyColumn Property="x => x.ContentString" Title="Content" />
             <PropertyColumn Property="x => x.CreatorId" Title="CreatorId" />
             <PropertyColumn Property="x => x.Creator.Name" Title="CreatorName" />
-            <PropertyColumn Property="x => x.Created" Title="Created" />
+            <PropertyColumn Property="x => x.CreatedLocal" Title="Created" />
             @if (UserAccessService.HasRight(RightEnum.NewsEdit) || UserAccessService.HasRight(RightEnum.NewsDelete))
             {
             <TemplateColumn CellClass="d-flex justify-end">

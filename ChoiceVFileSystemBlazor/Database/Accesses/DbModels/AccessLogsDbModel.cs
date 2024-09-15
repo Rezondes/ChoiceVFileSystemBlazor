@@ -1,4 +1,5 @@
-﻿using ChoiceVFileSystemBlazor.Database.Accesses.Enums;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using ChoiceVFileSystemBlazor.Database.Accesses.Enums;
 
 namespace ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
 
@@ -20,6 +21,9 @@ public class AccessLogsDbModel
     public Ulid AccessId { get; set; }
     public string Content { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    
+    [NotMapped]
+    public DateTime CreatedAtLocal => CreatedAt.ToLocalTime();
     
     // Navigation Properties
     public AccessDbModel TargetAccessModel { get; set; }

@@ -113,7 +113,7 @@ else if (_model is not null)
                             <MudCard>
                                 <MudCardHeader>
                                     <CardHeaderContent>
-                                        <MudText Typo="Typo.h5">@entry.CreatorAccessModel.Name am @entry.CreatedAt</MudText>
+                                        <MudText Typo="Typo.h5">@entry.CreatorAccessModel.Name am @entry.CreatedAtLocal</MudText>
                                     </CardHeaderContent>
                                 </MudCardHeader>
                                 <MudCardContent>
@@ -131,7 +131,7 @@ else if (_model is not null)
                                             <RowTemplate>
                                                 <MudTd>@context.FileName</MudTd>
                                                 <MudTd>@context.SizeText</MudTd>
-                                                <MudTd>@context.UploadDate.ToString("g")</MudTd>
+                                                <MudTd>@context.UploadDateLocal.ToString("g")</MudTd>
                                                 <MudTd>
                                                     <MudButtonGroup Color="Color.Primary" Variant="Variant.Text">
                                                         @if (UserAccessService.HasRight(RightEnum.SupportfilePreviewFileForEntry))
@@ -229,7 +229,7 @@ else if (_model is not null)
                         <PropertyColumn Property="x => x.AccessModel.Name" Title="Ersteller" />
                         <PropertyColumn Property="x => x.AccessId" Title="ErstellerId" />
                         <PropertyColumn Property="x => x.Type" Title="Type" />
-                        <PropertyColumn Property="x => x.CreatedAt" Title="Datum" />
+                        <PropertyColumn Property="x => x.CreatedAtLocal" Title="Datum" />
                     </Columns>
                     <PagerContent>
                         <MudDataGridPager T="SupportfileLogsDbModel" />
@@ -660,7 +660,7 @@ else
 
     private string GetSublineText(SupportfileEntryDbModel entry)
     {
-        return $"{entry.Id}" + (entry.CreatedAt != entry.ModifiedAt ? $" - geändert {entry.ModifiedAt}" : string.Empty);
+        return $"{entry.Id}" + (entry.CreatedAtLocal != entry.ModifiedAtLocal ? $" - geändert {entry.ModifiedAtLocal}" : string.Empty);
     }
     
     private Func<SupportfileLogsDbModel, bool> QuickFilter => x =>
@@ -678,7 +678,7 @@ else
         if (x.Type.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
-        if (x.CreatedAt.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.CreatedAtLocal.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
         if ($"{x.Id}".ToLower().Contains(lowerSearchString))

@@ -30,8 +30,12 @@ public class NewsDbModel
     public string ContentString => string.Join("\n", Content);
     
     public Ulid CreatorId { get; set; } 
+    
     public DateTime Created { get; set; } = DateTime.UtcNow;
     
+    [NotMapped]
+    public DateTime CreatedLocal => Created.ToLocalTime();
+
     // Navigation Properties
     public AccessDbModel Creator { get; set; }
 }
