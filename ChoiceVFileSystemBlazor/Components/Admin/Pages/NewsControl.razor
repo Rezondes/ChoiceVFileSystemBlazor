@@ -94,7 +94,7 @@ else
     {
         await base.OnInitializedAsync();
         
-        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewAdminRightsControl);
+        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewNewsControl);
         _shouldRedirect = !_isAuthorized;
     }
     
