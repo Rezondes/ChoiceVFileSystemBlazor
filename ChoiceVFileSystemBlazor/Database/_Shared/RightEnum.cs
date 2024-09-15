@@ -21,7 +21,7 @@ public enum RightEnum
     SupportfileCreateEntrys = 1410,
     SupportfileEditEntrys = 1411,
     SupportfileDeleteEntrys = 1412,
-    SupportfileRestoreEntrys = 1412,
+    SupportfileRestoreEntrys = 1413,
     ViewUploadedFilesForEntrys = 1500,
     SupportfileUploadFileForEntry = 1510,
     SupportfileDownloadFileForEntry = 1511,
