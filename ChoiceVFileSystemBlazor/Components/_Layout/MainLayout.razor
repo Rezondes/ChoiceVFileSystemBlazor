@@ -45,7 +45,7 @@ else
         </MudAppBar>
 
         <MudDrawer @bind-Open="_open" ClipMode="_clipMode" Breakpoint="_breakpoint" Variant="DrawerVariant.Mini">
-            <NavMenu/>
+            <NavMenu @ref="_navMenu"/>
         </MudDrawer>
 
         <MudMainContent Style="height: 100%; overflow: hidden;">
@@ -67,7 +67,7 @@ else
     private Breakpoint _breakpoint = Breakpoint.Lg;
     private DrawerClipMode _clipMode = DrawerClipMode.Always;
 
-    private MudTheme _currentTheme = new MudTheme()
+    private MudTheme _currentTheme = new()
     {
         PaletteDark = new PaletteDark()
         {
@@ -80,6 +80,8 @@ else
         }
     };
     private bool _isDarkMode = true;
+
+    private NavMenu? _navMenu;
     
     protected override async Task OnInitializedAsync()
     {
@@ -89,25 +91,8 @@ else
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
-
-        var access = await UserAccessService.GetUserAccess();
         
-        if (access is null)
-        {
-            _shouldRedirect = true;
-            _loading = false;
-            StateHasChanged();
-            return;
-        }
-        
-        if (access.Rank <= RankEnum.None)
-        {
-            _shouldRedirect = true;
-            StateHasChanged();
-            return;
-        }
-        
-        CheckRedirect();
+        await CheckRedirect();
         
         await StartHubConnection();
             
@@ -115,10 +100,35 @@ else
         StateHasChanged();
     }
 
-    private void CheckRedirect()
+    private async Task CheckRedirect()
     {
+        StateHasChanged();
+
+        _navMenu?.Reload();
+        
+        var relativePath = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var right = PageRightRegistry.GetNeededRankForPage(relativePath);
+        var hasRight = UserAccessService.HasRight(right);
+        if (!hasRight)
+        {
+            _shouldRedirect = true;
+        }
+        
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null)
+        {
+            _shouldRedirect = true;
+        }
+        else if (access.Rank <= RankEnum.None)
+        {
+            _shouldRedirect = true;
+        }
+        
+        _loading = false;
         if (!_shouldRedirect) return;
 
+        StateHasChanged();
+        
         Navigation.NavigateToNotAuthorized();
     }
     
@@ -135,7 +145,7 @@ else
                 if (accessId != access.Id) return;
 
                 await InvokeAsync(UserAccessService.ReloadUserAccessAsync);
-                CheckRedirect();
+                await InvokeAsync(CheckRedirect);
             }
             catch (Exception ex)
             {
@@ -151,7 +161,7 @@ else
                 if (access is null) return;
 
                 await InvokeAsync(UserAccessService.ReloadUserAccessAsync);
-                CheckRedirect();
+                await InvokeAsync(CheckRedirect);
             }
             catch (Exception ex)
             {

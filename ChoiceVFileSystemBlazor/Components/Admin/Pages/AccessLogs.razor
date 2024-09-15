@@ -1,7 +1,7 @@
 ﻿@page "/admin/logs"
 
 @code {
-    private const string Url = "/admin/logs";
+    public const string Url = "/admin/logs";
     public static string GetRedirectUrl() => Url;
 }
 
@@ -57,7 +57,7 @@ else
     {
         await base.OnInitializedAsync();
         
-        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewAdminAccessLogs);
+        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
 

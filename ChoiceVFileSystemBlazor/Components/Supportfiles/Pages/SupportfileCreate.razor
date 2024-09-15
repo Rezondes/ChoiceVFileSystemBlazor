@@ -1,7 +1,7 @@
 ﻿@page "/supportfiles/create"
 
 @code {
-    private const string Url = "/supportfiles/create";
+    public const string Url = "/supportfiles/create";
     public static string GetRedirectUrl() => Url;
 }
 
@@ -81,7 +81,7 @@ else
         
         _model = new SupportfileDbModel(access!.Id);
         
-        _isAuthorized = UserAccessService.HasRight(RightEnum.SupportfileCreate);
+        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
         StateHasChanged();
     }

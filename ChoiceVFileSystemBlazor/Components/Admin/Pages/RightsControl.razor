@@ -75,8 +75,8 @@ else
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        
-        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewAdminRightsControl);
+
+        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
 
@@ -151,8 +151,6 @@ else
         
         var (updateCount, addedCount, removedCount) = await RankProxy.ChangeBulkAsync(_checkboxValues);
         
-        await MainLayout.BaseHubConnection.SendAsync(BaseHubMethodEnum.UpdateRights.ToString());
-        
         _loading = false;
         StateHasChanged();
 
@@ -162,6 +160,8 @@ else
             return;
         }
         
+        await MainLayout.BaseHubConnection.SendAsync(BaseHubMethodEnum.UpdateRights.ToString());
+
         Snackbar.Add($"{addedCount}x Rechte zu Rollen hinzugefügt und {removedCount}x Rechte von Rollen entfernt.", Severity.Success);
     }
 }

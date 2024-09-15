@@ -1,8 +1,7 @@
 ﻿@page "/supportfiles"
 
-
 @code {
-    private const string Url = "/supportfiles/";
+    public const string Url = "/supportfiles/";
     public static string GetRedirectUrl() => Url;
 }
 
@@ -21,7 +20,7 @@
     {
         await base.OnInitializedAsync();
 
-        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewSupportfiles);
+        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
     

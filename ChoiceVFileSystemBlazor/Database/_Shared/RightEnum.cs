@@ -2,6 +2,8 @@
 
 public enum RightEnum
 {
+    None = 0,
+    
     ViewSupportfilesArea = 1000,
     ViewSupportfiles = 1001,
     ViewDeletedFiles = 1002,

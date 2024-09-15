@@ -1,9 +1,7 @@
 ﻿@page "/admin/discordroles"
-@using ChoiceVFileSystemBlazor.Database.Discord.DbModels
-@using ChoiceVFileSystemBlazor.Database.Discord.DbModels.Partials
 
 @code {
-    private const string Url = "/admin/discordroles";
+    public const string Url = "/admin/discordroles";
     public static string GetRedirectUrl() => Url;
 }
 
@@ -93,7 +91,7 @@ else
     {
         await base.OnInitializedAsync();
         
-        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewDiscordRolesControl);
+        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
 

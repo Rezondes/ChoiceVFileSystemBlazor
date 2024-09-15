@@ -1,8 +1,7 @@
 ﻿@page "/admin/access"
-@using ChoiceVFileSystemBlazor.Database.Accesses.DbModels.Partials
 
 @code {
-    private const string Url = "/admin/access";
+    public const string Url = "/admin/access";
     public static string GetRedirectUrl() => Url;
 }
 
@@ -54,7 +53,7 @@ else
     {
         base.OnInitialized();
         
-        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewAdminAccessControl);
+        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
     

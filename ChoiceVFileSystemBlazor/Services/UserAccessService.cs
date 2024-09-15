@@ -116,7 +116,7 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
 
     public List<RightEnum> GetUserRights() => _userRights;
 
-    public bool HasRight(RightEnum right) => _userAccess.Rank == RankEnum.Admin || _userRights.Contains(right);
+    public bool HasRight(RightEnum right) => right == RightEnum.None || _userAccess.Rank == RankEnum.Admin || _userRights.Contains(right);
     
     public bool HasAnyRights(List<RightEnum> rights) => _userAccess.Rank == RankEnum.Admin || _userRights.Any(rights.Contains);
 }

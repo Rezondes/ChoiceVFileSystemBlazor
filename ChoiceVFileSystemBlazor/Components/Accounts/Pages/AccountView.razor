@@ -1,8 +1,7 @@
 ﻿@page "/accounts/view/{id}"
-@using ChoiceVFileSystemBlazor.Components.Characters.Pages
 
 @code {
-    private const string Url = "/accounts/view/";
+    public const string Url = "/accounts/view/";
     public static string GetRedirectUrl(string id) => Url + id;
 }
 

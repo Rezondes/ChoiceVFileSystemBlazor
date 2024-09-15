@@ -1,5 +1,10 @@
 ﻿@page "/notauthorized"
 
+@code {
+    public const string Url = "/notauthorized";
+    public static string GetRedirectUrl(string id) => Url + id;
+}
+
 <div class="centered">
     
     <h3>Not Authorized</h3>

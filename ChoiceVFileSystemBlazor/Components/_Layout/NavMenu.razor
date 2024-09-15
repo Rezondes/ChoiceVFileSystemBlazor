@@ -86,4 +86,9 @@
 
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+
+    public void Reload()
+    {
+        StateHasChanged();
+    }
 }

@@ -1,8 +1,7 @@
 ﻿@page "/characters/view/{id}"
-@using ChoiceVFileSystemBlazor.Components.Accounts.Pages
 
 @code {
-    private const string Url = "/characters/view/";
+    public const string Url = "/characters/view/";
     public static string GetRedirectUrl(string id) => Url + id;
 }
 
@@ -143,7 +142,7 @@ else
     {
         await base.OnInitializedAsync();
 
-        _isAuthorized = UserAccessService.HasRight(RightEnum.ViewSupportfiles);
+        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
     
