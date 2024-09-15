@@ -280,7 +280,6 @@ else
         if (file is null) return;
 
         var maxFileSize = SupportfileEntryProxy.GetMaxFileSize();
-        
         if (file.Size > maxFileSize)
         {
             Snackbar.Add("Datei ist zu groß!", Severity.Error);
@@ -289,26 +288,14 @@ else
         
         try
         {
-            if (file.ContentType == "image/png" || file.ContentType == "image/jpeg" || file.ContentType == "image/jpg")
-            {
-                var fileUpload = await GetFileUploadDbModel(file, entryDbModel);
-
-                _fileUploadPreview.OpenFile(fileUpload, true);
-            }
-            else if (file.ContentType == "application/pdf")
-            {
-                using var stream = file.OpenReadStream(maxFileSize); // max 10 MB
-                using var memoryStream = new MemoryStream();
-                await stream.CopyToAsync(memoryStream);
-                var buffer = memoryStream.ToArray();
-                
-                var fileUpload = new SupportfileFileUploadDbModel(entryDbModel.Id, file.Name, file.ContentType, buffer);
-                _fileUploadPreview.OpenFile(fileUpload, true);
-            }
-            else
+            var fileDbModel = await GetFileUploadDbModel(file, entryDbModel);
+            if (fileDbModel is null)
             {
                 Snackbar.Add($"Dateiformat [{file.ContentType}] wird nicht unterstützt.", Severity.Error);
+                return;
             }
+            
+            _fileUploadPreview.OpenFile(fileDbModel, true);
         }
         catch (Exception ex)
         {
@@ -316,20 +303,37 @@ else
         }
     }
 
-    private async Task<SupportfileFileUploadDbModel> GetFileUploadDbModel(IBrowserFile file, SupportfileEntryDbModel entryDbModel)
+    private async Task<SupportfileFileUploadDbModel?> GetFileUploadDbModel(IBrowserFile file, SupportfileEntryDbModel entryDbModel)
     {
         var maxFileSize = SupportfileEntryProxy.GetMaxFileSize();
         
-        var resizedFile = await file.RequestImageFileAsync(file.ContentType, 800, 600); // Rescale wenn nötig
-        using var stream = resizedFile.OpenReadStream(maxFileSize); // max 10 MB
+        switch (file.ContentType)
+        {
+            case "image/png":
+            case "image/jpeg":
+            case "image/jpg":
+            {
+                var resizedFile = await file.RequestImageFileAsync(file.ContentType, 800, 600);
+                using var stream = resizedFile.OpenReadStream(maxFileSize);
 
-        // Nutze einen MemoryStream, um die Daten korrekt zu verarbeiten
-        using var memoryStream = new MemoryStream();
-        await stream.CopyToAsync(memoryStream);
-        var buffer = memoryStream.ToArray(); 
+                using var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+                var buffer = memoryStream.ToArray(); 
         
-        var fileUpload = new SupportfileFileUploadDbModel(entryDbModel.Id, file.Name, file.ContentType, buffer);
-        return fileUpload;
+                return new SupportfileFileUploadDbModel(entryDbModel.Id, file.Name, file.ContentType, buffer);
+            }
+            case "application/pdf":
+            {
+                using var stream = file.OpenReadStream(maxFileSize);
+                using var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+                var buffer = memoryStream.ToArray();
+                
+                return new SupportfileFileUploadDbModel(entryDbModel.Id, file.Name, file.ContentType, buffer);
+            }
+            default:
+                return null;
+        }
     }
 
     private async Task DeleteFile(SupportfileFileUploadDbModel file)
