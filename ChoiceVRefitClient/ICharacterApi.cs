@@ -12,7 +12,7 @@ public interface ICharacterApi
     Task<ApiResponse<List<CharacterApiModel>>> GetAllAsync(); 
     
     [Get("/v1/character/{characterId}")]
-    Task<ApiResponse<CharacterApiModel>> GetByCharacterIdAsync(int characterId); 
+    Task<ApiResponse<CharacterApiModel?>> GetByCharacterIdAsync(int characterId); 
     
     [Get("/v1/character/account/{accountId}")]
     Task<ApiResponse<List<CharacterApiModel>>> GetByAccountIdAsync(int accountId); 

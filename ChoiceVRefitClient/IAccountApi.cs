@@ -10,8 +10,8 @@ public interface IAccountApi
     Task<ApiResponse<List<AccountApiModel>>> GetAllAsync(); 
     
     [Get("/v1/account/{accountId}")]
-    Task<ApiResponse<AccountApiModel>> GetByIdAsync(int accountId);
+    Task<ApiResponse<AccountApiModel?>> GetByIdAsync(int accountId);
     
     [Get("/v1/account/discord/{discordId}")]
-    Task<ApiResponse<AccountApiModel>> GetByDiscordIdAsync(string discordId);
+    Task<ApiResponse<AccountApiModel?>> GetByDiscordIdAsync(string discordId);
 }

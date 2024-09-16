@@ -34,7 +34,7 @@ else
                 <div class="d-flex align-items-center justify-content-center" style="padding: 15px 0 25px 0">
                     <MudText Typo="Typo.h5">[@_model.Id] @_model.FirstName @_model.MiddleName @_model.LastName</MudText>
                     
-                    @if (_model.Gender == 'M')
+                    @if (_model.Gender == "M")
                     {
                         <MudTooltip Text="Männlich" Duration="@Constants.TOOLTIP_DURATION">
                             <MudAvatar Color="Color.Primary">M</MudAvatar>
@@ -194,7 +194,7 @@ else
     private async Task LoadCharacterAsync()
     {
         var response = await CharacterApi.GetByCharacterIdAsync(_id);
-        if (!response.IsSuccessStatusCode)
+        if (!response.IsSuccessStatusCode || response.Content is null)
         {
             Navigation.NavigateToError();
             return; 

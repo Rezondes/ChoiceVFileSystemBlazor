@@ -4,6 +4,48 @@ namespace ChoiceVSharedApiModels.Characters;
 
 public class CharacterApiModel
 {
+    public CharacterApiModel() { }
+    
+    public CharacterApiModel(
+        int id, 
+        int accountId, 
+        string? title, 
+        string firstName, 
+        string lastName, 
+        string middleName, 
+        double hunger, 
+        double thirst, 
+        double energy, 
+        double health, 
+        DateOnly birthDate, 
+        string position, 
+        string rotation, 
+        string gender, 
+        decimal cash, 
+        DateTime lastLogin, 
+        DateTime lastLogout, 
+        int dimension)
+    {
+        Id = id;
+        AccountId = accountId;
+        Title = title;
+        FirstName = firstName;
+        LastName = lastName;
+        MiddleName = middleName;
+        Hunger = hunger;
+        Thirst = thirst;
+        Energy = energy;
+        Health = health;
+        BirthDate = birthDate;
+        Position = position;
+        Rotation = rotation;
+        Gender = gender;
+        Cash = cash;
+        LastLogin = lastLogin;
+        LastLogout = lastLogout;
+        Dimension = dimension;
+    }
+
     [JsonPropertyName("id")]
     public int Id { get; set; }
     
@@ -35,7 +77,7 @@ public class CharacterApiModel
     public double Health { get; set; }
         
     [JsonPropertyName("birth_date")]
-    public DateTime BirthDate { get; set; }
+    public DateOnly BirthDate { get; set; }
         
     [JsonPropertyName("position")]
     public string Position { get; set; }
@@ -44,7 +86,7 @@ public class CharacterApiModel
     public string Rotation { get; set; }
         
     [JsonPropertyName("gender")]
-    public char Gender { get; set; }
+    public string Gender { get; set; }
         
     [JsonPropertyName("cash")]
     public decimal Cash { get; set; }
