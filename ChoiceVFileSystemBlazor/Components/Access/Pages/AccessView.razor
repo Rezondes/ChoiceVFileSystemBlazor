@@ -1,4 +1,5 @@
 ﻿@page "/access/view/{id}"
+@using TimeZoneConverter
 
 @code {
     public const string Url = "/access/view/";
@@ -19,7 +20,8 @@ else
                 <MudText>Rank: @UserAccessService.GetUserAccess().Result!.Rank</MudText>
                 <MudText>AccountId: @UserAccessService.GetUserAccess().Result!.AccountId</MudText>
                 <MudText>DiscordId: @UserAccessService.GetUserAccess().Result!.DiscordId</MudText>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OverrideData">Namen aktualisieren</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OverrideName">Namen aktualisieren</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OverrideTimezone">Zeitzone aktualisieren</MudButton>
             </MudPaper>
         </MudItem>
         <MudItem xs="12">
@@ -78,18 +80,16 @@ else
             return;
         }
 
-        _checkModel = access!.CreateShallowCopy();
+        _checkModel = access.CreateShallowCopy();
         await _supportfileOverviewDataGrid.Load();
     }
 
-    private async Task OverrideData()
+    private async Task OverrideName()
     {
         var access = await UserAccessService.GetUserAccess();
         if (MainLayout.BaseHubConnection is null) return;
         if (access is null) return;
         if (_checkModel is null) return;
-        
-        var accessDbModel = await UserAccessService.GetUserAccess()!;
         
         const string title = "Namen ändern";
         const string description = "";
@@ -102,7 +102,7 @@ else
             new(
                 InputTypes.Text,
                 nameLabel,
-                accessDbModel.Name,
+                access.Name,
                 "John Doe"
             ),
         };
@@ -130,22 +130,83 @@ else
 
         if (_checkModel.Name == name)
         {
-            Snackbar.Add("Es wurde kein Name eingetragen!", Severity.Error);
+            Snackbar.Add("Der Name wurde nicht geändert!", Severity.Error);
             return;
         }
 
-        
-
-        var partialAccessModel = new PartialAccessModel(accessDbModel.AccountId, accessDbModel.DiscordId, name, accessDbModel.Rank);
-        var response = await AccessProxy.UpdateToPartial(accessDbModel, partialAccessModel, access!.Id);
+        var partialAccessModel = new PartialAccessModel(access.AccountId, access.DiscordId, name, access.Rank);
+        var response = await AccessProxy.UpdateToPartial(access, partialAccessModel, access!.Id);
         if (!response)
         {
             Snackbar.Add("Beim Aktualisieren ist ein Fehler aufgetreten oder es wurden keine andere Werte angegeben.", Severity.Error);
             return;
         }
 
-        await MainLayout.BaseHubConnection.SendAsync(BaseHubMethodEnum.UpdateAccess.ToString(), accessDbModel.Id);
+        await MainLayout.BaseHubConnection.SendAsync(BaseHubMethodEnum.UpdateAccess.ToString(), access.Id);
         
-        Snackbar.Add($"[{accessDbModel.Id}] {accessDbModel.Name} wurde aktualisiert.", Severity.Success);
+        Snackbar.Add($"[{access.Id}] {access.Name} wurde aktualisiert.", Severity.Success);
     }
+
+    private async Task OverrideTimezone()
+    {
+        var access = await UserAccessService.GetUserAccess();
+        if (MainLayout.BaseHubConnection is null) return;
+        if (access is null) return;
+        if (_checkModel is null) return;
+        
+        const string title = "Zeitzone ändern";
+        const string description = "";
+        const string submitButtonText = "Speichern";
+
+        const string timeZoneLabel = "Zeitzone";
+        
+        var timeZoneIds = TZConvert.KnownIanaTimeZoneNames
+            .Where(x => DateTime.UtcNow.TryConvertTimeFromUtcWithTimeZone(x) is not null)
+            .Select(x => new InputOptionModel(x, x))
+            .ToList();
+        
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Select,
+                timeZoneLabel,
+                access.Settings.TimeZone,
+                string.Empty,
+                timeZoneIds
+            ),
+        };
+
+        var parameter = new DialogParameters<SimpleMudDialog>
+        {
+            { x => x.Description, description },
+            { x => x.Inputs, inputs },
+            { x => x.SubmitButtonText, submitButtonText },
+        };
+
+        var dialog = await DialogService.ShowAsync<SimpleMudDialog>(title, parameter, new DialogOptions { FullWidth = true });
+        var dialogResult = await dialog.Result;
+
+        if (dialogResult is null || dialogResult.Canceled) return;
+
+        var data = (List<InputModel>)dialogResult.Data!;
+        
+        var timeZone = data.First(x => x.Label == timeZoneLabel).Value;
+        if (string.IsNullOrEmpty(timeZone))
+        {
+            Snackbar.Add("Es wurde kein Zeitzone ausgewählt!", Severity.Error);
+            return;
+        }
+        
+        var response = await AccessProxy.UpdateTimeZoneAsync(access.Id, timeZone, access.Id);
+        if (!response)
+        {
+            Snackbar.Add("Beim Aktualisieren ist ein Fehler aufgetreten oder es wurden keine andere Werte angegeben.", Severity.Error);
+            return;
+        }
+
+        await MainLayout.BaseHubConnection.SendAsync(BaseHubMethodEnum.UpdateAccess.ToString(), access.Id);
+        
+        Snackbar.Add($"[{access.Id}] {access.Name} wurde aktualisiert.", Severity.Success);
+    }
+
 }

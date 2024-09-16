@@ -258,6 +258,81 @@ public class AccessProxy : IAccessProxy
         return changes > 0;
     }
 
+    public async Task<bool> UpdateIsDarkModeAsync(Ulid id, bool isDarkMode, Ulid accessId)
+    {
+        var check = await GetWithSettingsAsync(id);
+        if (check is null) return false;
+        
+        using var dbContext = await CreateDbContextAsync();
+
+        if (check.Settings.IsDarkMode == isDarkMode) return false;
+
+        var oldIsDarkMode = check.Settings.TimeZone;
+        check.Settings.IsDarkMode = isDarkMode;
+        
+        dbContext.AccessSettingsDbModels.Update(check.Settings);
+        await _accessLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+            check.Id,
+            AccessLogTypeEnum.ModifyIsDarkMode,
+            accessId,
+            $"OldIsDarkMode: {oldIsDarkMode} \n" +
+            $"NewIsDarkMode: {check.Settings.IsDarkMode}"
+        ));
+        var changes = await dbContext.SaveChangesAsync();
+
+        return changes > 0;
+    }
+    
+    public async Task<bool> UpdateIsNavbarExpandedAsync(Ulid id, bool isNavbarExpanded, Ulid accessId)
+    {
+        var check = await GetWithSettingsAsync(id);
+        if (check is null) return false;
+        
+        using var dbContext = await CreateDbContextAsync();
+
+        if (check.Settings.IsNavbarExpanded == isNavbarExpanded) return false;
+
+        var oldIsNavbarExpanded = check.Settings.IsNavbarExpanded;
+        check.Settings.IsNavbarExpanded = isNavbarExpanded;
+        
+        dbContext.AccessSettingsDbModels.Update(check.Settings);
+        await _accessLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+            check.Id,
+            AccessLogTypeEnum.ModifyIsNavbarExpanded,
+            accessId,
+            $"OldIsNavbarExpanded: {oldIsNavbarExpanded} \n" +
+            $"NewIsNavbarExpanded: {check.Settings.IsNavbarExpanded}"
+        ));
+        var changes = await dbContext.SaveChangesAsync();
+
+        return changes > 0;
+    }
+    
+    public async Task<bool> UpdateTimeZoneAsync(Ulid id, string timeZone, Ulid accessId)
+    {
+        var check = await GetWithSettingsAsync(id);
+        if (check is null) return false;
+        
+        using var dbContext = await CreateDbContextAsync();
+
+        if (check.Settings.TimeZone == timeZone) return false;
+
+        var oldTimeZone = check.Settings.TimeZone;
+        check.Settings.TimeZone = timeZone;
+        
+        dbContext.AccessSettingsDbModels.Update(check.Settings);
+        await _accessLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+            check.Id,
+            AccessLogTypeEnum.ModifyTimezone,
+            accessId,
+            $"OldTimezone: {oldTimeZone} \n" +
+            $"NewTimezone: {check.Settings.TimeZone}"
+        ));
+        var changes = await dbContext.SaveChangesAsync();
+
+        return changes > 0;
+    }
+
     public async Task<AccessSettingsDbModel?> AddSettingsAsync(AccessDbModel accessDbModel)
     {
         var check = await GetAsync(accessDbModel.Id);

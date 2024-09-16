@@ -27,5 +27,8 @@ public interface IAccessProxy
         bool updateRank = true
     );
 
+    public Task<bool> UpdateIsDarkModeAsync(Ulid id, bool isDarkMode, Ulid accessId);
+    public Task<bool> UpdateIsNavbarExpandedAsync(Ulid id, bool isNavbarExpanded, Ulid accessId);
+    public Task<bool> UpdateTimeZoneAsync(Ulid id, string timeZone, Ulid accessId);
     public Task<AccessSettingsDbModel?> AddSettingsAsync(AccessDbModel accessDbModel);
 }
