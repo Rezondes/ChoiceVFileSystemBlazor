@@ -45,6 +45,11 @@ else
             <PropertyColumn Property="x => x.CreatorAccessModel.Name" Title="Ersteller"/>
             <PropertyColumn Property="x => x.CreatorAccessModel.Id" Title="ErstellerId"/>
             <PropertyColumn Property="x => x.Status" Title="Status" />
+            <TemplateColumn Hideable="false" Sortable="true" Filterable="true" Title="Datum">
+                <CellTemplate>
+                    @context.Item.CreatedAtLocal(UserAccessService.GetUserAccess().Result.Settings.TimeZone)
+                </CellTemplate>
+            </TemplateColumn>
             @if (UserAccessService.HasRight(RightEnum.ViewDeletedFiles))
             {
                 <PropertyColumn Property="x => x.Deleted" Title="Gelöscht" />

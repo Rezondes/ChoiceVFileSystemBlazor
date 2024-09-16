@@ -6,29 +6,23 @@
     public static string GetRedirectUrl(string id) => Url + id;
 }
 
-@if (UserAccessService.GetUserAccess().Result is null)
-{
-    <PageLoading/>
-}
-else
-{
-    <MudGrid Justify="Justify.Center" style="height: 100%; overflow-y: auto;">
-        <MudItem xs="12"> 
-            <MudPaper Elevation="25" Style="padding: 20px;">
-                <MudText>Id: @UserAccessService.GetUserAccess().Result!.Id</MudText>
-                <MudText>Name: @UserAccessService.GetUserAccess().Result!.Name</MudText>
-                <MudText>Rank: @UserAccessService.GetUserAccess().Result!.Rank</MudText>
-                <MudText>AccountId: @UserAccessService.GetUserAccess().Result!.AccountId</MudText>
-                <MudText>DiscordId: @UserAccessService.GetUserAccess().Result!.DiscordId</MudText>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OverrideName">Namen aktualisieren</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OverrideTimezone">Zeitzone aktualisieren</MudButton>
-            </MudPaper>
-        </MudItem>
-        <MudItem xs="12">
-            <SupportfileOverviewDataGrid AccessId="@UserAccessService.GetUserAccess().Result!.Id" Label="Erstellte Supportakten" @ref="_supportfileOverviewDataGrid"/>
-        </MudItem>
-    </MudGrid>    
-}
+<MudGrid Justify="Justify.Center" style="height: 100%; overflow-y: auto;">
+    <MudItem xs="12"> 
+        <MudPaper Elevation="25" Style="padding: 20px;">
+            <MudText>Id: @UserAccessService.GetUserAccess().Result.Id</MudText>
+            <MudText>Name: @UserAccessService.GetUserAccess().Result.Name</MudText>
+            <MudText>Rank: @UserAccessService.GetUserAccess().Result.Rank</MudText>
+            <MudText>AccountId: @UserAccessService.GetUserAccess().Result.AccountId</MudText>
+            <MudText>DiscordId: @UserAccessService.GetUserAccess().Result.DiscordId</MudText>
+            <MudText>Zeitzone: @UserAccessService.GetUserAccess().Result.Settings.TimeZone</MudText>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OverrideName">Namen aktualisieren</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OverrideTimezone">Zeitzone aktualisieren</MudButton>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12">
+        <SupportfileOverviewDataGrid AccessId="@UserAccessService.GetUserAccess().Result!.Id" Label="Erstellte Supportakten" @ref="_supportfileOverviewDataGrid"/>
+    </MudItem>
+</MudGrid>  
 
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }

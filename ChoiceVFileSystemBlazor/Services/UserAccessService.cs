@@ -118,7 +118,7 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
         _userAccess.Rank = highestRank;
     }
     
-    public async Task<AccessDbModel?> GetUserAccess() {
+    public async Task<AccessDbModel> GetUserAccess() {
         if (_userAccess is not null) return _userAccess;
         
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();

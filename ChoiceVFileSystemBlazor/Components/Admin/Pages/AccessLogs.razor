@@ -38,7 +38,7 @@ else
             <PropertyColumn Hideable="false" Property="x => x.Type" Title="Type" />
             <TemplateColumn Hideable="false" Sortable="true" Filterable="true" Title="CreatedAt">
                 <CellTemplate>
-                    @context.Item.CreatedAtLocal()
+                    @context.Item.CreatedAtLocal(UserAccessService.GetUserAccess().Result.Settings.TimeZone)
                 </CellTemplate>
             </TemplateColumn>
         </Columns>
@@ -105,7 +105,7 @@ else
         if (x.Type.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
-        if (x.CreatedAtLocal().ToString(CultureInfo.InvariantCulture).ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.CreatedAtLocal(UserAccessService.GetUserAccess().Result.Settings.TimeZone).ToString(CultureInfo.InvariantCulture).ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
         if ($"{x.Id}".ToLower().Contains(lowerSearchString))

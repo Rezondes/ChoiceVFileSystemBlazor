@@ -43,7 +43,7 @@ else
             <PropertyColumn Hideable="false" Property="x => x.Creator.Name" Title="CreatorName" />
             <TemplateColumn Hideable="false" Sortable="true" Filterable="true" Title="Created">
                 <CellTemplate>
-                    @context.Item.CreatedLocal()
+                    @context.Item.CreatedLocal(UserAccessService.GetUserAccess().Result.Settings.TimeZone)
                 </CellTemplate>
             </TemplateColumn>
             @if (UserAccessService.HasRight(RightEnum.NewsEdit) || UserAccessService.HasRight(RightEnum.NewsDelete))
