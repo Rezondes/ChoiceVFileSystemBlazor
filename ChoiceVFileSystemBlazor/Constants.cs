@@ -1,4 +1,4 @@
-﻿namespace ChoiceVFileSystemBlazor.Components;
+﻿namespace ChoiceVFileSystemBlazor;
 
 public static class Constants
 {
