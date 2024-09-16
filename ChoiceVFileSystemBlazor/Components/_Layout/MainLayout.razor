@@ -86,6 +86,10 @@ else
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        var access = await UserAccessService.GetUserAccess();
+
+        _isDarkMode = access.Settings.IsDarkMode;
+        _open = access.Settings.IsNavbarExpanded;
     }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -170,8 +174,26 @@ else
         await BaseHubConnection.StartAsync();
     }
 
-    private void ToggleDrawer() => _open = !_open;
-    private void ToggleDarkMode(bool newValue) => _isDarkMode = newValue;
+    private async Task ToggleDrawer()
+    {
+        var access = await UserAccessService.GetUserAccess();
+
+        var response = await AccessProxy.UpdateIsNavbarExpandedAsync(access.Id, !_open, access.Id);
+        if (!response) return;
+        
+        _open = !_open;
+        StateHasChanged();
+    }
+    private async Task ToggleDarkMode(bool newValue)
+    {
+        var access = await UserAccessService.GetUserAccess();
+
+        var response = await AccessProxy.UpdateIsDarkModeAsync(access.Id, newValue, access.Id);
+        if (!response) return;
+        
+        _isDarkMode = newValue;
+        StateHasChanged();
+    }
 
     private async Task OpenAccessPage()
     {
