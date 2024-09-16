@@ -32,26 +32,51 @@ public class AccessProxy : IAccessProxy
     public async Task<AccessDbModel?> GetAsync(string discordId)
     {
         using var dbContext = await CreateDbContextAsync();
-        return await dbContext.AccessDbModels.AsNoTracking().FirstOrDefaultAsync(x => x.DiscordId == discordId);
+        return await dbContext.AccessDbModels
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.DiscordId == discordId);
     }
 
+    public async Task<AccessDbModel?> GetWithSettingsAsync(string discordId)
+    {
+        using var dbContext = await CreateDbContextAsync();
+        return await dbContext.AccessDbModels
+            .AsNoTracking()
+            .Include(x => x.Settings)
+            .FirstOrDefaultAsync(x => x.DiscordId == discordId);
+    }
+    
     public async Task<AccessDbModel?> GetAsync(int accountId)
     {
         using var dbContext = await CreateDbContextAsync();
-        return await dbContext.AccessDbModels.AsNoTracking().FirstOrDefaultAsync(x => x.AccountId == accountId);
+        return await dbContext.AccessDbModels
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.AccountId == accountId);
     }
 
     public async Task<AccessDbModel?> GetAsync(Ulid id)
     {
         using var dbContext = await CreateDbContextAsync();
-        return await dbContext.AccessDbModels.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+        return await dbContext.AccessDbModels
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id);
     }
 
+    public async Task<AccessDbModel?> GetWithSettingsAsync(Ulid id)
+    {
+        using var dbContext = await CreateDbContextAsync();
+        return await dbContext.AccessDbModels
+            .AsNoTracking()
+            .Include(x => x.Settings)
+            .FirstOrDefaultAsync(x => x.Id == id);
+    }
+    
     public async Task<AccessDbModel?> GetFullAsync(Ulid id)
     {
         using var dbContext = await CreateDbContextAsync();
         return await dbContext.AccessDbModels
             .AsNoTracking()
+            .Include(x => x.Settings)
             .Include(x => x.Supportfiles)
             .Include(x => x.SupportfileLogs)
             .Include(x => x.SupportfileEntrys)
@@ -70,6 +95,7 @@ public class AccessProxy : IAccessProxy
             // var checkAccountId = await GetAsync(accessModel.AccountId);
             // if (checkAccountId is not null) return false;
 
+            await dbContext.AccessSettingsDbModels.AddAsync(new AccessSettingsDbModel(accessModel.Id));
             await dbContext.AccessDbModels.AddAsync(accessModel);
             var changes = await dbContext.SaveChangesAsync();
 
@@ -230,5 +256,20 @@ public class AccessProxy : IAccessProxy
         var changes = await dbContext.SaveChangesAsync();
 
         return changes > 0;
+    }
+
+    public async Task<AccessSettingsDbModel?> AddSettingsAsync(AccessDbModel accessDbModel)
+    {
+        var check = await GetAsync(accessDbModel.Id);
+        if (check is null) return null;
+        
+        using var dbContext = await CreateDbContextAsync();
+
+        var settings = new AccessSettingsDbModel(accessDbModel.Id);
+        
+        await dbContext.AccessSettingsDbModels.AddAsync(settings);
+        var changes = await dbContext.SaveChangesAsync();
+
+        return changes > 0 ? settings : null;
     }
 }

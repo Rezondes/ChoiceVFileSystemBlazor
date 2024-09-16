@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Net.Sockets;
+using System.Security.Claims;
 using ChoiceVFileSystemBlazor.Database._Shared;
 using ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
 using ChoiceVFileSystemBlazor.Database.Accesses.Proxies.Interfaces;
@@ -25,7 +26,7 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
 
         if (discordId is null || discordName is null) throw new Exception("No Claims");
 
-        var accessDbModel = await accessProxy.GetAsync(discordId);
+        var accessDbModel = await accessProxy.GetWithSettingsAsync(discordId);
         if (accessDbModel is null)
         {
             var newAccess = await CreateNewAccessAsync(discordId, discordName);
@@ -36,6 +37,11 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
         }
         else
         {
+            if (accessDbModel.Settings is null)
+            {
+                await accessProxy.AddSettingsAsync(accessDbModel);
+            }
+            
             _userAccess = accessDbModel;
         }
 
@@ -45,7 +51,7 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
 
     public async Task ReloadUserAccessAsync()
     {
-        var accessDbModel = await accessProxy.GetAsync(_userAccess.DiscordId);
+        var accessDbModel = await accessProxy.GetWithSettingsAsync(_userAccess.DiscordId);
 
         _userAccess = accessDbModel ?? throw new Exception("No Access");
         
@@ -56,16 +62,22 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
     private async Task<AccessDbModel> CreateNewAccessAsync(string discordId, string discordName)
     {
         AccessDbModel? newAccessModel;
-
-        var accountResponse = await accountApi.GetByDiscordIdAsync(discordId);
-        if (accountResponse.IsSuccessStatusCode)
+        try
         {
-            var account = accountResponse.Content;
-            // TODO change back on Api ready
-            // newAccessModel = new AccessDbModel(account.Id, account.DiscordId, account.Name);
-            newAccessModel = new AccessDbModel(-1, discordId, discordName);
+            var accountResponse = await accountApi.GetByDiscordIdAsync(discordId);
+            if (accountResponse.IsSuccessStatusCode)
+            {
+                var account = accountResponse.Content;
+                // TODO change back on Api ready
+                // newAccessModel = new AccessDbModel(account.Id, account.DiscordId, account.Name);
+                newAccessModel = new AccessDbModel(-1, discordId, discordName);
+            }
+            else
+            {
+                newAccessModel = new AccessDbModel(-1, discordId, discordName);
+            }
         }
-        else
+        catch (HttpRequestException ex)
         {
             newAccessModel = new AccessDbModel(-1, discordId, discordName);
         }

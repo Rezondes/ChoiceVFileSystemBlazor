@@ -11,8 +11,9 @@ namespace ChoiceVFileSystemBlazor.Database;
 public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFileSystemBlazorDatabaseContext> options) : DbContext(options)
 {
     #region Access
-    public DbSet<AccessLogsDbModel> AccessLogsDbModels { get; set; }
     public DbSet<AccessDbModel> AccessDbModels { get; set; }
+    public DbSet<AccessLogsDbModel> AccessLogsDbModels { get; set; }
+    public DbSet<AccessSettingsDbModel> AccessSettingsDbModels { get; set; }
     #endregion
     
     #region Discord
@@ -41,6 +42,17 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
 
         #region Access
         
+        modelBuilder.Entity<AccessDbModel>()
+            .Property(e => e.Id)
+            .HasConversion(
+                v => v.ToString(),
+                v => Ulid.Parse(v));
+        modelBuilder.Entity<AccessDbModel>()
+            .HasOne(a => a.Settings) 
+            .WithOne(a => a.AccessModel) 
+            .HasForeignKey<AccessSettingsDbModel>(a => a.AccessId) 
+            .OnDelete(DeleteBehavior.Cascade); 
+        
         modelBuilder.Entity<AccessLogsDbModel>()
             .Property(e => e.Id)
             .HasConversion(
@@ -65,12 +77,16 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
             .WithMany(a => a.TargetedAccessLogs) 
             .HasForeignKey(s => s.TargetAccessId); 
         
-        modelBuilder.Entity<AccessDbModel>()
+        modelBuilder.Entity<AccessSettingsDbModel>()
             .Property(e => e.Id)
             .HasConversion(
                 v => v.ToString(),
                 v => Ulid.Parse(v));
-
+        modelBuilder.Entity<AccessSettingsDbModel>()
+            .Property(e => e.AccessId)
+            .HasConversion(
+                v => v.ToString(),
+                v => Ulid.Parse(v));
         #endregion
         
         #region Discord

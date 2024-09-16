@@ -8,7 +8,9 @@ public interface IAccessProxy
 {
     public Task<List<AccessDbModel>> GetAllAsync();
     public Task<AccessDbModel?> GetAsync(string discordId);
+    public Task<AccessDbModel?> GetWithSettingsAsync(string discordId);
     public Task<AccessDbModel?> GetAsync(Ulid id);
+    public Task<AccessDbModel?> GetWithSettingsAsync(Ulid id);
     public Task<AccessDbModel?> GetFullAsync(Ulid id);
     public Task<bool> AddAccessModelAsync(AccessDbModel accessModel);
     public Task<bool> UpdateNameAsync(Ulid id, string newName, Ulid accessId);
@@ -24,4 +26,6 @@ public interface IAccessProxy
         bool updateDiscordId = true,
         bool updateRank = true
     );
+
+    public Task<AccessSettingsDbModel?> AddSettingsAsync(AccessDbModel accessDbModel);
 }

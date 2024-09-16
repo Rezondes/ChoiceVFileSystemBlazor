@@ -27,6 +27,7 @@ public class AccessDbModel : PartialAccessModel
     public Ulid Id { get; set; } = Ulid.NewUlid();
     
     // Navigation Properties
+    public AccessSettingsDbModel Settings { get; set; }
     public List<SupportfileDbModel> Supportfiles { get; set; } = [];
     public List<SupportfileLogsDbModel> SupportfileLogs { get; set; } = [];
     public List<SupportfileEntryDbModel> SupportfileEntrys { get; set; } = [];
