@@ -14,7 +14,7 @@
 else
 {
     <MudDataGrid 
-        T="AccountModel" MultiSelection="true" 
+        T="AccountApiModel" MultiSelection="true" 
         Items="@_accounts" SortMode="SortMode.Multiple" Filterable="true" 
         QuickFilter="@QuickFilter" RowClick="@RowClicked"
         Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh">
@@ -34,7 +34,7 @@ else
             <PropertyColumn Property="x => x.DiscordId" Title="DiscordId" />
         </Columns>
         <PagerContent>
-            <MudDataGridPager T="AccountModel" />
+            <MudDataGridPager T="AccountApiModel" />
         </PagerContent>
     </MudDataGrid>
 }
@@ -47,7 +47,7 @@ else
     
     private string? _searchString;
     
-    private List<AccountModel> _accounts = [];
+    private List<AccountApiModel> _accounts = [];
    
     protected override async Task OnInitializedAsync()
     {
@@ -88,7 +88,7 @@ else
         StateHasChanged();
     }
     
-    private Func<AccountModel, bool> QuickFilter => x =>
+    private Func<AccountApiModel, bool> QuickFilter => x =>
     {
         if (_searchString == null) return true;
         
@@ -112,7 +112,7 @@ else
         return false;
     };
     
-    void RowClicked(DataGridRowClickEventArgs<AccountModel> args)
+    void RowClicked(DataGridRowClickEventArgs<AccountApiModel> args)
     {
         Navigation.NavigateTo(AccountView.GetRedirectUrl(args.Item.Id.ToString()));
     }

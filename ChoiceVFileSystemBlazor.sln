@@ -4,8 +4,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChoiceVFileSystemBlazor", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChoiceVSharedApiModels", "ChoiceVSharedApiModels\ChoiceVSharedApiModels.csproj", "{536A360C-F3C2-4A78-A6ED-462F2F0B666A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChoiceVApi", "ChoiceVApi\ChoiceVApi.csproj", "{825A3005-D320-4276-AD72-3B00C0EBBB83}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChoiceVRefitClient", "ChoiceVRefitClient\ChoiceVRefitClient.csproj", "{95945CC0-58FB-48E5-BBB7-916C8595E8C8}"
 EndProject
 Global
@@ -22,10 +20,6 @@ Global
 		{536A360C-F3C2-4A78-A6ED-462F2F0B666A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{536A360C-F3C2-4A78-A6ED-462F2F0B666A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{536A360C-F3C2-4A78-A6ED-462F2F0B666A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{825A3005-D320-4276-AD72-3B00C0EBBB83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{825A3005-D320-4276-AD72-3B00C0EBBB83}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{825A3005-D320-4276-AD72-3B00C0EBBB83}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{825A3005-D320-4276-AD72-3B00C0EBBB83}.Release|Any CPU.Build.0 = Release|Any CPU
 		{95945CC0-58FB-48E5-BBB7-916C8595E8C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{95945CC0-58FB-48E5-BBB7-916C8595E8C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95945CC0-58FB-48E5-BBB7-916C8595E8C8}.Release|Any CPU.ActiveCfg = Release|Any CPU

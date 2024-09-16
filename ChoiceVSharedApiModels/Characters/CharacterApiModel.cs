@@ -2,7 +2,7 @@
 
 namespace ChoiceVSharedApiModels.Characters;
 
-public class CharacterModel
+public class CharacterApiModel
 {
     [JsonPropertyName("id")]
     public int Id { get; set; }

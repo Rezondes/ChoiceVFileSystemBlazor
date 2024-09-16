@@ -2,7 +2,7 @@
 
 namespace ChoiceVSharedApiModels.Inventory;
 
-public class InventoryItemModel
+public class InventoryItemApiModel
 {
     [JsonPropertyName("id")]
     public int Id { get; set; }

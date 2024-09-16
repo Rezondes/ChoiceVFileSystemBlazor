@@ -2,11 +2,11 @@
 
 namespace ChoiceVSharedApiModels.Inventory;
 
-public class InventoryModel
+public class InventoryApiModel
 {
     [JsonPropertyName("characterId")]
     public int CharacterId { get; set; }
     
     [JsonPropertyName("items")]
-    public List<InventoryItemModel> Items { get; set; }
+    public List<InventoryItemApiModel> Items { get; set; }
 }

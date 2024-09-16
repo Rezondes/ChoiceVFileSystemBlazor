@@ -62,21 +62,21 @@ public class CharacterController
     #region GameserverMethodLinks
 
     // TODO Durch richtige Daten ersetzen
-    private static async Task<List<CharacterModel>> GetAllCharactersAsync()
+    private static async Task<List<CharacterApiModel>> GetAllCharactersAsync()
     {
-        return TestDataGenerator.GenerateList<CharacterModel>(100); 
+        return TestDataGenerator.GenerateList<CharacterApiModel>(100); 
     }
 
     // TODO Durch richtige Daten ersetzen
-    private static async Task<List<CharacterModel>> GetAllCharactersByAccountId(int accountId)
+    private static async Task<List<CharacterApiModel>> GetAllCharactersByAccountId(int accountId)
     {
-        return TestDataGenerator.GenerateList<CharacterModel>(3); 
+        return TestDataGenerator.GenerateList<CharacterApiModel>(3); 
     }
 
     // TODO Durch richtige Daten ersetzen
-    private static async Task<CharacterModel> GetCharacterById(int characterId)
+    private static async Task<CharacterApiModel> GetCharacterById(int characterId)
     {
-        return TestDataGenerator.GenerateSingle<CharacterModel>();
+        return TestDataGenerator.GenerateSingle<CharacterApiModel>();
     }
 
     #endregion

@@ -2,7 +2,7 @@
 
 namespace ChoiceVSharedApiModels.Accounts;
 
-public class AccountModel
+public class AccountApiModel
 {
     [JsonPropertyName("id")]
     public int Id { get; set; }

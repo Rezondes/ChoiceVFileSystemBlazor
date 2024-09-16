@@ -22,7 +22,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\ChoiceVApi\ChoiceVApi.csproj" />
       <ProjectReference Include="..\ChoiceVRefitClient\ChoiceVRefitClient.csproj" />
       <ProjectReference Include="..\ChoiceVSharedApiModels\ChoiceVSharedApiModels.csproj" />
     </ItemGroup>

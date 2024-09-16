@@ -28,9 +28,6 @@ using MudBlazor;
 using MudBlazor.Services;
 using Refit;
 
-// TODO remove serverapi and put it to the gameserver
-_ = Task.Run(ChoiceVApi.ChoiceVApi.Start);
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -173,15 +170,37 @@ builder.Services.ConfigureApplicationCookie(options =>
 #region ChoiceV Api
 var choiceVApiBaseAddress = builder.Configuration.GetValue<string>("ChoiceVApi:BaseAddress");
 Assert(string.IsNullOrEmpty(choiceVApiBaseAddress), "ChoiceVApi Address is missing");
+var choiceVApiUsername = builder.Configuration.GetValue<string>("ChoiceVApi:BasicAuthUsername");
+Assert(string.IsNullOrEmpty(choiceVApiUsername), "ChoiceVApi BasicAuthUsername is missing");
+var choiceVApiPassword = builder.Configuration.GetValue<string>("ChoiceVApi:BasicAuthPassword");
+Assert(string.IsNullOrEmpty(choiceVApiPassword), "ChoiceVApi BasicAuthPassword is missing");
 
 builder.Services.AddRefitClient<IAccountApi>()
-    .ConfigureHttpClient(c => c.BaseAddress = new Uri(choiceVApiBaseAddress!));
+    .ConfigureHttpClient(c =>
+    {
+        c.BaseAddress = new Uri(choiceVApiBaseAddress!);
+        c.DefaultRequestHeaders.Authorization = 
+            new AuthenticationHeaderValue("Basic", 
+                Convert.ToBase64String(Encoding.UTF8.GetBytes($"{choiceVApiUsername}:{choiceVApiPassword}")));
+    });
 
 builder.Services.AddRefitClient<ICharacterApi>()
-    .ConfigureHttpClient(c => c.BaseAddress = new Uri(choiceVApiBaseAddress!));
+    .ConfigureHttpClient(c =>
+    {
+        c.BaseAddress = new Uri(choiceVApiBaseAddress!);
+        c.DefaultRequestHeaders.Authorization = 
+            new AuthenticationHeaderValue("Basic", 
+                Convert.ToBase64String(Encoding.UTF8.GetBytes($"{choiceVApiUsername}:{choiceVApiPassword}")));
+    });
 
 builder.Services.AddRefitClient<IInventoryApi>()
-    .ConfigureHttpClient(c => c.BaseAddress = new Uri(choiceVApiBaseAddress!));
+    .ConfigureHttpClient(c =>
+    {
+        c.BaseAddress = new Uri(choiceVApiBaseAddress!);
+        c.DefaultRequestHeaders.Authorization = 
+            new AuthenticationHeaderValue("Basic", 
+                Convert.ToBase64String(Encoding.UTF8.GetBytes($"{choiceVApiUsername}:{choiceVApiPassword}")));
+    });
 #endregion
 
 #region Database

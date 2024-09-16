@@ -14,7 +14,7 @@
 else
 {
     <MudDataGrid 
-        T="CharacterModel" MultiSelection="true" 
+        T="CharacterApiModel" MultiSelection="true" 
         Items="@_data" SortMode="SortMode.Multiple" Filterable="true" 
         QuickFilter="@QuickFilter" RowClick="@RowClicked"
         Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh">
@@ -36,7 +36,7 @@ else
             <PropertyColumn Property="x => x.Dimension" Title="Dimension" />
         </Columns>
         <PagerContent>
-            <MudDataGridPager T="CharacterModel" />
+            <MudDataGridPager T="CharacterApiModel" />
         </PagerContent>
     </MudDataGrid>
 }
@@ -49,7 +49,7 @@ else
 
     private string? _searchString;
     
-    private List<CharacterModel> _data = [];
+    private List<CharacterApiModel> _data = [];
     
     protected override async Task OnInitializedAsync()
     {
@@ -90,7 +90,7 @@ else
         StateHasChanged();
     }
     
-    private Func<CharacterModel, bool> QuickFilter => x =>
+    private Func<CharacterApiModel, bool> QuickFilter => x =>
     {
         if (_searchString == null) return true;
         
@@ -117,7 +117,7 @@ else
         return false;
     };
     
-    void RowClicked(DataGridRowClickEventArgs<CharacterModel> args)
+    void RowClicked(DataGridRowClickEventArgs<CharacterApiModel> args)
     {
         Navigation.NavigateTo(CharacterView.GetRedirectUrl(args.Item.Id.ToString()));
     }

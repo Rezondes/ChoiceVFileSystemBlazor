@@ -96,7 +96,7 @@ else
         <MudItem xs="6">
             <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-8">
                 <MudDataGrid
-                    T="InventoryItemModel" MultiSelection="true"
+                    T="InventoryItemApiModel" MultiSelection="true"
                     Items="@_inventory.Items" SortMode="SortMode.Multiple" Filterable="true"
                     QuickFilter="@QuickFilter"
                     Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="65vh" Class="mud-width-full">
@@ -116,7 +116,7 @@ else
                         <PropertyColumn Property="x => x.Quantity" Title="Quantity"/>
                     </Columns>
                     <PagerContent>
-                        <MudDataGridPager T="InventoryItemModel"/>
+                        <MudDataGridPager T="InventoryItemApiModel"/>
                     </PagerContent>
                 </MudDataGrid>
             </MudPaper>
@@ -133,9 +133,9 @@ else
     [Parameter] public string Id { get; set; }
     private int _id;
     
-    private CharacterModel? _model;
+    private CharacterApiModel? _model;
     
-    private InventoryModel? _inventory;
+    private InventoryApiModel? _inventory;
     private string? _searchString;
     
     protected override async Task OnInitializedAsync()
@@ -215,7 +215,7 @@ else
         _inventory = response.Content;
     }
     
-    private Func<InventoryItemModel, bool> QuickFilter => x =>
+    private Func<InventoryItemApiModel, bool> QuickFilter => x =>
     {
         if (_searchString == null) return true;
         

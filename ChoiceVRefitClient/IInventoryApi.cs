@@ -8,6 +8,6 @@ namespace ChoiceVRefitClient;
 public interface IInventoryApi
 {
     [Get("/v1/inventory/{characterId}")]
-    Task<ApiResponse<InventoryModel>> GetByCharacterIdAsync(int characterId); 
+    Task<ApiResponse<InventoryApiModel>> GetByCharacterIdAsync(int characterId); 
     
 }

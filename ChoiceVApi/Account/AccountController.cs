@@ -59,24 +59,24 @@ public static class AccountController
     #region GameserverMethodLinks
 
     // TODO Durch richtige Daten ersetzen
-    private static async Task<List<AccountModel>> GetAllAccountsAsync()
+    private static async Task<List<AccountApiModel>> GetAllAccountsAsync()
     {
-        return TestDataGenerator.GenerateList<AccountModel>(100); 
+        return TestDataGenerator.GenerateList<AccountApiModel>(100); 
     }
 
     // TODO Durch richtige Daten ersetzen
-    private static async Task<AccountModel> GetByIdAsync(int accountId)
+    private static async Task<AccountApiModel> GetByIdAsync(int accountId)
     {
-        var account = TestDataGenerator.GenerateSingle<AccountModel>();
+        var account = TestDataGenerator.GenerateSingle<AccountApiModel>();
         account.Id = accountId;
         
         return account;
     }
     
     // TODO Durch richtige Daten ersetzen
-    private static async Task<AccountModel> GetByDiscordIdAsync(string discordId)
+    private static async Task<AccountApiModel> GetByDiscordIdAsync(string discordId)
     {
-        var account = TestDataGenerator.GenerateSingle<AccountModel>();
+        var account = TestDataGenerator.GenerateSingle<AccountApiModel>();
         account.DiscordId = discordId;
         
         return account;

@@ -53,12 +53,12 @@ public class InventoryController
     #region GameserverMethodLinks
     
     // TODO Durch richtige Daten ersetzen
-    private static async Task<InventoryModel> GetByCharacterId(int characterId)
+    private static async Task<InventoryApiModel> GetByCharacterId(int characterId)
     {
-        return new InventoryModel
+        return new InventoryApiModel
         {
             CharacterId = characterId,
-            Items = TestDataGenerator.GenerateList<InventoryItemModel>(25) 
+            Items = TestDataGenerator.GenerateList<InventoryItemApiModel>(25) 
         };
     }
     
