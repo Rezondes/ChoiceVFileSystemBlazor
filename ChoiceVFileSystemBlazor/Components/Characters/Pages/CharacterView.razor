@@ -193,26 +193,40 @@ else
 
     private async Task LoadCharacterAsync()
     {
-        var response = await CharacterApi.GetByCharacterIdAsync(_id);
-        if (!response.IsSuccessStatusCode || response.Content is null)
+        try
         {
-            Navigation.NavigateToError();
-            return; 
-        }
+            var response = await CharacterApi.GetByCharacterIdAsync(_id);
+            if (!response.IsSuccessStatusCode || response.Content is null)
+            {
+                Navigation.NavigateToError();
+                return; 
+            }
 
-        _model = response.Content;
+            _model = response.Content;
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
     }
 
     private async Task LoadInventoryAsync()
     {
-        var response = await InventoryApi.GetByCharacterIdAsync(_id);
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            Navigation.NavigateToError();
-            return; 
-        }
+            var response = await InventoryApi.GetByCharacterIdAsync(_id);
+            if (!response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateToError();
+                return; 
+            }
 
-        _inventory = response.Content;
+            _inventory = response.Content;
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
     }
     
     private Func<InventoryItemApiModel, bool> QuickFilter => x =>

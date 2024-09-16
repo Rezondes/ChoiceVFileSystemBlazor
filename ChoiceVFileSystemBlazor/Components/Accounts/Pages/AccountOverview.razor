@@ -75,14 +75,21 @@ else
         _loading = true;
         StateHasChanged();
         
-        var response = await AccountApi.GetAllAsync();
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            Navigation.NavigateToError();
-            return; 
-        }
+            var response = await AccountApi.GetAllAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateToError();
+                return; 
+            }
 
-        _accounts = response.Content;
+            _accounts = response.Content;
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
         
         _loading = false;
         StateHasChanged();

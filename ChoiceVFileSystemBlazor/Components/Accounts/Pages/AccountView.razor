@@ -131,26 +131,40 @@ else
 
     private async Task LoadCharacterAsync()
     {
-        var response = await AccountApi.GetByIdAsync(_id);
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            Navigation.NavigateToError();
-            return; 
-        }
+            var response = await AccountApi.GetByIdAsync(_id);
+            if (!response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateToError();
+                return; 
+            }
 
-        _model = response.Content;
+            _model = response.Content;
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
     }
 
     private async Task LoadCharactersAsync()
     {
-        var response = await CharacterApi.GetByAccountIdAsync(_id);
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            Navigation.NavigateToError();
-            return; 
-        }
+            var response = await CharacterApi.GetByAccountIdAsync(_id);
+            if (!response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateToError();
+                return; 
+            }
 
-        _characters = response.Content;
+            _characters = response.Content;
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
     }
     
     private Func<CharacterApiModel, bool> QuickFilter => x =>

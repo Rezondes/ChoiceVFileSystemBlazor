@@ -76,15 +76,22 @@ else
     {
         _loading = true;
         StateHasChanged();
-        
-        var response = await CharacterApi.GetAllAsync();
-        if (!response.IsSuccessStatusCode)
-        {
-            Navigation.NavigateToError();
-            return; 
-        }
 
-        _data = response.Content;
+        try
+        {
+            var response = await CharacterApi.GetAllAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                Navigation.NavigateToError();
+                return; 
+            }
+
+            _data = response.Content;
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
         
         _loading = false;
         StateHasChanged();

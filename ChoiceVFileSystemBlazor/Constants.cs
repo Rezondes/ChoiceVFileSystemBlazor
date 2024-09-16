@@ -8,4 +8,7 @@ public static class Constants
     public const string CLOUD_URL = "https://cloud.choicev.net/apps/dashboard/";
 
     public const string DATAGRID_SEARCHBAR_PLACEHOLDER = "Suche nach Spalteninhalt...";
+    
+    public const string API_ERROR_NOT_AVAILABLE = "Die Api ist derzeit nicht verfügbar.";
+    
 }
