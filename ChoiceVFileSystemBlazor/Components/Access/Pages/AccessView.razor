@@ -156,6 +156,7 @@
         
         var timeZoneIds = TZConvert.KnownIanaTimeZoneNames
             .Where(x => DateTime.UtcNow.TryConvertTimeFromUtcWithTimeZone(x) is not null)
+            .OrderBy(x => x)
             .Select(x => new InputOptionModel(x, x))
             .ToList();
         
