@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using ChoiceVFileSystemBlazor.Database._Shared;
 using ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
+using ChoiceVFileSystemBlazor.Extensions;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
@@ -38,10 +39,9 @@ public class SupportfileDbModel
     [Required]
     [MaxLength(150, ErrorMessage = "Description must be at most 150 characters long.")]
     public string Description { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
-    [NotMapped]
-    public DateTime CreatedAtLocal => CreatedAt.ToLocalTime();
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAtLocal(string timeZoneId = "Europe/Berlin") => CreatedAt.ConvertTimeFromUtcWithTimeZone(timeZoneId);
     
     public Ulid CreatedByAccessId { get; set; }
     [Required]

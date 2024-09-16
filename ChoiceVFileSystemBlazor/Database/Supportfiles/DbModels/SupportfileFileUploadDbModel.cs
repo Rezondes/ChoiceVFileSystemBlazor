@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using ChoiceVFileSystemBlazor.Extensions;
 
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 
@@ -19,13 +20,11 @@ public class SupportfileFileUploadDbModel
     public string FileName { get; set; }
     public string ContentType { get; set; }
     public byte[] Data { get; set; }
-    public DateTime UploadDate { get; set; } = DateTime.UtcNow;
     
-    [NotMapped]
-    public DateTime UploadDateLocal => UploadDate.ToLocalTime();
+    public DateTime UploadDate { get; set; } = DateTime.UtcNow;
+    public DateTime UploadDateLocal(string timeZoneId = "Europe/Berlin") => UploadDate.ConvertTimeFromUtcWithTimeZone(timeZoneId);
 
     public int Size => Data.Length;
-
     public string SizeText
     {
         get

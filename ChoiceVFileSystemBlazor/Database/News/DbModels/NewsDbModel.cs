@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
+using ChoiceVFileSystemBlazor.Extensions;
 
 namespace ChoiceVFileSystemBlazor.Database.News.DbModels;
 
@@ -32,9 +33,8 @@ public class NewsDbModel
     public Ulid CreatorId { get; set; } 
     
     public DateTime Created { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedLocal(string timeZoneId = "Europe/Berlin") => Created.ConvertTimeFromUtcWithTimeZone(timeZoneId);
     
-    [NotMapped]
-    public DateTime CreatedLocal => Created.ToLocalTime();
 
     // Navigation Properties
     public AccessDbModel Creator { get; set; }

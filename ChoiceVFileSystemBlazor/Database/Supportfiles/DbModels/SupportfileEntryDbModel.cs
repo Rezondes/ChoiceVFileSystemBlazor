@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
+using ChoiceVFileSystemBlazor.Extensions;
 
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 
@@ -18,14 +19,13 @@ public class SupportfileEntryDbModel
     public Ulid SupportfileId { get; set; }
     public string Content { get; set; }
     public Ulid CreatedByAccessId { get; set; }
+    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAtLocal(string timeZoneId = "Europe/Berlin") => CreatedAt.ConvertTimeFromUtcWithTimeZone(timeZoneId);
     
-    [NotMapped]
-    public DateTime CreatedAtLocal => CreatedAt.ToLocalTime();
     public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
+    public DateTime ModifiedAtLocal(string timeZoneId = "Europe/Berlin") => ModifiedAt.ConvertTimeFromUtcWithTimeZone(timeZoneId);
     
-    [NotMapped]
-    public DateTime ModifiedAtLocal => ModifiedAt.ToLocalTime();
     public bool Deleted { get; set; } = false;
     
     // Navigation Properties

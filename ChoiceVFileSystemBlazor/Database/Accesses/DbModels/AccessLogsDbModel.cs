@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using ChoiceVFileSystemBlazor.Database.Accesses.Enums;
+﻿using ChoiceVFileSystemBlazor.Database.Accesses.Enums;
+using ChoiceVFileSystemBlazor.Extensions;
 
 namespace ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
 
@@ -20,10 +20,9 @@ public class AccessLogsDbModel
     public AccessLogTypeEnum Type { get; set; }
     public Ulid AccessId { get; set; }
     public string Content { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
-    [NotMapped]
-    public DateTime CreatedAtLocal => CreatedAt.ToLocalTime();
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAtLocal(string timeZoneId = "Europe/Berlin") => CreatedAt.ConvertTimeFromUtcWithTimeZone(timeZoneId);
     
     // Navigation Properties
     public AccessDbModel TargetAccessModel { get; set; }

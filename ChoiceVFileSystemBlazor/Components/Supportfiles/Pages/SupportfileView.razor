@@ -1,4 +1,5 @@
 ﻿@page "/supportfiles/view/{id}"
+@using System.Globalization
 
 @code {
     public const string Url = "/supportfiles/view/";
@@ -113,7 +114,7 @@ else if (_model is not null)
                             <MudCard>
                                 <MudCardHeader>
                                     <CardHeaderContent>
-                                        <MudText Typo="Typo.h5">@entry.CreatorAccessModel.Name am @entry.CreatedAtLocal</MudText>
+                                        <MudText Typo="Typo.h5">@entry.CreatorAccessModel.Name am @entry.CreatedAtLocal()</MudText>
                                     </CardHeaderContent>
                                 </MudCardHeader>
                                 <MudCardContent>
@@ -131,7 +132,7 @@ else if (_model is not null)
                                             <RowTemplate>
                                                 <MudTd>@context.FileName</MudTd>
                                                 <MudTd>@context.SizeText</MudTd>
-                                                <MudTd>@context.UploadDateLocal.ToString("g")</MudTd>
+                                                <MudTd>@context.UploadDateLocal()</MudTd>
                                                 <MudTd>
                                                     <MudButtonGroup Color="Color.Primary" Variant="Variant.Text">
                                                         @if (UserAccessService.HasRight(RightEnum.SupportfilePreviewFileForEntry))
@@ -224,12 +225,16 @@ else if (_model is not null)
                             IconSize="Size.Medium" Class="mt-0"/>
                     </ToolBarContent>
                     <Columns>
-                        <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
-                        <PropertyColumn Property="x => x.Content" Title="Information" />
-                        <PropertyColumn Property="x => x.AccessModel.Name" Title="Ersteller" />
-                        <PropertyColumn Property="x => x.AccessId" Title="ErstellerId" />
-                        <PropertyColumn Property="x => x.Type" Title="Type" />
-                        <PropertyColumn Property="x => x.CreatedAtLocal" Title="Datum" />
+                        <PropertyColumn Hideable="false" Property="x => x.Id" Title="#" Filterable="false" />
+                        <PropertyColumn Hideable="false" Property="x => x.Content" Title="Information" />
+                        <PropertyColumn Hideable="false" Property="x => x.AccessModel.Name" Title="Ersteller" />
+                        <PropertyColumn Hideable="false" Property="x => x.AccessId" Title="ErstellerId" />
+                        <PropertyColumn Hideable="false" Property="x => x.Type" Title="Type" />
+                        <TemplateColumn Hideable="false" Sortable="true" Filterable="true" Title="Datum">
+                            <CellTemplate>
+                                @context.Item.CreatedAtLocal()
+                            </CellTemplate>
+                        </TemplateColumn>
                     </Columns>
                     <PagerContent>
                         <MudDataGridPager T="SupportfileLogsDbModel" />
@@ -678,7 +683,7 @@ else
         if (x.Type.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
-        if (x.CreatedAtLocal.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.CreatedAtLocal().ToString(CultureInfo.InvariantCulture).ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
         if ($"{x.Id}".ToLower().Contains(lowerSearchString))
