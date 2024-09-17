@@ -80,20 +80,28 @@ else
         try
         {
             var response = await CharacterApi.GetAllAsync();
-            if (!response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
-                Navigation.NavigateToError();
-                return; 
+                _data = response.Content;
             }
-
-            _data = response.Content;
+            else
+            {
+                Snackbar.Add(response.Error.Message, Severity.Error);
+            }
         }
         catch (HttpRequestException ex)
         {
             Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
         }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
         
-        _loading = false;
         StateHasChanged();
     }
     

@@ -134,17 +134,22 @@ else
         try
         {
             var response = await AccountApi.GetByIdAsync(_id);
-            if (!response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
-                Navigation.NavigateToError();
-                return; 
+                _model = response.Content;
             }
-
-            _model = response.Content;
+            else
+            {
+                Snackbar.Add(response.Error.Message, Severity.Error);
+            }
         }
         catch (HttpRequestException ex)
         {
             Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
         }
     }
 
@@ -153,17 +158,22 @@ else
         try
         {
             var response = await CharacterApi.GetByAccountIdAsync(_id);
-            if (!response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
-                Navigation.NavigateToError();
-                return; 
+                _characters = response.Content;
             }
-
-            _characters = response.Content;
+            else
+            {
+                Snackbar.Add(response.Error.Message, Severity.Error);
+            }
         }
         catch (HttpRequestException ex)
         {
             Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
         }
     }
     
