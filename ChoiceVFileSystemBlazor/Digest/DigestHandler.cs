@@ -22,29 +22,27 @@ public class DigestHandler : DelegatingHandler
         // Initiale Anfrage senden
         var initialResponse = await base.SendAsync(request, cancellationToken);
 
-        if (initialResponse.StatusCode == HttpStatusCode.Unauthorized)
+        if (initialResponse.StatusCode != HttpStatusCode.Unauthorized) return initialResponse;
+        
+        // Digest-Authentifizierungs-Challenge erhalten
+        var authenticateHeader = initialResponse.Headers.WwwAuthenticate.FirstOrDefault();
+        if (authenticateHeader == null || !authenticateHeader.Scheme.Equals("Digest", StringComparison.OrdinalIgnoreCase))
         {
-            // Digest-Authentifizierungs-Challenge erhalten
-            var authenticateHeader = initialResponse.Headers.WwwAuthenticate.FirstOrDefault();
-            if (authenticateHeader == null || !authenticateHeader.Scheme.Equals("Digest", StringComparison.OrdinalIgnoreCase))
-            {
-                return initialResponse; // Challenge war keine Digest-Authentifizierung
-            }
-
-            var digestHeader = ParseDigestHeader(authenticateHeader.Parameter);
-
-            if (digestHeader != null)
-            {
-                // Digest Authorization Header erstellen
-                var digestAuthHeader = CreateDigestAuthHeader(digestHeader, request.Method.Method, request.RequestUri!);
-                request.Headers.Authorization = new AuthenticationHeaderValue("Digest", digestAuthHeader);
-
-                // Anfrage erneut senden mit Digest Authentication Header
-                return await base.SendAsync(request, cancellationToken);
-            }
+            return initialResponse; // Challenge war keine Digest-Authentifizierung
         }
 
-        return initialResponse;
+        if (authenticateHeader.Parameter == null) return initialResponse;
+        
+        var digestHeader = ParseDigestHeader(authenticateHeader.Parameter);
+
+        if (digestHeader == null) return initialResponse;
+        
+        // Digest Authorization Header erstellen
+        var digestAuthHeader = CreateDigestAuthHeader(digestHeader, request.Method.Method, request.RequestUri!);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Digest", digestAuthHeader);
+
+        // Anfrage erneut senden mit Digest Authentication Header
+        return await base.SendAsync(request, cancellationToken);
     }
 
     private DigestHeaderParameters? ParseDigestHeader(string digestHeader)
@@ -54,29 +52,27 @@ public class DigestHandler : DelegatingHandler
 
     private string CreateDigestAuthHeader(DigestHeaderParameters digestParams, string httpMethod, Uri uri)
     {
-        var ha1 = CalculateMD5Hash($"{_username}:{digestParams.Realm}:{_password}");
-        var ha2 = CalculateMD5Hash($"{httpMethod}:{uri.PathAndQuery}");
-        var response = CalculateMD5Hash($"{ha1}:{digestParams.Nonce}:{ha2}");
+        var ha1 = CalculateMd5Hash($"{_username}:{digestParams.Realm}:{_password}");
+        var ha2 = CalculateMd5Hash($"{httpMethod}:{uri.PathAndQuery}");
+        var response = CalculateMd5Hash($"{ha1}:{digestParams.Nonce}:{ha2}");
 
         var authHeaderValue = new StringBuilder();
-        authHeaderValue.AppendFormat("username=\"{0}\", ", _username);
-        authHeaderValue.AppendFormat("realm=\"{0}\", ", digestParams.Realm);
-        authHeaderValue.AppendFormat("nonce=\"{0}\", ", digestParams.Nonce);
-        authHeaderValue.AppendFormat("uri=\"{0}\", ", uri.PathAndQuery);
-        authHeaderValue.AppendFormat("response=\"{0}\", ", response);
-        authHeaderValue.AppendFormat("opaque=\"{0}\"", digestParams.Opaque);
+        authHeaderValue.Append($"username=\"{_username}\", ");
+        authHeaderValue.Append($"realm=\"{digestParams.Realm}\", ");
+        authHeaderValue.Append($"nonce=\"{digestParams.Nonce}\", ");
+        authHeaderValue.Append($"uri=\"{uri.PathAndQuery}\", ");
+        authHeaderValue.Append($"response=\"{response}\", ");
+        authHeaderValue.Append($"opaque=\"{digestParams.Opaque}\"");
 
         return authHeaderValue.ToString();
     }
 
-    private static string CalculateMD5Hash(string input)
+    private static string CalculateMd5Hash(string input)
     {
-        using (var md5 = MD5.Create())
-        {
-            var inputBytes = Encoding.UTF8.GetBytes(input);
-            var hashBytes = md5.ComputeHash(inputBytes);
-            return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
-        }
+        var inputBytes = Encoding.UTF8.GetBytes(input);
+        var hashBytes = MD5.HashData(inputBytes);
+
+        return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
     }
 }
 public class DigestHeaderParameters
