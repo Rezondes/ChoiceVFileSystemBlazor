@@ -17,6 +17,7 @@ using ChoiceVFileSystemBlazor.Database.Ranks.Proxies;
 using ChoiceVFileSystemBlazor.Database.Ranks.Proxies.Intefaces;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces;
+using ChoiceVFileSystemBlazor.Digest;
 using ChoiceVFileSystemBlazor.Services;
 using ChoiceVRefitClient;
 using Microsoft.AspNetCore.Authentication;
@@ -175,32 +176,26 @@ Assert(string.IsNullOrEmpty(choiceVApiUsername), "ChoiceVApi BasicAuthUsername i
 var choiceVApiPassword = builder.Configuration.GetValue<string>("ChoiceVApi:BasicAuthPassword");
 Assert(string.IsNullOrEmpty(choiceVApiPassword), "ChoiceVApi BasicAuthPassword is missing");
 
-builder.Services.AddRefitClient<IAccountApi>()
-    .ConfigureHttpClient(c =>
+builder.Services.AddHttpClient<IAccountApi>(client =>
     {
-        c.BaseAddress = new Uri(choiceVApiBaseAddress!);
-        c.DefaultRequestHeaders.Authorization = 
-            new AuthenticationHeaderValue("Basic", 
-                Convert.ToBase64String(Encoding.UTF8.GetBytes($"{choiceVApiUsername}:{choiceVApiPassword}")));
-    });
+        client.BaseAddress = new Uri(choiceVApiBaseAddress!);
+    })
+    .ConfigurePrimaryHttpMessageHandler(() => new DigestHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
+    .AddTypedClient(Refit.RestService.For<IAccountApi>);
 
-builder.Services.AddRefitClient<ICharacterApi>()
-    .ConfigureHttpClient(c =>
+builder.Services.AddHttpClient<ICharacterApi>(client =>
     {
-        c.BaseAddress = new Uri(choiceVApiBaseAddress!);
-        c.DefaultRequestHeaders.Authorization = 
-            new AuthenticationHeaderValue("Basic", 
-                Convert.ToBase64String(Encoding.UTF8.GetBytes($"{choiceVApiUsername}:{choiceVApiPassword}")));
-    });
+        client.BaseAddress = new Uri(choiceVApiBaseAddress!);
+    })
+    .ConfigurePrimaryHttpMessageHandler(() => new DigestHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
+    .AddTypedClient(Refit.RestService.For<ICharacterApi>);
 
-builder.Services.AddRefitClient<IInventoryApi>()
-    .ConfigureHttpClient(c =>
+builder.Services.AddHttpClient<IInventoryApi>(client =>
     {
-        c.BaseAddress = new Uri(choiceVApiBaseAddress!);
-        c.DefaultRequestHeaders.Authorization = 
-            new AuthenticationHeaderValue("Basic", 
-                Convert.ToBase64String(Encoding.UTF8.GetBytes($"{choiceVApiUsername}:{choiceVApiPassword}")));
-    });
+        client.BaseAddress = new Uri(choiceVApiBaseAddress!);
+    })
+    .ConfigurePrimaryHttpMessageHandler(() => new DigestHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
+    .AddTypedClient(Refit.RestService.For<IInventoryApi>);
 #endregion
 
 #region Database
