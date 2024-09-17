@@ -7,7 +7,7 @@ namespace ChoiceVRefitClient;
 [Headers("Content-Type: application/json", "accept: application/json")]
 public interface IInventoryApi
 {
-    [Get("/v1/inventory/{characterId}")]
+    [Get("/v1/inventory?characterId={characterId}")]
     Task<ApiResponse<InventoryApiModel>> GetByCharacterIdAsync(int characterId); 
     
 }
