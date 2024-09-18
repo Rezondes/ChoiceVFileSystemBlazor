@@ -54,4 +54,8 @@ public class SupportfileDbModel
     
     // Navigation Properties
     public AccessDbModel CreatorAccessModel { get; set; }
+    
+    public List<SupportfileCharacterEntryDbModel> CharacterEntrys { get; set; }
+    public List<SupportfileEntryDbModel> Entrys { get; set; }
+    public List<SupportfileLogsDbModel> Logs { get; set; }
 }

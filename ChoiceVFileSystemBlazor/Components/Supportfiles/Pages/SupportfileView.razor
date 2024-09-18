@@ -79,6 +79,50 @@ else if (_model is not null)
             </MudGrid>
         </MudTabPanel>
         
+        <MudTabPanel Text="Charakterverweise" Icon="@Icons.Material.Filled.AccountCircle">
+            <MudTextField
+                T="string" @bind-Value="_charSearchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+                Adornment="Adornment.Start" Immediate="true"
+                AdornmentIcon="@Icons.Material.Filled.Search"
+                TextChanged="text => CharSearchTriggered(text)"
+                IconSize="Size.Medium" Class="mt-0"/>
+            
+            <MudPaper Square="true">
+                <MudDropContainer
+                    T="CharEntry"
+                    ItemDisabled="@(item => !_apiAvailable || _charEntrysUpdating)"
+                    Items="_filteredCharEntrys"
+                    ItemsSelector="@((item, dropzone) => item.DropZoneIdentifier == dropzone)"
+                    ItemDropped="CharEntryItemUpdated"
+                    Class="d-flex flex-wrap">
+
+                    <ChildContent>
+                        <MudPaper Class="ma-4" Width="45%" style="height: 70vh; overflow-y: auto;">
+                            <MudList T="string" Class="mud-height-full">
+                                <MudDropZone T="CharEntry" Identifier="available" Class="mud-height-full">
+                                    <MudListSubheader>Verfügbar</MudListSubheader>
+                                </MudDropZone>
+                            </MudList>
+                        </MudPaper>
+                        <MudPaper Class="ma-4" Width="45%" style="height: 70vh; overflow-y: auto;">
+                            <MudList T="string" Class="mud-height-full">
+                                <MudDropZone T="CharEntry" Identifier="added" Class="mud-height-full">
+                                    <MudListSubheader>Hinzugefügt</MudListSubheader>
+                                </MudDropZone>
+                            </MudList>
+                        </MudPaper>
+                    </ChildContent>
+                    <ItemRenderer>
+                        <MudListItem
+                            T="string"
+                            Disabled="@(!_apiAvailable || _charEntrysUpdating)">
+                            @context.SupportfileCharacterEntryDbModel.GetFullDisplayString()
+                        </MudListItem>
+                    </ItemRenderer>
+                </MudDropContainer>
+            </MudPaper>
+        </MudTabPanel>
+        
         @if (UserAccessService.HasRight(RightEnum.ViewSupportfileEntrys))
         {
             <MudTabPanel Text="Einträge" Icon="@Icons.Custom.FileFormats.FileDocument">
@@ -265,7 +309,18 @@ else
     private SupportfileDbModel? _checkModel;
     private List<SupportfileLogsDbModel> _logs = [];
     private List<SupportfileEntryDbModel> _entrys = [];
-    private List<AccessDbModel> _allAccessModels = [];
+    private List<CharEntry> _charEntrys = [];
+    private List<CharEntry> _filteredCharEntrys = [];
+    private bool _apiAvailable = false;
+    private bool _charEntrysUpdating = false;
+    private string? _charSearchString;
+
+    private class CharEntry(SupportfileCharacterEntryDbModel supportfileCharacterEntryDbModel, bool isAdded, string dropZoneIdentifier)
+    {
+        public SupportfileCharacterEntryDbModel SupportfileCharacterEntryDbModel { get; } = supportfileCharacterEntryDbModel;
+        public bool IsAdded { get; set; } = isAdded;
+        public string DropZoneIdentifier { get; set; } = dropZoneIdentifier;
+    }
     
     private static string _dividerStyle = "margin: 10px 0; opacity: 0;";
     private string GetSupportfileTitle() => _model != null ? "Supportakte " + _model.Title : "Loading...";
@@ -276,6 +331,59 @@ else
     private string? _logSearchString;
     
     private FileUploadPreview? _fileUploadPreview;
+
+    private void CharSearchTriggered(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            _filteredCharEntrys = _charEntrys;
+            return;
+        }
+        
+        _filteredCharEntrys = _charEntrys.Where(x => x.SupportfileCharacterEntryDbModel.GetFullDisplayString().Contains(text)).ToList();
+    }
+    
+    private async Task CharEntryItemUpdated(MudItemDropInfo<CharEntry> dropItem)
+    {
+        if (dropItem.Item is null) return;
+        if (dropItem.Item.DropZoneIdentifier == dropItem.DropzoneIdentifier) return;
+        
+        var access = await UserAccessService.GetUserAccess();
+        
+        dropItem.Item.DropZoneIdentifier = dropItem.DropzoneIdentifier;
+        dropItem.Item.IsAdded = !dropItem.Item.IsAdded;
+        
+        _charEntrysUpdating = true;
+        StateHasChanged();
+        
+        if (dropItem.Item.IsAdded)
+        {
+            var isAdded = await SupportfileProxy.AddCharEntryAsync(dropItem.Item.SupportfileCharacterEntryDbModel, access.Id);
+            if (!isAdded)
+            {
+                Snackbar.Add("add failed", Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add("added", Severity.Success);
+            }
+        }
+        else
+        {
+            var isRemoved = await SupportfileProxy.RemoveCharEntryAsync(dropItem.Item.SupportfileCharacterEntryDbModel, access.Id);
+            if (!isRemoved)
+            {
+                Snackbar.Add("remove failed", Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add("removed", Severity.Success);
+            }
+        }
+        
+        _charEntrysUpdating = false;
+        StateHasChanged();
+    }
     
     private async Task UploadFiles(IBrowserFile? file, SupportfileEntryDbModel entryDbModel)
     {
@@ -410,7 +518,7 @@ else
             return;
         }
         
-        var model = await SupportfileProxy.GetAsync(fileId);
+        var model = await SupportfileProxy.GetFullAsync(fileId);
         if (model is null)
         {
             Snackbar.Add("Ein Fehler beim Laden ist aufgetreten.", Severity.Error);
@@ -428,31 +536,67 @@ else
 
         _model = model;
         _checkModel = _model.CreateShallowCopy();
-
-        _allAccessModels = await AccessProxy.GetAllAsync();
-        
-        await LoadEntrys();
-        StateHasChanged();
-    }
-    
-    private async Task LoadEntrys()
-    {
-        if (_model is null) return;
         
         @if (UserAccessService.HasRight(RightEnum.ViewSupportfileEntrys))
         {
-            var entrys = await SupportfileEntryProxy.GetAllEntrysForSupportfileIdAsync(_model.Id);
-            _entrys = _showDeletedEntrys ? entrys : entrys.Where(x => !x.Deleted).ToList();
+            _entrys = _showDeletedEntrys ? 
+                model.Entrys
+                    .OrderByDescending(x => x.Id)
+                    .ToList() : 
+                model.Entrys
+                    .Where(x => !x.Deleted)
+                    .OrderByDescending(x => x.Id)
+                    .ToList();
         }
         
         @if (UserAccessService.HasRight(RightEnum.SupportfileViewLogs))
         {
-            _logs = await SupportfileLogsProxy.GetAllLogsForSupportfileIdAsync(_model.Id);
+            _logs = model.Logs
+                .OrderByDescending(x => x.Id)
+                .ToList();;
         }
+
+        _charEntrys = model.CharacterEntrys.Select(x => new CharEntry(x, true, "added")).ToList();
+        var addedCharIds = model.CharacterEntrys.Select(x => x.CharacterId);
+
+        try
+        {
+            var response = await CharacterApi.GetAllAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var allChars = response.Content;
+
+                foreach (var characterApiModel in allChars.Where(x => !addedCharIds.Contains(x.Id)))
+                {
+                    var charEntry = new SupportfileCharacterEntryDbModel(_model.Id, characterApiModel.Id, characterApiModel.FirstName, characterApiModel.LastName);
+                    
+                    _charEntrys.Add(new CharEntry(charEntry, false, "available"));
+                }
+
+                _apiAvailable = true;
+            }
+            else
+            {
+                Snackbar.Add(response.Error.Message, Severity.Error);
+                _apiAvailable = false;
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+            _apiAvailable = false;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+            _apiAvailable = false;
+        }
+
+        _filteredCharEntrys = _charEntrys;
         
         StateHasChanged();
     }
-
+    
     private async Task OnClickCreate()
     {
         var access = await UserAccessService.GetUserAccess();
@@ -506,7 +650,6 @@ else
         }
 
         await SendUpdateEntryToHub();
-        await LoadEntrys();
     }
 
     private async Task StartHubConnection()
@@ -527,7 +670,7 @@ else
             if (_model is null) return;
             if (id != _model.Id) return;
             
-            await InvokeAsync(LoadEntrys);
+            await InvokeAsync(LoadModel);
             StateHasChanged();
         });
         
@@ -805,6 +948,6 @@ else
     {
         _showDeletedEntrys = !_showDeletedEntrys;
 
-        await LoadEntrys();
+        await LoadModel();
     }
 }

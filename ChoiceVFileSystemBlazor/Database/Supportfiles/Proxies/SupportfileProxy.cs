@@ -25,7 +25,21 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
         
         return await dbContext.SupportfileDbModels
             .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id);
+    }
+    
+    public async Task<SupportfileDbModel?> GetFullAsync(Ulid id)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        return await dbContext.SupportfileDbModels
+            .AsNoTracking()
             .Include(x => x.CreatorAccessModel)
+            .Include(x => x.CharacterEntrys)
+            .Include(x => x.Entrys)
+                .ThenInclude(x => x.CreatorAccessModel)
+            .Include(x => x.Logs)
+                .ThenInclude(x => x.AccessModel)
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
@@ -46,6 +60,46 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
         return changes <= 0 ? null : file;
     }
 
+    public async Task<bool> AddCharEntryAsync(SupportfileCharacterEntryDbModel characterEntry, Ulid accessId)
+    {
+        var fileCheck  = await GetFullAsync(characterEntry.SupportfileId);
+        if (fileCheck is null) return false;
+        
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var charCheck = dbContext.SupportfileCharacterEntryDbModels
+            .FirstOrDefault(x => 
+                x.CharacterId == characterEntry.CharacterId && 
+                x.SupportfileId == characterEntry.SupportfileId);
+        if (charCheck is not null) return false;
+        
+        dbContext.SupportfileCharacterEntryDbModels.Add(characterEntry);
+        // TODO Logs
+        var changes = await dbContext.SaveChangesAsync();
+        
+        return changes > 0;
+    }
+
+    public async Task<bool> RemoveCharEntryAsync(SupportfileCharacterEntryDbModel characterEntry, Ulid accessId)
+    {
+        var fileCheck  = await GetFullAsync(characterEntry.SupportfileId);
+        if (fileCheck is null) return false;
+        
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var charCheck = dbContext.SupportfileCharacterEntryDbModels
+            .FirstOrDefault(x => 
+                x.CharacterId == characterEntry.CharacterId &&
+                x.SupportfileId == characterEntry.SupportfileId);
+        if (charCheck is null) return false;
+        
+        dbContext.SupportfileCharacterEntryDbModels.Remove(charCheck);
+        // TODO Logs
+        var changes = await dbContext.SaveChangesAsync();
+        
+        return changes > 0;
+    }
+    
     public async Task<bool> ToggleDeletedAsync(Ulid id, Ulid accessId)
     {
         var file = await GetAsync(id);

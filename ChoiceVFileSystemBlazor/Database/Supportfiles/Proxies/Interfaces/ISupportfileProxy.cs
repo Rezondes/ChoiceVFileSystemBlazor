@@ -9,7 +9,13 @@ public interface ISupportfileProxy
 
     public Task<SupportfileDbModel?> GetAsync(Ulid id);
     
+    public Task<SupportfileDbModel?> GetFullAsync(Ulid id);
+    
     public Task<SupportfileDbModel?> AddAsync(SupportfileDbModel file);
+
+    public Task<bool> AddCharEntryAsync(SupportfileCharacterEntryDbModel characterEntry, Ulid accessId);
+
+    public Task<bool> RemoveCharEntryAsync(SupportfileCharacterEntryDbModel characterEntry, Ulid accessId);
 
     public Task<bool> ToggleDeletedAsync(Ulid id, Ulid accessId);
 

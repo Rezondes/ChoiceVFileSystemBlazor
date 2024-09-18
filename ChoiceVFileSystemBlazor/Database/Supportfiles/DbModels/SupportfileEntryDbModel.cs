@@ -30,5 +30,6 @@ public class SupportfileEntryDbModel
     
     // Navigation Properties
     public AccessDbModel CreatorAccessModel { get; set; }
+    public SupportfileDbModel SupportfileDbModel { get; set; }
     public List<SupportfileFileUploadDbModel> FileUploads { get; set; } = [];
 }
