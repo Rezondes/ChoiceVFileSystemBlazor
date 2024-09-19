@@ -17,50 +17,87 @@ else if (_characters is null || _model is null)
 }
 else
 {
-    <MudGrid Justify="Justify.Center">
-        <MudItem xs="6">
-            <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-8 mud-height-full">
-                <MudText>Id: @_model.Id</MudText>
-                <MudText>Name: @_model.Name</MudText>
-                <MudText>SocialClubName: @_model.SocialClubName</MudText>
-                <MudText>DiscordId: @_model.DiscordId</MudText>
-                <MudText>LastLogin: @_model.LastLogin</MudText>
-                <MudText>State: @_model.State</MudText>
-                <MudText>StateReason: @_model.StateReason</MudText>
-            </MudPaper>
+    <MudContainer Class="px-8" MaxWidth="MaxWidth.False"  style="height: 100%; overflow-y: auto; padding: 16px 0;">
+        <MudItem Style="height: 75px;">
+            <MudText Typo="Typo.h3">@_model.Name</MudText>
         </MudItem>
+        <MudGrid Justify="Justify.Center">
+            <MudItem xs="5" >
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudPaper>
+                            <div class="d-flex flex-row align-items-center px-5 mud-width-full">
+                                <MudIcon Icon="@Icons.Material.Filled.Info"/>
+                                <MudText Class="px-5" Typo="Typo.h5">Spielerinformationen</MudText>
+                            </div>
+                            <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
+                                <MudText>Spieler-Id: @_model.Id</MudText>
+                                <MudText>SocialClubName: @_model.SocialClubName</MudText>
+                                <MudText>DiscordId: @_model.DiscordId</MudText>
+                                <MudText>LastLogin: @_model.LastLogin</MudText>
+                                <MudText>State: @_model.State</MudText>
+                                <MudText>StateReason: @_model.StateReason</MudText>
+                            </MudContainer>
+                        </MudPaper>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-8">
+                            <MudDataGrid
+                                T="CharacterApiModel" MultiSelection="true"
+                                Items="@_characters" SortMode="SortMode.Multiple" Filterable="true"
+                                QuickFilter="@QuickFilter" RowClick="@RowClicked"
+                                Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="300px" Class="mud-width-full">
+                                <ToolBarContent>
+                                    <MudText Typo="Typo.h6">Charaktere</MudText>
+                                    <MudSpacer />
+                                    <MudTextField
+                                        T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+                                        Adornment="Adornment.Start" Immediate="true"
+                                        AdornmentIcon="@Icons.Material.Filled.Search"
+                                        IconSize="Size.Medium" Class="mt-0"/>
+                                </ToolBarContent>
+                                <Columns>
+                                    <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
+                                    <PropertyColumn Property="x => x.FirstName" Title="Vorname" />
+                                    <PropertyColumn Property="x => x.MiddleName" Title="Mittelnamen" />
+                                    <PropertyColumn Property="x => x.LastName" Title="Nachname" />
+                                    <PropertyColumn Property="x => x.Dimension" Title="Dimension" />
+                                </Columns>
+                                <PagerContent>
+                                    <MudDataGridPager T="CharacterApiModel" />
+                                </PagerContent>
+                            </MudDataGrid>
+                        </MudPaper>
+                    </MudItem>
+                </MudGrid>
+            </MudItem>
 
-        <MudItem xs="6">
-            <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-8">
-                <MudDataGrid
-                    T="CharacterApiModel" MultiSelection="true"
-                    Items="@_characters" SortMode="SortMode.Multiple" Filterable="true"
-                    QuickFilter="@QuickFilter" RowClick="@RowClicked"
-                    Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh" Class="mud-width-full">
-                    <ToolBarContent>
-                        <MudText Typo="Typo.h6">Charaktere</MudText>
-                        <MudSpacer />
-                        <MudTextField
-                            T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
-                            Adornment="Adornment.Start" Immediate="true"
-                            AdornmentIcon="@Icons.Material.Filled.Search"
-                            IconSize="Size.Medium" Class="mt-0"/>
-                    </ToolBarContent>
-                    <Columns>
-                        <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
-                        <PropertyColumn Property="x => x.AccountId" Title="AccountId" />
-                        <PropertyColumn Property="x => x.FirstName" Title="FirstName" />
-                        <PropertyColumn Property="x => x.MiddleName" Title="MiddleName" />
-                        <PropertyColumn Property="x => x.LastName" Title="LastName" />
-                        <PropertyColumn Property="x => x.Dimension" Title="Dimension" />
-                    </Columns>
-                    <PagerContent>
-                        <MudDataGridPager T="CharacterApiModel" />
-                    </PagerContent>
-                </MudDataGrid>
-            </MudPaper>
-        </MudItem>
-    </MudGrid>
+            <MudItem xs="7">
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudPaper Height="140px">
+                            <div class="d-flex flex-row align-items-center px-5 mud-width-full">
+                                <MudIcon Icon="@Icons.Material.Filled.AdsClick"/>
+                                <MudText Class="px-5" Typo="Typo.h5">Support-Funktionen</MudText>
+                            </div>
+                            <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
+                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Timeout/Bann</MudButton>
+                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Kicken</MudButton>
+                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Whitelisting</MudButton>
+                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Unstuck</MudButton>
+                            </div>
+                        </MudPaper>
+
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-8">
+                            <SupportfileOverviewDataGrid @ref="_supportfileOverviewDataGrid" AccountId="_id" Height="400px" Label="Support-Fälle"/>
+                        </MudPaper>
+                    </MudItem>
+                </MudGrid>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
 }
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
@@ -75,6 +112,8 @@ else
     
     private List<CharacterApiModel>? _characters;
     private string? _searchString;
+    
+    private SupportfileOverviewDataGrid _supportfileOverviewDataGrid;
     
     protected override async Task OnInitializedAsync()
     {
@@ -102,6 +141,7 @@ else
         }
 
         await LoadAllAsync();
+        await _supportfileOverviewDataGrid.Load();
     }
     
     private bool ParseId()

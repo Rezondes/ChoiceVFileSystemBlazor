@@ -7,6 +7,8 @@ public interface ISupportfileProxy
 {
     public Task<List<SupportfileDbModel>> GetAllAsync();
 
+    public Task<List<SupportfileDbModel>> GetAllFullAsync();
+    
     public Task<SupportfileDbModel?> GetAsync(Ulid id);
     
     public Task<SupportfileDbModel?> GetFullAsync(Ulid id);

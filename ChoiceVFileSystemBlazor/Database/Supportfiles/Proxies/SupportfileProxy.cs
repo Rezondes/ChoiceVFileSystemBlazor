@@ -17,6 +17,24 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
             .Include(x => x.CreatorAccessModel)
             .ToListAsync();
     }
+    
+    public async Task<List<SupportfileDbModel>> GetAllFullAsync()
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        return await dbContext.SupportfileDbModels
+            .AsNoTracking()
+            .Include(x => x.CreatorAccessModel)
+            .Include(x => x.CharacterEntrys)
+            .Include(x => x.Entrys)
+                .ThenInclude(x => x.FileUploads)
+            .Include(x => x.Entrys)
+                .ThenInclude(x => x.CreatorAccessModel)
+            .Include(x => x.Logs)
+                .ThenInclude(x => x.AccessModel)
+            .AsSplitQuery()
+            .ToListAsync();
+    }
 
     public async Task<SupportfileDbModel?> GetAsync(Ulid id)
     {

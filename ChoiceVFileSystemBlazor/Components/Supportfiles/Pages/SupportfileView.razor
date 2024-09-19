@@ -577,7 +577,7 @@ else
 
                 foreach (var characterApiModel in allChars.Where(x => !addedCharIds.Contains(x.Id)))
                 {
-                    var charEntry = new SupportfileCharacterEntryDbModel(_model.Id, characterApiModel.Id, characterApiModel.FirstName, characterApiModel.LastName);
+                    var charEntry = new SupportfileCharacterEntryDbModel(_model.Id, characterApiModel.AccountId, characterApiModel.Id, characterApiModel.FirstName, characterApiModel.LastName);
                     
                     _charEntrys.Add(new CharEntry(charEntry, false, "available"));
                 }
