@@ -5,18 +5,8 @@ using System.Text;
 
 namespace ChoiceVFileSystemBlazor.Digest;
 
-public class DigestHandler : DelegatingHandler
+public class DigestAuthHandler(HttpMessageHandler innerHandler, string username, string password) : DelegatingHandler(innerHandler)
 {
-    private readonly string _username;
-    private readonly string _password;
-
-    public DigestHandler(HttpMessageHandler innerHandler, string username, string password)
-        : base(innerHandler)
-    {
-        _username = username;
-        _password = password;
-    }
-
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         // Initiale Anfrage senden
@@ -52,12 +42,12 @@ public class DigestHandler : DelegatingHandler
 
     private string CreateDigestAuthHeader(DigestHeaderParameters digestParams, string httpMethod, Uri uri)
     {
-        var ha1 = CalculateMd5Hash($"{_username}:{digestParams.Realm}:{_password}");
+        var ha1 = CalculateMd5Hash($"{username}:{digestParams.Realm}:{password}");
         var ha2 = CalculateMd5Hash($"{httpMethod}:{uri.PathAndQuery}");
         var response = CalculateMd5Hash($"{ha1}:{digestParams.Nonce}:{ha2}");
 
         var authHeaderValue = new StringBuilder();
-        authHeaderValue.Append($"username=\"{_username}\", ");
+        authHeaderValue.Append($"username=\"{username}\", ");
         authHeaderValue.Append($"realm=\"{digestParams.Realm}\", ");
         authHeaderValue.Append($"nonce=\"{digestParams.Nonce}\", ");
         authHeaderValue.Append($"uri=\"{uri.PathAndQuery}\", ");

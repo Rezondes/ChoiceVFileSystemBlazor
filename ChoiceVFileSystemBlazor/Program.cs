@@ -180,21 +180,21 @@ builder.Services.AddHttpClient<IAccountApi>(client =>
     {
         client.BaseAddress = new Uri(choiceVApiBaseAddress!);
     })
-    .ConfigurePrimaryHttpMessageHandler(() => new DigestHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
+    .ConfigurePrimaryHttpMessageHandler(() => new DigestAuthHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
     .AddTypedClient(RestService.For<IAccountApi>);
 
 builder.Services.AddHttpClient<ICharacterApi>(client =>
     {
         client.BaseAddress = new Uri(choiceVApiBaseAddress!);
     })
-    .ConfigurePrimaryHttpMessageHandler(() => new DigestHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
+    .ConfigurePrimaryHttpMessageHandler(() => new DigestAuthHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
     .AddTypedClient(RestService.For<ICharacterApi>);
 
 builder.Services.AddHttpClient<IInventoryApi>(client =>
     {
         client.BaseAddress = new Uri(choiceVApiBaseAddress!);
     })
-    .ConfigurePrimaryHttpMessageHandler(() => new DigestHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
+    .ConfigurePrimaryHttpMessageHandler(() => new DigestAuthHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
     .AddTypedClient(RestService.For<IInventoryApi>);
 #endregion
 
