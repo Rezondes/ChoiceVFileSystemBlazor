@@ -18,4 +18,7 @@ public enum SupportfileLogTypeEnum
     AddFileUpload = 3000,
     DeleteFileUpload = 3001,
     RenameFileUpload = 3002,
+    
+    AddCharEntry = 4000,
+    RemoveCharEntry = 4001,
 }

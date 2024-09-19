@@ -8,12 +8,12 @@ namespace ChoiceVRefitClient;
 [Headers("Content-Type: application/json", "accept: application/json")]
 public interface ICharacterApi
 {
-    [Get("/v1/character/")]
+    [Get("/api/v1/character")]
     Task<ApiResponse<List<CharacterApiModel>>> GetAllAsync(); 
     
-    [Get("/v1/character/{characterId}")]
+    [Get("/api/v1/character?characterId={characterId}")]
     Task<ApiResponse<CharacterApiModel?>> GetByCharacterIdAsync(int characterId); 
     
-    [Get("/v1/character/account/{accountId}")]
+    [Get("/api/v1/character?accountId={accountId}")]
     Task<ApiResponse<List<CharacterApiModel>>> GetByAccountIdAsync(int accountId); 
 }

@@ -267,7 +267,7 @@ public class AccessProxy : IAccessProxy
 
         if (check.Settings.IsDarkMode == isDarkMode) return false;
 
-        var oldIsDarkMode = check.Settings.TimeZone;
+        var oldIsDarkMode = check.Settings.IsDarkMode;
         check.Settings.IsDarkMode = isDarkMode;
         
         dbContext.AccessSettingsDbModels.Update(check.Settings);

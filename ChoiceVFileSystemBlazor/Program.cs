@@ -17,6 +17,7 @@ using ChoiceVFileSystemBlazor.Database.Ranks.Proxies;
 using ChoiceVFileSystemBlazor.Database.Ranks.Proxies.Intefaces;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces;
+using ChoiceVFileSystemBlazor.Digest;
 using ChoiceVFileSystemBlazor.Services;
 using ChoiceVRefitClient;
 using Microsoft.AspNetCore.Authentication;
@@ -175,32 +176,26 @@ Assert(string.IsNullOrEmpty(choiceVApiUsername), "ChoiceVApi BasicAuthUsername i
 var choiceVApiPassword = builder.Configuration.GetValue<string>("ChoiceVApi:BasicAuthPassword");
 Assert(string.IsNullOrEmpty(choiceVApiPassword), "ChoiceVApi BasicAuthPassword is missing");
 
-builder.Services.AddRefitClient<IAccountApi>()
-    .ConfigureHttpClient(c =>
+builder.Services.AddHttpClient<IAccountApi>(client =>
     {
-        c.BaseAddress = new Uri(choiceVApiBaseAddress!);
-        c.DefaultRequestHeaders.Authorization = 
-            new AuthenticationHeaderValue("Basic", 
-                Convert.ToBase64String(Encoding.UTF8.GetBytes($"{choiceVApiUsername}:{choiceVApiPassword}")));
-    });
+        client.BaseAddress = new Uri(choiceVApiBaseAddress!);
+    })
+    .ConfigurePrimaryHttpMessageHandler(() => new DigestAuthHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
+    .AddTypedClient(RestService.For<IAccountApi>);
 
-builder.Services.AddRefitClient<ICharacterApi>()
-    .ConfigureHttpClient(c =>
+builder.Services.AddHttpClient<ICharacterApi>(client =>
     {
-        c.BaseAddress = new Uri(choiceVApiBaseAddress!);
-        c.DefaultRequestHeaders.Authorization = 
-            new AuthenticationHeaderValue("Basic", 
-                Convert.ToBase64String(Encoding.UTF8.GetBytes($"{choiceVApiUsername}:{choiceVApiPassword}")));
-    });
+        client.BaseAddress = new Uri(choiceVApiBaseAddress!);
+    })
+    .ConfigurePrimaryHttpMessageHandler(() => new DigestAuthHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
+    .AddTypedClient(RestService.For<ICharacterApi>);
 
-builder.Services.AddRefitClient<IInventoryApi>()
-    .ConfigureHttpClient(c =>
+builder.Services.AddHttpClient<IInventoryApi>(client =>
     {
-        c.BaseAddress = new Uri(choiceVApiBaseAddress!);
-        c.DefaultRequestHeaders.Authorization = 
-            new AuthenticationHeaderValue("Basic", 
-                Convert.ToBase64String(Encoding.UTF8.GetBytes($"{choiceVApiUsername}:{choiceVApiPassword}")));
-    });
+        client.BaseAddress = new Uri(choiceVApiBaseAddress!);
+    })
+    .ConfigurePrimaryHttpMessageHandler(() => new DigestAuthHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
+    .AddTypedClient(RestService.For<IInventoryApi>);
 #endregion
 
 #region Database
@@ -258,16 +253,17 @@ app.MapRazorComponents<App>()
 app.MapHub<BaseHub>(BaseHub.HubPattern);
 app.MapHub<SupportfileHub>(SupportfileHub.HubPattern);
 
-app.UseStatusCodePages(async context =>
+app.UseStatusCodePages(context =>
 {
     var response = context.HttpContext.Response;
+
+    if (response.StatusCode != 404) return Task.CompletedTask;
     
-    if (response.StatusCode == 404)
-    {
-        var originalUrl = context.HttpContext.Request.Path + context.HttpContext.Request.QueryString;
-        var redirectUrl = $"{NotFound.GetRedirectUrl()}?requestedUrl={Uri.EscapeDataString(originalUrl)}";
-        response.Redirect(redirectUrl);
-    }
+    var originalUrl = context.HttpContext.Request.Path + context.HttpContext.Request.QueryString;
+    var redirectUrl = $"{NotFound.GetRedirectUrl()}?requestedUrl={Uri.EscapeDataString(originalUrl)}";
+    response.Redirect(redirectUrl);
+
+    return Task.CompletedTask;
 });
 
 app.Run();

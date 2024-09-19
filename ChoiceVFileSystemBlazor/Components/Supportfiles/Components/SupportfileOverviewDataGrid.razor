@@ -11,8 +11,8 @@ else
     <MudDataGrid
         T="SupportfileDbModel" MultiSelection="true"
         Items="@_supportfiles" SortMode="SortMode.Multiple" Filterable="true"
-        QuickFilter="@QuickFilter" RowClick="@RowClicked"
-        Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh">
+        QuickFilter="@QuickFilter" RowClick="@RowClicked" Style="width: 100%;" 
+        Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="@(Height is null ? "75vh" : Height)">
         <ToolBarContent>
             <MudText Typo="Typo.h6">@(Label ?? "Supportakten Übersicht")</MudText>
             <MudSpacer />
@@ -64,7 +64,9 @@ else
 @code {  
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     [Parameter] public Ulid? AccessId { get; set; }
+    [Parameter] public int? AccountId { get; set; }
     [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Height { get; set; }
     
     private bool _loading = true;
     private string? _searchString;
@@ -108,11 +110,21 @@ else
         
         _supportfiles = null;
 
-        var response = await SupportfileProxy.GetAllAsync();
+        List<SupportfileDbModel> response;
 
         if (AccessId is not null)
         {
+            response = await SupportfileProxy.GetAllAsync();
             response = response.Where(x => x.CreatedByAccessId == AccessId).ToList();
+        }
+        else if (AccountId is not null)
+        {
+            response = await SupportfileProxy.GetAllFullAsync();
+            response = response.Where(x => x.CharacterEntrys.Any(y => y.AccountId == AccountId)).ToList();
+        }
+        else
+        {
+            response = await SupportfileProxy.GetAllAsync();
         }
         
         var filteredResponse = response.Where(x => x.MinRank <= access.Rank).ToList();

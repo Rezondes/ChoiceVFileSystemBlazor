@@ -28,4 +28,5 @@ public class SupportfileLogsDbModel
         
     // Navigation Properties
     public AccessDbModel AccessModel { get; set; }
+    public SupportfileDbModel SupportfileDbModel { get; set; }
 }
