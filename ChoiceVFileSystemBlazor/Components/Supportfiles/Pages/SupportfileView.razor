@@ -1,5 +1,6 @@
 ﻿@page "/supportfiles/view/{id}"
-@using System.Globalization
+
+@implements IAsyncDisposable
 
 @code {
     public const string Url = "/supportfiles/view/";
@@ -716,7 +717,7 @@ else
         });
         
         await _hubConnection.StartAsync();
-
+        
         if (_model is null) return;
         
         _isLocked = await GetLockCharTabAsync();
@@ -777,7 +778,6 @@ else
         _lockedByUser = Ulid.Empty;
     }
     
-    
     private async Task SendUpdateEntryToHub()
     {
         if (_model is null) return;
@@ -793,7 +793,7 @@ else
         await UnlockCharTab();
         await _hubConnection.DisposeAsync();
     }
-
+    
     private async Task EditEntry(SupportfileEntryDbModel entry)
     {
         var access = await UserAccessService.GetUserAccess();
