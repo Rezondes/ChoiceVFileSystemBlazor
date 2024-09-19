@@ -75,7 +75,13 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
         if (charCheck is not null) return false;
         
         dbContext.SupportfileCharacterEntryDbModels.Add(characterEntry);
-        // TODO Logs
+        await supportfileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+            characterEntry.SupportfileId,
+            SupportfileLogTypeEnum.AddCharEntry,
+            accessId,
+            $"Id: {characterEntry.Id} \n" +
+            $"CharacterId: {characterEntry.CharacterId}"
+        ));
         var changes = await dbContext.SaveChangesAsync();
         
         return changes > 0;
@@ -95,7 +101,13 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
         if (charCheck is null) return false;
         
         dbContext.SupportfileCharacterEntryDbModels.Remove(charCheck);
-        // TODO Logs
+        await supportfileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+            characterEntry.SupportfileId,
+            SupportfileLogTypeEnum.RemoveCharEntry,
+            accessId,
+            $"Id: {characterEntry.Id} \n" +
+            $"CharacterId: {characterEntry.CharacterId}"
+        ));
         var changes = await dbContext.SaveChangesAsync();
         
         return changes > 0;
