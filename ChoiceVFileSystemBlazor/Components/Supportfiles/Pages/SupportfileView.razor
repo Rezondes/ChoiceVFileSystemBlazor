@@ -367,11 +367,11 @@ else
             var isAdded = await SupportfileProxy.AddCharEntryAsync(dropItem.Item.SupportfileCharacterEntryDbModel, access.Id);
             if (!isAdded)
             {
-                Snackbar.Add("add failed", Severity.Error);
+                Snackbar.Add($"{dropItem.Item.SupportfileCharacterEntryDbModel.GetFullDisplayString()} konnte nicht hinzugefügt werden.", Severity.Error);
             }
             else
             {
-                Snackbar.Add("added", Severity.Success);
+                Snackbar.Add($"{dropItem.Item.SupportfileCharacterEntryDbModel.GetFullDisplayString()} zu Supportakte hinzugefügt.", Severity.Success);
                 await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), _model.Id);
             }
         }
@@ -380,11 +380,11 @@ else
             var isRemoved = await SupportfileProxy.RemoveCharEntryAsync(dropItem.Item.SupportfileCharacterEntryDbModel, access.Id);
             if (!isRemoved)
             {
-                Snackbar.Add("remove failed", Severity.Error);
+                Snackbar.Add($"{dropItem.Item.SupportfileCharacterEntryDbModel.GetFullDisplayString()} konnte nicht entfernt werden.", Severity.Error);
             }
             else
             {
-                Snackbar.Add("removed", Severity.Success);
+                Snackbar.Add($"{dropItem.Item.SupportfileCharacterEntryDbModel.GetFullDisplayString()} von Supportakte entfernt.", Severity.Success);
                 await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), _model.Id);
             }
         }
