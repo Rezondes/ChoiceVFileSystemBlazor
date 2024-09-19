@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using ChoiceVFileSystemBlazor.Database._Shared;
+﻿using ChoiceVFileSystemBlazor.Database._Shared;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.Enums;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces;
@@ -33,13 +32,15 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
         return await dbContext.SupportfileDbModels
-            .AsNoTracking()
             .Include(x => x.CreatorAccessModel)
             .Include(x => x.CharacterEntrys)
+            .Include(x => x.Entrys)
+                .ThenInclude(x => x.FileUploads)
             .Include(x => x.Entrys)
                 .ThenInclude(x => x.CreatorAccessModel)
             .Include(x => x.Logs)
                 .ThenInclude(x => x.AccessModel)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
