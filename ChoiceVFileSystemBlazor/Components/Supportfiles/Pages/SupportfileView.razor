@@ -16,7 +16,7 @@
 else if (_model is not null)
 {
     <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6 height-85" Style="height: 100%">
-        <MudTabPanel Text="Allgemein" Icon="@Icons.Material.Filled.Info">
+        <MudTabPanel Text="Allgemein" Icon="@Icons.Material.Filled.Info" OnClick="() => UnlockCharTab()">
             <MudGrid Justify="Justify.FlexStart">
                 <MudItem xs="8">
                     <MudPaper Class="pa-4">
@@ -79,18 +79,19 @@ else if (_model is not null)
             </MudGrid>
         </MudTabPanel>
         
-        <MudTabPanel Text="Charakterverweise" Icon="@Icons.Material.Filled.AccountCircle">
+        <MudTabPanel Text="Charakterverweise" Icon="@Icons.Material.Filled.AccountCircle" OnClick="() => OpenCharTab()">
             <MudTextField
                 T="string" @bind-Value="_charSearchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
                 Adornment="Adornment.Start" Immediate="true"
                 AdornmentIcon="@Icons.Material.Filled.Search"
                 TextChanged="text => CharSearchTriggered(text)"
-                IconSize="Size.Medium" Class="mt-0"/>
+                IconSize="Size.Medium" Class="mt-0"
+                Disabled="_isLocked"/>
             
             <MudPaper Square="true">
                 <MudDropContainer
                     T="CharEntry"
-                    ItemDisabled="@(item => !_apiAvailable || _charEntrysUpdating)"
+                    ItemDisabled="@(item => !_apiAvailable || _charEntrysUpdating || _isLocked)"
                     Items="_filteredCharEntrys"
                     ItemsSelector="@((item, dropzone) => item.DropZoneIdentifier == dropzone)"
                     ItemDropped="CharEntryItemUpdated"
@@ -115,7 +116,7 @@ else if (_model is not null)
                     <ItemRenderer>
                         <MudListItem
                             T="string"
-                            Disabled="@(!_apiAvailable || _charEntrysUpdating)">
+                            Disabled="@(!_apiAvailable || _charEntrysUpdating || _isLocked)">
                             @context.SupportfileCharacterEntryDbModel.GetFullDisplayString()
                         </MudListItem>
                     </ItemRenderer>
@@ -125,7 +126,7 @@ else if (_model is not null)
         
         @if (UserAccessService.HasRight(RightEnum.ViewSupportfileEntrys))
         {
-            <MudTabPanel Text="Einträge" Icon="@Icons.Custom.FileFormats.FileDocument">
+            <MudTabPanel Text="Einträge" Icon="@Icons.Custom.FileFormats.FileDocument" OnClick="() => UnlockCharTab()">
                 @if (UserAccessService.HasRight(RightEnum.SupportfileCreateEntrys))
                 {
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="() => OnClickCreate()">Eintrag hinzufügen</MudButton>
@@ -253,7 +254,7 @@ else if (_model is not null)
         
         @if (UserAccessService.HasRight(RightEnum.SupportfileViewLogs))
         {
-            <MudTabPanel Text="Logs" Icon="@Icons.Material.Filled.ScreenSearchDesktop">
+            <MudTabPanel Text="Logs" Icon="@Icons.Material.Filled.ScreenSearchDesktop" OnClick="() => UnlockCharTab()">
                 <MudDataGrid
                     T="SupportfileLogsDbModel" MultiSelection="true"
                     Items="@_logs" SortMode="SortMode.Multiple" Filterable="true"
@@ -314,7 +315,10 @@ else
     private bool _apiAvailable = false;
     private bool _charEntrysUpdating = false;
     private string? _charSearchString;
-
+    private bool _isLocked;
+    private Ulid _lockedByUser;
+    private bool _isCurrentTabCharEntrys = false;
+    
     private class CharEntry(SupportfileCharacterEntryDbModel supportfileCharacterEntryDbModel, bool isAdded, string dropZoneIdentifier)
     {
         public SupportfileCharacterEntryDbModel SupportfileCharacterEntryDbModel { get; } = supportfileCharacterEntryDbModel;
@@ -347,6 +351,8 @@ else
     {
         if (dropItem.Item is null) return;
         if (dropItem.Item.DropZoneIdentifier == dropItem.DropzoneIdentifier) return;
+        if (_hubConnection is null) return;
+        if (_model is null) return;
         
         var access = await UserAccessService.GetUserAccess();
         
@@ -366,6 +372,7 @@ else
             else
             {
                 Snackbar.Add("added", Severity.Success);
+                await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), _model.Id);
             }
         }
         else
@@ -378,6 +385,7 @@ else
             else
             {
                 Snackbar.Add("removed", Severity.Success);
+                await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), _model.Id);
             }
         }
         
@@ -681,9 +689,94 @@ else
             
             Navigation.NavigateTo(SupportfileOverview.GetRedirectUrl());
         });
+        
+        _hubConnection.On<Ulid, Ulid>("FileLocked", (fileId, userId) =>
+        {
+            if (_model is null) return;
+            if (fileId != _model.Id) return;
+            
+            _isLocked = true;
+            _lockedByUser = userId;
+            InvokeAsync(StateHasChanged);
+        });
 
+        
+        _hubConnection.On<Ulid, Ulid>("FileUnlocked", (fileId, userId) =>
+        {
+            if (_model is null) return;
+            if (fileId != _model.Id) return;
+
+            _isLocked = false;
+            _lockedByUser = Ulid.Empty;
+            InvokeAsync(StateHasChanged);
+
+            if (!_isCurrentTabCharEntrys) return;
+
+            InvokeAsync(LockCharTabAsync);
+        });
+        
         await _hubConnection.StartAsync();
+
+        if (_model is null) return;
+        
+        _isLocked = await GetLockCharTabAsync();
+        if (_isLocked)
+        {
+            _lockedByUser = await _hubConnection.InvokeAsync<Ulid>("GetLockedByUser", _model.Id);
+        }
     }
+
+    private async Task OpenCharTab()
+    {
+        _isCurrentTabCharEntrys = true;
+        if (_model is null) return;
+        if (_hubConnection is null) return;
+
+        _isLocked = await GetLockCharTabAsync();
+        if (_isLocked)
+        {
+            _lockedByUser = await _hubConnection.InvokeAsync<Ulid>("GetLockedByUser", _model.Id);
+            return;
+        }
+
+        await LockCharTabAsync();
+    }
+
+    private async Task<bool> GetLockCharTabAsync()
+    {
+        if (_model is null) return false;
+        if (_hubConnection is null) return false;
+        
+        return await _hubConnection.InvokeAsync<bool>("IsFileLocked", _model.Id);
+    }
+    
+    private async Task LockCharTabAsync()
+    {
+        if (_model is null) return;
+        if (_hubConnection is null) return;
+        
+        var access = await UserAccessService.GetUserAccess();
+        
+        await _hubConnection.InvokeAsync("LockFile", _model.Id, access.Id);
+        _lockedByUser = access.Id;
+    }
+
+    private async Task UnlockCharTab()
+    {
+        _isCurrentTabCharEntrys = false;
+        if (_isLocked) return;
+        
+        if (_model is null) return;
+        if (_hubConnection is null) return;
+        
+        var access = await UserAccessService.GetUserAccess();
+
+        if (_lockedByUser != access.Id) return;
+        
+        await _hubConnection.InvokeAsync("UnlockFile", _model.Id, access.Id);
+        _lockedByUser = Ulid.Empty;
+    }
+    
     
     private async Task SendUpdateEntryToHub()
     {
@@ -696,7 +789,8 @@ else
     public async ValueTask DisposeAsync()
     {
         if (_hubConnection is null) return;
-        
+ 
+        await UnlockCharTab();
         await _hubConnection.DisposeAsync();
     }
 
