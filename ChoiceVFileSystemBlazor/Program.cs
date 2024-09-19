@@ -181,21 +181,21 @@ builder.Services.AddHttpClient<IAccountApi>(client =>
         client.BaseAddress = new Uri(choiceVApiBaseAddress!);
     })
     .ConfigurePrimaryHttpMessageHandler(() => new DigestHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
-    .AddTypedClient(Refit.RestService.For<IAccountApi>);
+    .AddTypedClient(RestService.For<IAccountApi>);
 
 builder.Services.AddHttpClient<ICharacterApi>(client =>
     {
         client.BaseAddress = new Uri(choiceVApiBaseAddress!);
     })
     .ConfigurePrimaryHttpMessageHandler(() => new DigestHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
-    .AddTypedClient(Refit.RestService.For<ICharacterApi>);
+    .AddTypedClient(RestService.For<ICharacterApi>);
 
 builder.Services.AddHttpClient<IInventoryApi>(client =>
     {
         client.BaseAddress = new Uri(choiceVApiBaseAddress!);
     })
     .ConfigurePrimaryHttpMessageHandler(() => new DigestHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
-    .AddTypedClient(Refit.RestService.For<IInventoryApi>);
+    .AddTypedClient(RestService.For<IInventoryApi>);
 #endregion
 
 #region Database
@@ -253,16 +253,17 @@ app.MapRazorComponents<App>()
 app.MapHub<BaseHub>(BaseHub.HubPattern);
 app.MapHub<SupportfileHub>(SupportfileHub.HubPattern);
 
-app.UseStatusCodePages(async context =>
+app.UseStatusCodePages(context =>
 {
     var response = context.HttpContext.Response;
+
+    if (response.StatusCode != 404) return Task.CompletedTask;
     
-    if (response.StatusCode == 404)
-    {
-        var originalUrl = context.HttpContext.Request.Path + context.HttpContext.Request.QueryString;
-        var redirectUrl = $"{NotFound.GetRedirectUrl()}?requestedUrl={Uri.EscapeDataString(originalUrl)}";
-        response.Redirect(redirectUrl);
-    }
+    var originalUrl = context.HttpContext.Request.Path + context.HttpContext.Request.QueryString;
+    var redirectUrl = $"{NotFound.GetRedirectUrl()}?requestedUrl={Uri.EscapeDataString(originalUrl)}";
+    response.Redirect(redirectUrl);
+
+    return Task.CompletedTask;
 });
 
 app.Run();
