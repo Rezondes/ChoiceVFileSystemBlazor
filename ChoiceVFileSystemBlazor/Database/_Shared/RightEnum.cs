@@ -43,7 +43,10 @@ public enum RightEnum
     ViewAccountsArea = 3100,
     ViewAccounts = 3101,
     ViewCharactersArea = 3200,
+    ViewCharacters = 3201,
     ViewSupportKeyLogsArea = 3300,
+    ViewCompaniesArea = 3400,
+    ViewCompanies = 3401,
     
     ViewAdminPanelArea = 9000,
     ViewAdminAccessControl = 9100,

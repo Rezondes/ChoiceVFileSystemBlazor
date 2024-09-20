@@ -177,6 +177,7 @@ Assert(string.IsNullOrEmpty(choiceVApiPassword), "ChoiceVApi BasicAuthPassword i
 
 builder.Services.ConfigureHttpClient<IAccountApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
 builder.Services.ConfigureHttpClient<ICharacterApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
+builder.Services.ConfigureHttpClient<ICompanyApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
 builder.Services.ConfigureHttpClient<IInventoryApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
 builder.Services.ConfigureHttpClient<IServerApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
 #endregion
