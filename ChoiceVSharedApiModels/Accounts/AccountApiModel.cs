@@ -12,7 +12,7 @@ public class AccountApiModel
         string socialClubName,
         string discordId, 
         DateTime? lastLogin, 
-        int state, 
+        AccountStateEnum state, 
         string? stateReason)
     {
         Id = id;
@@ -40,7 +40,7 @@ public class AccountApiModel
     public DateTime? LastLogin { get; set; }
     
     [JsonPropertyName("state")]
-    public int State { get; set; } // TODO Enum?
+    public AccountStateEnum State { get; set; }
     
     [JsonPropertyName("stateReason")]
     public string? StateReason { get; set; }
