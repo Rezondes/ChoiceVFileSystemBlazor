@@ -1,0 +1,218 @@
+@page "/admin/testapi"
+
+<h3>API Performance Test</h3>
+
+<MudTextField @bind-Value="testDurationMinutes" Label="Test Duration (Minutes)" Variant="Variant.Filled"></MudTextField>
+
+<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="StartStopTest">@buttonText</MudButton>
+
+<div>
+    <p>Total Requests Handled: @totalRequests</p>
+    <p>Average Request Duration: @averageDuration ms</p>
+    <p>Total Time Elapsed: @totalTimeElapsed seconds</p>
+</div>
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+    
+    private bool isTesting = false;
+    private int totalRequests = 0;
+    private double averageDuration = 0;
+    private double totalTimeElapsed = 0;
+    private Stopwatch stopwatch = new Stopwatch();
+    private string buttonText = "Start Test";
+
+    private CancellationTokenSource cancellationTokenSource;
+    private int testDurationMinutes = 1; // Default test duration in minutes
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        var access = await UserAccessService.GetUserAccess();
+
+        _isAuthorized = access.Rank == RankEnum.Admin;
+        _shouldRedirect = !_isAuthorized;
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        if (!_shouldRedirect) return;
+        
+        Navigation.NavigateToNotAuthorized();
+    }
+    
+    private async Task StartStopTest()
+    {
+        if (isTesting)
+        {
+            // Stop the test
+            isTesting = false;
+            buttonText = "Start Test";
+            cancellationTokenSource.Cancel();
+        }
+        else
+        {
+            // Start the test
+            isTesting = true;
+            buttonText = "Stop Test";
+            cancellationTokenSource = new CancellationTokenSource();
+            totalRequests = 0;
+            averageDuration = 0;
+            totalTimeElapsed = 0;
+            stopwatch.Restart();
+
+            // Run the test in the background
+            await Task.Run(() => RunTestAsync(cancellationTokenSource.Token));
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task RunTestAsync(CancellationToken cancellationToken)
+    {
+        // Testlaufzeit in Millisekunden
+        var testDurationMs = testDurationMinutes * 60 * 1000;
+
+        var tasks = new List<Task>();
+
+        tasks.Add(Task.Run(() => TestAccountApiAsync(testDurationMs, cancellationToken)));
+        tasks.Add(Task.Run(() => TestCharacterApiAsync(testDurationMs, cancellationToken)));
+        tasks.Add(Task.Run(() => TestInventoryApiAsync(testDurationMs, cancellationToken)));
+
+        try
+        {
+            await Task.WhenAll(tasks);
+        }
+        catch (OperationCanceledException)
+        {
+            // Handle cancellation
+        }
+        finally
+        {
+            stopwatch.Stop();
+            totalTimeElapsed = stopwatch.Elapsed.TotalSeconds;
+            isTesting = false;
+            buttonText = "Start Test";
+        }
+    }
+
+    private async Task TestAccountApiAsync(int testDurationMs, CancellationToken cancellationToken)
+    {
+        long totalDuration = 0; // Summe der Dauer für diese API
+        long requestsDone = 0;
+
+        var localStopwatch = new Stopwatch();
+        localStopwatch.Start();
+
+        while (localStopwatch.ElapsedMilliseconds < testDurationMs)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var requestStopwatch = new Stopwatch();
+            requestStopwatch.Start();
+
+            try
+            {
+                var response = await AccountApi.GetAllAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    totalRequests++;
+                    requestsDone++;
+                    totalDuration += requestStopwatch.ElapsedMilliseconds; // Dauer hinzufügen
+                }
+            }
+            catch
+            {
+                // Handle errors (optional)
+            }
+
+            requestStopwatch.Stop();
+            averageDuration = requestsDone > 0 ? (double)totalDuration / requestsDone : 0; 
+
+            // Update UI in a thread-safe manner
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task TestCharacterApiAsync(int testDurationMs, CancellationToken cancellationToken)
+    {
+        long totalDuration = 0; // Summe der Dauer für diese API
+        long requestsDone = 0;
+
+        var localStopwatch = new Stopwatch();
+        localStopwatch.Start();
+
+        while (localStopwatch.ElapsedMilliseconds < testDurationMs)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var requestStopwatch = new Stopwatch();
+            requestStopwatch.Start();
+
+            try
+            {
+                var response = await CharacterApi.GetAllAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    totalRequests++;
+                    requestsDone++;
+                    totalDuration += requestStopwatch.ElapsedMilliseconds; // Dauer hinzufügen
+                }
+            }
+            catch
+            {
+                // Handle errors (optional)
+            }
+
+            requestStopwatch.Stop();
+            averageDuration = requestsDone > 0 ? (double)totalDuration / requestsDone : 0;
+
+            // Update UI in a thread-safe manner
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task TestInventoryApiAsync(int testDurationMs, CancellationToken cancellationToken)
+    {
+        long totalDuration = 0; // Summe der Dauer für diese API
+        long requestsDone = 0;
+
+        var localStopwatch = new Stopwatch();
+        localStopwatch.Start();
+
+        while (localStopwatch.ElapsedMilliseconds < testDurationMs)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var requestStopwatch = new Stopwatch();
+            requestStopwatch.Start();
+
+            try
+            {
+                // Beispiel mit fiktivem characterId, du solltest hier einen echten Wert verwenden
+                var response = await InventoryApi.GetByCharacterIdAsync(577);
+                if (response.IsSuccessStatusCode)
+                {
+                    totalRequests++;
+                    requestsDone++;
+                    totalDuration += requestStopwatch.ElapsedMilliseconds; // Dauer hinzufügen
+                }
+            }
+            catch
+            {
+                // Handle errors (optional)
+            }
+
+            requestStopwatch.Stop();
+            averageDuration = requestsDone > 0 ? (double)totalDuration / requestsDone : 0;
+
+            // Update UI in a thread-safe manner
+            InvokeAsync(StateHasChanged);
+        }
+    }
+}
