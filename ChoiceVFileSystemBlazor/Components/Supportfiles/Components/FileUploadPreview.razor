@@ -174,7 +174,7 @@ else
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
         if (Model is null) return;
-        if (!Model.Deleted) return;
+        if (Model.Deleted) return;
         if (HubConnection is null) return;
         
         const string title = "Dateinamen bearbeiten";
@@ -241,7 +241,7 @@ else
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
         if (Model is null) return;
-        if (!Model.Deleted) return;
+        if (Model.Deleted) return;
         if (HubConnection is null) return;
         
         Close();
