@@ -1,4 +1,5 @@
 ﻿@page "/characters"
+@using ChoiceVFileSystemBlazor.Components.Characters.Components
 
 @code {
     public const string Url = "/characters";
@@ -7,49 +8,15 @@
 
 <PageTitle>Character Übersicht</PageTitle>
 
-@if (_loading || !_isAuthorized || _shouldRedirect)
-{
-    <PageLoading/>
-}
-else
-{
-    <MudDataGrid 
-        T="CharacterApiModel" MultiSelection="true" 
-        Items="@_data" SortMode="SortMode.Multiple" Filterable="true" 
-        QuickFilter="@QuickFilter" RowClick="@RowClicked"
-        Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh">
-        <ToolBarContent>
-            <MudText Typo="Typo.h6">Character Übersicht</MudText>
-            <MudSpacer />
-            <MudTextField 
-                T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER" 
-                Adornment="Adornment.Start" Immediate="true"
-                AdornmentIcon="@Icons.Material.Filled.Search" 
-                IconSize="Size.Medium" Class="mt-0"/>
-        </ToolBarContent>
-        <Columns>
-            <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
-            <PropertyColumn Property="x => x.AccountId" Title="AccountId" />
-            <PropertyColumn Property="x => x.FirstName" Title="FirstName" />
-            <PropertyColumn Property="x => x.MiddleName" Title="MiddleName" />
-            <PropertyColumn Property="x => x.LastName" Title="LastName" />
-            <PropertyColumn Property="x => x.Dimension" Title="Dimension" />
-        </Columns>
-        <PagerContent>
-            <MudDataGridPager T="CharacterApiModel" />
-        </PagerContent>
-    </MudDataGrid>
-}
+<CharacterOverviewDataGrid @ref="_characterOverviewDataGrid"/>
 
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    
     private bool _isAuthorized;
     private bool _shouldRedirect;
-    private bool _loading = true;
 
-    private string? _searchString;
-    
-    private List<CharacterApiModel> _data = [];
+    private CharacterOverviewDataGrid _characterOverviewDataGrid;
     
     protected override async Task OnInitializedAsync()
     {
@@ -69,71 +36,6 @@ else
             return;
         }
 
-        await Load();
-    }
-
-    private async Task Load()
-    {
-        _loading = true;
-        StateHasChanged();
-
-        try
-        {
-            var response = await CharacterApi.GetAllAsync();
-            if (response.IsSuccessStatusCode)
-            {
-                _data = response.Content;
-            }
-            else
-            {
-                Snackbar.Add(response.Error.Message, Severity.Error);
-            }
-        }
-        catch (HttpRequestException ex)
-        {
-            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-        finally
-        {
-            _loading = false;
-        }
-        
-        StateHasChanged();
-    }
-    
-    private Func<CharacterApiModel, bool> QuickFilter => x =>
-    {
-        if (_searchString == null) return true;
-        
-        var lowerSearchString = _searchString.ToLower();
-
-        if (string.IsNullOrWhiteSpace(lowerSearchString))
-            return true;
-
-        if (x.FirstName != null && x.FirstName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        if (x.LastName != null && x.LastName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        
-        if (x.MiddleName != null && x.MiddleName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        
-        if (x.AccountId != null && x.AccountId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        
-        if ($"{x.Id}".ToLower().Contains(_searchString))
-            return true;
-
-        return false;
-    };
-    
-    void RowClicked(DataGridRowClickEventArgs<CharacterApiModel> args)
-    {
-        Navigation.NavigateTo(CharacterView.GetRedirectUrl(args.Item.Id.ToString()));
+        await _characterOverviewDataGrid.Load();
     }
 }
