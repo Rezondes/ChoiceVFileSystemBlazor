@@ -41,7 +41,7 @@ else
                         </MudPaper>
                     </MudItem>
                     <MudItem xs="12">
-                        <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-8">
+                        <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
                             <MudDataGrid
                                 T="CharacterApiModel" MultiSelection="true"
                                 Items="@_characters" SortMode="SortMode.Multiple" Filterable="true"
@@ -90,7 +90,7 @@ else
 
                     </MudItem>
                     <MudItem xs="12">
-                        <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-8">
+                        <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
                             <SupportfileOverviewDataGrid @ref="_supportfileOverviewDataGrid" AccountId="_id" Height="400px" Label="Support-Fälle"/>
                         </MudPaper>
                     </MudItem>
