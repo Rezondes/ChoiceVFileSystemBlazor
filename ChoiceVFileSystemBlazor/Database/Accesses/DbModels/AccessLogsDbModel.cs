@@ -22,7 +22,7 @@ public class AccessLogsDbModel
     public string Content { get; set; }
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime CreatedAtLocal(string timeZoneId = "Europe/Berlin") => CreatedAt.ConvertTimeFromUtcWithTimeZone(timeZoneId);
+    public string CreatedAtLocal(string timeZoneId = "Europe/Berlin") => CreatedAt.ConvertTimeFromUtcWithTimeZone(timeZoneId);
     
     // Navigation Properties
     public AccessDbModel TargetAccessModel { get; set; }

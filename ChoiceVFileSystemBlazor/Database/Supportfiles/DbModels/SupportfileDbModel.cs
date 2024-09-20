@@ -41,7 +41,7 @@ public class SupportfileDbModel
     public string Description { get; set; }
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime CreatedAtLocal(string timeZoneId = "Europe/Berlin") => CreatedAt.ConvertTimeFromUtcWithTimeZone(timeZoneId);
+    public string CreatedAtLocal(string timeZoneId = "Europe/Berlin") => CreatedAt.ConvertTimeFromUtcWithTimeZone(timeZoneId);
     
     public Ulid CreatedByAccessId { get; set; }
     [Required]

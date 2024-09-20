@@ -22,7 +22,7 @@ public class SupportfileFileUploadDbModel
     public byte[] Data { get; set; }
     
     public DateTime UploadDate { get; set; } = DateTime.UtcNow;
-    public DateTime UploadDateLocal(string timeZoneId = "Europe/Berlin") => UploadDate.ConvertTimeFromUtcWithTimeZone(timeZoneId);
+    public string UploadDateLocal(string timeZoneId = "Europe/Berlin") => UploadDate.ConvertTimeFromUtcWithTimeZone(timeZoneId);
 
     public int Size => Data.Length;
     public string SizeText

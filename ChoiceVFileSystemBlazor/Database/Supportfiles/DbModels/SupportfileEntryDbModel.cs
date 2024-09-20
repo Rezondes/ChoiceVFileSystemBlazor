@@ -21,10 +21,10 @@ public class SupportfileEntryDbModel
     public Ulid CreatedByAccessId { get; set; }
     
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime CreatedAtLocal(string timeZoneId = "Europe/Berlin") => CreatedAt.ConvertTimeFromUtcWithTimeZone(timeZoneId);
+    public string CreatedAtLocal(string timeZoneId = "Europe/Berlin") => CreatedAt.ConvertTimeFromUtcWithTimeZone(timeZoneId);
     
     public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
-    public DateTime ModifiedAtLocal(string timeZoneId = "Europe/Berlin") => ModifiedAt.ConvertTimeFromUtcWithTimeZone(timeZoneId);
+    public string ModifiedAtLocal(string timeZoneId = "Europe/Berlin") => ModifiedAt.ConvertTimeFromUtcWithTimeZone(timeZoneId);
     
     public bool Deleted { get; set; } = false;
     

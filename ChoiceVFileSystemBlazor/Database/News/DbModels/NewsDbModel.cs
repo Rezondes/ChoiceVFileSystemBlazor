@@ -33,7 +33,7 @@ public class NewsDbModel
     public Ulid CreatorId { get; set; } 
     
     public DateTime Created { get; set; } = DateTime.UtcNow;
-    public DateTime CreatedLocal(string timeZoneId = "Europe/Berlin") => Created.ConvertTimeFromUtcWithTimeZone(timeZoneId);
+    public string CreatedLocal(string timeZoneId = "Europe/Berlin") => Created.ConvertTimeFromUtcWithTimeZone(timeZoneId);
     
 
     // Navigation Properties

@@ -937,7 +937,7 @@ else
         if (x.Type.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
-        if (x.CreatedAtLocal(UserAccessService.GetUserAccess().Result.Settings.TimeZone).ToString(CultureInfo.InvariantCulture).ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.CreatedAtLocal(UserAccessService.GetUserAccess().Result.Settings.TimeZone).ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
         if ($"{x.Id}".ToLower().Contains(lowerSearchString))
