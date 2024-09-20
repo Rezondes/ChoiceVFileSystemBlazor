@@ -41,13 +41,13 @@ else
                     <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Tertiary" OnClick="() => DownloadFile(_file)"/>
                 </MudTooltip>
             }
-            @if (UserAccessService.HasRight(RightEnum.SupportfileRenameFileForEntry))
+            @if (!Model.Deleted && UserAccessService.HasRight(RightEnum.SupportfileRenameFileForEntry))
             {
                 <MudTooltip Text="Dateinamen ändern" Duration="Constants.TOOLTIP_DURATION">
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => RenameFile(_file)"/>
                 </MudTooltip>
             }
-            @if (UserAccessService.HasRight(RightEnum.SupportfileDeleteFileForEntry))
+            @if (!Model.Deleted && UserAccessService.HasRight(RightEnum.SupportfileDeleteFileForEntry))
             {
                 <MudTooltip Text="Datei löschen" Duration="Constants.TOOLTIP_DURATION">
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" OnClick="() => DeleteFile(_file)"/>
@@ -174,6 +174,7 @@ else
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
         if (Model is null) return;
+        if (!Model.Deleted) return;
         if (HubConnection is null) return;
         
         const string title = "Dateinamen bearbeiten";
@@ -240,6 +241,7 @@ else
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
         if (Model is null) return;
+        if (!Model.Deleted) return;
         if (HubConnection is null) return;
         
         Close();
