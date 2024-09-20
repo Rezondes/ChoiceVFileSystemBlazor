@@ -11,9 +11,9 @@
 {
     <PageLoading/>
 }
-else if (_characters is null || _model is null)
+else if (_model is null)
 {
-    <PageLoading/>
+    <MudAlert Severity="Severity.Error">Ein Fehler ist aufgetreten!</MudAlert>
 }
 else
 {
@@ -25,7 +25,7 @@ else
             <MudItem xs="5" >
                 <MudGrid>
                     <MudItem xs="12">
-                        <MudPaper>
+                        <MudPaper Height="240px">
                             <div class="d-flex flex-row align-items-center px-5 mud-width-full">
                                 <MudIcon Icon="@Icons.Material.Filled.Info"/>
                                 <MudText Class="px-5" Typo="Typo.h5">Spielerinformationen</MudText>
@@ -42,31 +42,7 @@ else
                     </MudItem>
                     <MudItem xs="12">
                         <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
-                            <MudDataGrid
-                                T="CharacterApiModel" MultiSelection="true"
-                                Items="@_characters" SortMode="SortMode.Multiple" Filterable="true"
-                                QuickFilter="@QuickFilter" RowClick="@RowClicked"
-                                Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="300px" Class="mud-width-full">
-                                <ToolBarContent>
-                                    <MudText Typo="Typo.h6">Charaktere</MudText>
-                                    <MudSpacer />
-                                    <MudTextField
-                                        T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
-                                        Adornment="Adornment.Start" Immediate="true"
-                                        AdornmentIcon="@Icons.Material.Filled.Search"
-                                        IconSize="Size.Medium" Class="mt-0"/>
-                                </ToolBarContent>
-                                <Columns>
-                                    <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
-                                    <PropertyColumn Property="x => x.FirstName" Title="Vorname" />
-                                    <PropertyColumn Property="x => x.MiddleName" Title="Mittelnamen" />
-                                    <PropertyColumn Property="x => x.LastName" Title="Nachname" />
-                                    <PropertyColumn Property="x => x.Dimension" Title="Dimension" />
-                                </Columns>
-                                <PagerContent>
-                                    <MudDataGridPager T="CharacterApiModel" />
-                                </PagerContent>
-                            </MudDataGrid>
+                            <CharacterOverviewDataGrid AccountId="_id" Height="300px" @ref="_characterOverviewDataGrid"/>
                         </MudPaper>
                     </MudItem>
                 </MudGrid>
@@ -110,10 +86,10 @@ else
     
     private AccountApiModel? _model;
     
-    private List<CharacterApiModel>? _characters;
     private string? _searchString;
     
     private SupportfileOverviewDataGrid _supportfileOverviewDataGrid;
+    private CharacterOverviewDataGrid _characterOverviewDataGrid;
     
     protected override async Task OnInitializedAsync()
     {
@@ -162,14 +138,15 @@ else
         _loading = true;
         StateHasChanged();
 
-        await LoadCharacterAsync();
-        await LoadCharactersAsync();
+        await LoadAccountAsync();
         
         _loading = false;
         StateHasChanged();
+        
+        await _characterOverviewDataGrid.Load();
     }
 
-    private async Task LoadCharacterAsync()
+    private async Task LoadAccountAsync()
     {
         try
         {
@@ -177,30 +154,6 @@ else
             if (response.IsSuccessStatusCode)
             {
                 _model = response.Content;
-            }
-            else
-            {
-                Snackbar.Add(response.Error.Message, Severity.Error);
-            }
-        }
-        catch (HttpRequestException ex)
-        {
-            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-    }
-
-    private async Task LoadCharactersAsync()
-    {
-        try
-        {
-            var response = await CharacterApi.GetByAccountIdAsync(_id);
-            if (response.IsSuccessStatusCode)
-            {
-                _characters = response.Content;
             }
             else
             {

@@ -12,10 +12,10 @@ else
     <MudDataGrid
         T="CharacterApiModel" MultiSelection="true"
         Items="@_data" SortMode="SortMode.Multiple" Filterable="true"
-        QuickFilter="@QuickFilter" RowClick="@RowClicked"
+        QuickFilter="@QuickFilter" RowClick="@RowClicked" Style="width: 100%;"
         Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="@(Height is null ? "75vh" : Height)">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">@(Label ?? "Character Übersicht")</MudText>
+            <MudText Typo="Typo.h6">@(Label ?? "Charakter Übersicht")</MudText>
             <MudSpacer />
             <MudTextField
                 T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
