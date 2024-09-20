@@ -743,6 +743,7 @@ else
 
     private async Task OpenCharTab()
     {
+        if (_isCurrentTabCharEntrys) return;
         _isCurrentTabCharEntrys = true;
         if (_model is null) return;
         if (_hubConnection is null) return;

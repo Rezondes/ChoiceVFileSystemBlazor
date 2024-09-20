@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using ChoiceVSharedApiModels.Server
 
 @code {
     public const string Url = "/";
@@ -7,14 +8,91 @@
 
 <PageTitle>Home</PageTitle>
 
+<style>
+    .server-info-item {
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+        margin: 5px;
+        width: 300px;
+    }
+    .server-info-container  {
+        justify-content: space-around;
+    }
+</style>
+
 <MudContainer Class="px-8" MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: auto; padding: 16px 0;">
     <MudGrid>
         <MudItem xs="12" sm="6" md="12">
-            <MudPaper Elevation="2" Class="pa-4" Style="height: 200px;">
-                <MudText Class="d-flex flex-column align-center justify-center mud-width-full" Typo="Typo.h6">
-                    Willkommen auf dem neuen ChoiceV Support Control Panel!
+            <MudText Class="d-flex flex-column align-center justify-center mud-width-full" Typo="Typo.h4">
+                Willkommen auf dem neuen ChoiceV Support Control Panel!
+            </MudText>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="12">
+            <MudPaper Elevation="2" Class="pa-4" Style="height: 250px;">
+                <MudText Class="d-flex flex-column align-center justify-center mud-width-full" Typo="Typo.h5">
+                    Aktuelle Serverinformationen
                 </MudText>
-                <MudText Typo="Typo.body1" Class="ml-3">Bei Fragen wendet euch einfach direkt an mich (@@Rezondes)</MudText>
+
+                @if (_loading)
+                {
+                    <div class="d-flex justify-content-center align-items-center mud-height-full">
+                        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+                    </div>
+                }
+                else if (_data is null)
+                {
+                    <MudAlert Severity="Severity.Error">Ein Fehler ist aufgetreten!</MudAlert>
+                }
+                else
+                {
+                    <div class="d-flex mud-width-full server-info-container">
+                        <MudPaper class="d-flex server-info-item" Elevation="2">
+                            <MudText Typo="Typo.h6">
+                                <MudIcon Icon="@Icons.Material.Filled.AccountBox"/> Accounts
+                            </MudText>
+                            <MudText Typo="Typo.body1">@_data.OverallAccountCount</MudText>
+                        </MudPaper>
+                        <MudPaper class="d-flex server-info-item" Elevation="2">
+                            <MudText Typo="Typo.h6">
+                                <MudIcon Icon="@Icons.Material.Filled.PlaylistAddCheck"/> davon gewhitelisted
+                            </MudText>
+                            <MudText Typo="Typo.body1">@_data.WhitelistedAccountsCount</MudText>
+                        </MudPaper>
+                        <MudPaper class="d-flex server-info-item" Elevation="2">
+                            <MudText Typo="Typo.h6">
+                                <MudIcon Icon="@Icons.Material.Filled.PlaylistRemove"/> davon gebannt
+                            </MudText>
+                            <MudText Typo="Typo.body1">@_data.BannedAccountsCount</MudText>
+                        </MudPaper>
+                    </div>
+                    <div class="d-flex mud-width-full server-info-container">
+                        <MudPaper class="d-flex server-info-item" Elevation="2">
+                            <MudText Typo="Typo.h6">
+                                <MudIcon Icon="@Icons.Material.Filled.AccountCircle"/> Spieler online
+                            </MudText>
+                            <MudText Typo="Typo.body1">@_data.PlayerOnlineCount</MudText>
+                        </MudPaper>
+                        <MudPaper class="d-flex server-info-item" Elevation="2">
+                            <MudText Typo="Typo.h6">
+                                <MudIcon Icon="@Icons.Material.Filled.LocalPolice"/> Cops Online
+                            </MudText>
+                            <MudText Typo="Typo.body1">@_data.PoliceInDutyCount</MudText>
+                        </MudPaper>
+                        <MudPaper class="d-flex server-info-item" Elevation="2">
+                            <MudText Typo="Typo.h6">
+                                <MudIcon Icon="@Icons.Material.Filled.MedicalInformation"/> Medics Online
+                            </MudText>
+                            <MudText Typo="Typo.body1">@_data.MedicInDutyCount</MudText>
+                        </MudPaper>
+                        <MudPaper class="d-flex server-info-item" Elevation="2">
+                            <MudText Typo="Typo.h6">
+                                <MudIcon Icon="@Icons.Material.Filled.LocalPolice"/> Sheriffs Online
+                            </MudText>
+                            <MudText Typo="Typo.body1">@_data.SheriffInDutyCount</MudText>
+                        </MudPaper>
+                    </div>
+                }
             </MudPaper>
         </MudItem>
         <NewsComponent/>
@@ -24,9 +102,51 @@
 
 
 @code {
+    private bool _loading;
+    private CurrentServerInfosApiModel? _data;
+    
     protected override async void OnInitialized()
     {
         await base.OnInitializedAsync();
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
 
+        await Load();
+    }
+    
+    private async Task Load()
+    {
+        _loading = true;
+        StateHasChanged();
+        
+        try
+        {
+            var response = await ServerApi.GetCurrentServerInfosAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                _data = response.Content;
+            }
+            else
+            {
+                Snackbar.Add(response.Error.Message, Severity.Error);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+        
+        StateHasChanged();
     }
 }

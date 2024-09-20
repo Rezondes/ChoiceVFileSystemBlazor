@@ -17,7 +17,7 @@ using ChoiceVFileSystemBlazor.Database.Ranks.Proxies;
 using ChoiceVFileSystemBlazor.Database.Ranks.Proxies.Intefaces;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces;
-using ChoiceVFileSystemBlazor.Digest;
+using ChoiceVFileSystemBlazor.Extensions;
 using ChoiceVFileSystemBlazor.Services;
 using ChoiceVRefitClient;
 using Microsoft.AspNetCore.Authentication;
@@ -27,7 +27,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MudBlazor;
 using MudBlazor.Services;
-using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -176,26 +175,10 @@ Assert(string.IsNullOrEmpty(choiceVApiUsername), "ChoiceVApi BasicAuthUsername i
 var choiceVApiPassword = builder.Configuration.GetValue<string>("ChoiceVApi:BasicAuthPassword");
 Assert(string.IsNullOrEmpty(choiceVApiPassword), "ChoiceVApi BasicAuthPassword is missing");
 
-builder.Services.AddHttpClient<IAccountApi>(client =>
-    {
-        client.BaseAddress = new Uri(choiceVApiBaseAddress!);
-    })
-    .ConfigurePrimaryHttpMessageHandler(() => new DigestAuthHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
-    .AddTypedClient(RestService.For<IAccountApi>);
-
-builder.Services.AddHttpClient<ICharacterApi>(client =>
-    {
-        client.BaseAddress = new Uri(choiceVApiBaseAddress!);
-    })
-    .ConfigurePrimaryHttpMessageHandler(() => new DigestAuthHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
-    .AddTypedClient(RestService.For<ICharacterApi>);
-
-builder.Services.AddHttpClient<IInventoryApi>(client =>
-    {
-        client.BaseAddress = new Uri(choiceVApiBaseAddress!);
-    })
-    .ConfigurePrimaryHttpMessageHandler(() => new DigestAuthHandler(new HttpClientHandler(), choiceVApiUsername!, choiceVApiPassword!))
-    .AddTypedClient(RestService.For<IInventoryApi>);
+builder.Services.ConfigureHttpClient<IAccountApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
+builder.Services.ConfigureHttpClient<ICharacterApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
+builder.Services.ConfigureHttpClient<IInventoryApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
+builder.Services.ConfigureHttpClient<IServerApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
 #endregion
 
 #region Database
@@ -230,7 +213,6 @@ if (!builder.Environment.IsDevelopment())
             listenOptions.UseHttps();
         });
     });
-    
 }
 
 var app = builder.Build();
