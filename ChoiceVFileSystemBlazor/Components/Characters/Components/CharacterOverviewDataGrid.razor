@@ -1,4 +1,3 @@
-
 @if (_loading)
 {
     <LoadingComponent/>
@@ -55,17 +54,20 @@ else
 
         try
         {
-            var response = await CharacterApi.GetAllAsync();
+            ApiResponse<List<CharacterApiModel>> response;
+            
+            if (AccountId.HasValue)
+            {
+                response = await CharacterApi.GetByAccountIdAsync(AccountId.Value);
+            }
+            else
+            {
+                response = await CharacterApi.GetAllAsync();
+            }
+            
             if (response.IsSuccessStatusCode)
             {
-                if (AccountId is not null)
-                {
-                    _data = response.Content.Where(x => x.AccountId == AccountId).ToList();
-                }
-                else
-                {
-                    _data = response.Content;
-                }
+                _data = response.Content;
             }
             else
             {
