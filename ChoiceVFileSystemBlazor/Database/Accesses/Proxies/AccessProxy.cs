@@ -139,12 +139,15 @@ public class AccessProxy : IAccessProxy
         accessDbModel.AccountId = accountId;
 
         dbContext.AccessDbModels.Update(accessDbModel);
-        await _accessLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
-            accessDbModel.Id,
-            AccessLogTypeEnum.ModifyAccountId,
-            accessId,
-            $"OldAccountId: {oldAccountId} \nNewAccountId: {accessDbModel.AccountId}"
-        ));
+        if (accessId != Ulid.Empty)
+        {
+            await _accessLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+                accessDbModel.Id,
+                AccessLogTypeEnum.ModifyAccountId,
+                accessId,
+                $"OldAccountId: {oldAccountId} \nNewAccountId: {accessDbModel.AccountId}"
+            ));
+        }
         var changes = await dbContext.SaveChangesAsync();
 
         return changes > 0;

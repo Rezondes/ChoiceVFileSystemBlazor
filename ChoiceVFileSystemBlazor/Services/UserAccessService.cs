@@ -41,6 +41,22 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
             {
                 await accessProxy.AddSettingsAsync(accessDbModel);
             }
+
+            if (accessDbModel.AccountId == -1)
+            {
+                try
+                {
+                    var accountResponse = await accountApi.GetByDiscordIdAsync(discordId);
+                    if (accountResponse.IsSuccessStatusCode)
+                    {
+                        var account = accountResponse.Content;
+                        
+                        accessDbModel.AccountId = account.Id;
+                        await accessProxy.UpdateAccountIdAsync(accessDbModel.Id, account.Id, Ulid.Empty);
+                    }
+                }
+                catch (HttpRequestException) { }
+            }
             
             _userAccess = accessDbModel;
         }
@@ -68,9 +84,7 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
             if (accountResponse.IsSuccessStatusCode)
             {
                 var account = accountResponse.Content;
-                // TODO change back on Api ready
-                // newAccessModel = new AccessDbModel(account.Id, account.DiscordId, account.Name);
-                newAccessModel = new AccessDbModel(-1, discordId, discordName);
+                newAccessModel = new AccessDbModel(account.Id, account.DiscordId, account.Name);
             }
             else
             {
