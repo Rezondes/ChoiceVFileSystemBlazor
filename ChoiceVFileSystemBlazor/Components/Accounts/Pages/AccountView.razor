@@ -23,54 +23,47 @@ else
         </MudItem>
         <MudGrid Justify="Justify.Center">
             <MudItem xs="5" >
-                <MudGrid>
-                    <MudItem xs="12">
-                        <MudPaper Height="240px">
-                            <div class="d-flex flex-row align-items-center px-5 mud-width-full">
-                                <MudIcon Icon="@Icons.Material.Filled.Info"/>
-                                <MudText Class="px-5" Typo="Typo.h5">Spielerinformationen</MudText>
-                            </div>
-                            <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
-                                <MudText>Spieler-Id: @_model.Id</MudText>
-                                <MudText>SocialClubName: @_model.SocialClubName</MudText>
-                                <MudText>DiscordId: @_model.DiscordId</MudText>
-                                <MudText>LastLogin: @_model.LastLogin</MudText>
-                                <MudText>State: @_model.State</MudText>
-                                <MudText>StateReason: @_model.StateReason</MudText>
-                            </MudContainer>
-                        </MudPaper>
-                    </MudItem>
-                    <MudItem xs="12">
-                        <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
-                            <CharacterOverviewDataGrid AccountId="_id" Height="300px" @ref="_characterOverviewDataGrid"/>
-                        </MudPaper>
-                    </MudItem>
-                </MudGrid>
+                <MudPaper Height="240px">
+                    <div class="d-flex flex-row align-items-center px-5 mud-width-full">
+                        <MudIcon Icon="@Icons.Material.Filled.Info"/>
+                        <MudText Class="px-5" Typo="Typo.h5">Spielerinformationen</MudText>
+                    </div>
+                    <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
+                        <MudText>Spieler-Id: @_model.Id</MudText>
+                        <MudText>SocialClubName: @_model.SocialClubName</MudText>
+                        <MudText>DiscordId: @_model.DiscordId</MudText>
+                        <MudText>LastLogin: @_model.LastLogin</MudText>
+                        <MudText>State: @_model.State</MudText>
+                        <MudText>StateReason: @_model.StateReason</MudText>
+                    </MudContainer>
+                </MudPaper>
             </MudItem>
 
             <MudItem xs="7">
-                <MudGrid>
-                    <MudItem xs="12">
-                        <MudPaper Height="140px">
-                            <div class="d-flex flex-row align-items-center px-5 mud-width-full">
-                                <MudIcon Icon="@Icons.Material.Filled.AdsClick"/>
-                                <MudText Class="px-5" Typo="Typo.h5">Support-Funktionen</MudText>
-                            </div>
-                            <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
-                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Timeout/Bann</MudButton>
-                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Kicken</MudButton>
-                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Whitelisting</MudButton>
-                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Unstuck</MudButton>
-                            </div>
-                        </MudPaper>
+                <MudPaper Height="140px">
+                    <div class="d-flex flex-row align-items-center px-5 mud-width-full">
+                        <MudIcon Icon="@Icons.Material.Filled.AdsClick"/>
+                        <MudText Class="px-5" Typo="Typo.h5">Support-Funktionen</MudText>
+                    </div>
+                    <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Timeout/Bann</MudButton>
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Kicken</MudButton>
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Whitelisting</MudButton>
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Unstuck</MudButton>
+                    </div>
+                </MudPaper>
+            </MudItem>
 
-                    </MudItem>
-                    <MudItem xs="12">
-                        <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
-                            <SupportfileOverviewDataGrid @ref="_supportfileOverviewDataGrid" AccountId="_id" Height="400px" Label="Support-Fälle"/>
-                        </MudPaper>
-                    </MudItem>
-                </MudGrid>
+            <MudItem xs="12">
+                <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
+                    <CharacterOverviewDataGrid AccountId="_id" Height="400px" @ref="_characterOverviewDataGrid"/>
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
+                    <SupportfileOverviewDataGrid @ref="_supportfileOverviewDataGrid" AccountId="_id" Height="400px" Label="Support-Fälle"/>
+                </MudPaper>
             </MudItem>
         </MudGrid>
     </MudContainer>
