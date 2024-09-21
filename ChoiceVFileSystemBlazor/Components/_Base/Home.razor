@@ -36,9 +36,7 @@
 
                 @if (_loading)
                 {
-                    <div class="d-flex justify-content-center align-items-center mud-height-full">
-                        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-                    </div>
+                    <LoadingComponent/>
                 }
                 else if (_data is null)
                 {
