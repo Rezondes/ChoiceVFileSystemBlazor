@@ -8,7 +8,6 @@
 }
 
 <PageTitle>@(GetSupportfileTitle())</PageTitle>
-<h1>@(GetSupportfileTitle())</h1>
 
 @if (_loading || _hubConnection is null || !_isAuthorized || !_hasNeededRank || _model is null)
 {
@@ -16,6 +15,7 @@
 }
 else if (_model is not null)
 {
+    <h1>@(GetSupportfileTitle())</h1>
     <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6 height-85" Style="height: 100%">
         <MudTabPanel Text="Allgemein" Icon="@Icons.Material.Filled.Info" OnClick="() => UnlockCharTab()">
             <MudGrid Justify="Justify.FlexStart">
@@ -81,48 +81,55 @@ else if (_model is not null)
         </MudTabPanel>
         
         <MudTabPanel Text="Charakterverweise" Icon="@Icons.Material.Filled.AccountCircle" OnClick="() => OpenCharTab()">
-            <MudTextField
-                T="string" @bind-Value="_charSearchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
-                Adornment="Adornment.Start" Immediate="true"
-                AdornmentIcon="@Icons.Material.Filled.Search"
-                TextChanged="text => CharSearchTriggered(text)"
-                IconSize="Size.Medium" Class="mt-0"
-                Disabled="@(_model.Deleted ? false : _isLocked)"/>
-            
-            <MudPaper Square="true">
-                <MudDropContainer
-                    T="CharEntry"
-                    ItemDisabled="@(item => !_apiAvailable || _charEntrysUpdating || _isLocked || _model.Deleted)"
-                    Items="_filteredCharEntrys"
-                    ItemsSelector="@((item, dropzone) => item.DropZoneIdentifier == dropzone)"
-                    ItemDropped="CharEntryItemUpdated"
-                    Class="d-flex flex-wrap">
+            @if (_charApiLoading)
+            {
+                <LoadingComponent/>
+            }
+            else
+            {
+                <MudTextField
+                    T="string" @bind-Value="_charSearchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+                    Adornment="Adornment.Start" Immediate="true"
+                    AdornmentIcon="@Icons.Material.Filled.Search"
+                    TextChanged="text => CharSearchTriggered(text)"
+                    IconSize="Size.Medium" Class="mt-0"
+                    Disabled="@(_model.Deleted ? false : _isLocked)"/>
 
-                    <ChildContent>
-                        <MudPaper Class="ma-4" Width="45%" style="height: 70vh; overflow-y: auto;">
-                            <MudList T="string" Class="mud-height-full">
-                                <MudDropZone T="CharEntry" Identifier="available" Class="mud-height-full">
-                                    <MudListSubheader>Verfügbar</MudListSubheader>
-                                </MudDropZone>
-                            </MudList>
-                        </MudPaper>
-                        <MudPaper Class="ma-4" Width="45%" style="height: 70vh; overflow-y: auto;">
-                            <MudList T="string" Class="mud-height-full">
-                                <MudDropZone T="CharEntry" Identifier="added" Class="mud-height-full">
-                                    <MudListSubheader>Hinzugefügt</MudListSubheader>
-                                </MudDropZone>
-                            </MudList>
-                        </MudPaper>
-                    </ChildContent>
-                    <ItemRenderer>
-                        <MudListItem
-                            T="string"
-                            Disabled="@(!_apiAvailable || _charEntrysUpdating || _isLocked)">
-                            @context.SupportfileCharacterEntryDbModel.GetFullDisplayString()
-                        </MudListItem>
-                    </ItemRenderer>
-                </MudDropContainer>
-            </MudPaper>
+                <MudPaper Square="true">
+                    <MudDropContainer
+                        T="CharEntry"
+                        ItemDisabled="@(item => !_apiAvailable || _charEntrysUpdating || _isLocked || _model.Deleted)"
+                        Items="_filteredCharEntrys"
+                        ItemsSelector="@((item, dropzone) => item.DropZoneIdentifier == dropzone)"
+                        ItemDropped="CharEntryItemUpdated"
+                        Class="d-flex flex-wrap">
+
+                        <ChildContent>
+                            <MudPaper Class="ma-4" Width="45%" style="height: 70vh; overflow-y: auto;">
+                                <MudList T="string" Class="mud-height-full">
+                                    <MudDropZone T="CharEntry" Identifier="available" Class="mud-height-full">
+                                        <MudListSubheader>Verfügbar</MudListSubheader>
+                                    </MudDropZone>
+                                </MudList>
+                            </MudPaper>
+                            <MudPaper Class="ma-4" Width="45%" style="height: 70vh; overflow-y: auto;">
+                                <MudList T="string" Class="mud-height-full">
+                                    <MudDropZone T="CharEntry" Identifier="added" Class="mud-height-full">
+                                        <MudListSubheader>Hinzugefügt</MudListSubheader>
+                                    </MudDropZone>
+                                </MudList>
+                            </MudPaper>
+                        </ChildContent>
+                        <ItemRenderer>
+                            <MudListItem
+                                T="string"
+                                Disabled="@(!_apiAvailable || _charEntrysUpdating || _isLocked)">
+                                @context.SupportfileCharacterEntryDbModel.GetFullDisplayString()
+                            </MudListItem>
+                        </ItemRenderer>
+                    </MudDropContainer>
+                </MudPaper>
+            }
         </MudTabPanel>
         
         @if (UserAccessService.HasRight(RightEnum.ViewSupportfileEntrys))
@@ -319,6 +326,7 @@ else
     private bool _isLocked;
     private Ulid _lockedByUser;
     private bool _isCurrentTabCharEntrys = false;
+    private bool _charApiLoading = true;
     
     private class CharEntry(SupportfileCharacterEntryDbModel supportfileCharacterEntryDbModel, bool isAdded, string dropZoneIdentifier)
     {
@@ -328,7 +336,7 @@ else
     }
     
     private static string _dividerStyle = "margin: 10px 0; opacity: 0;";
-    private string GetSupportfileTitle() => _model != null ? "Supportakte " + _model.Title : "Loading...";
+    private string GetSupportfileTitle() => _checkModel != null ? "Supportakte " + _checkModel.Title : "Loading...";
 
     private const int _entryLines = 3;
     private bool _showDeletedEntrys = false;
@@ -506,21 +514,16 @@ else
         }
             
         await StartHubConnection();
-        
-        await FetchSupportfileById();
+        await Load();
     }
 
-    private async Task FetchSupportfileById()
+    private async Task Load()
     {
-        _loading = true;
-        StateHasChanged();
-        
         await LoadModel();
-        
-        _loading = false;
-        StateHasChanged();
-    }
 
+        await LoadCharEntrys();
+    }
+    
     private async Task LoadModel()
     {
         var access = await UserAccessService.GetUserAccess();
@@ -554,11 +557,11 @@ else
         
         @if (UserAccessService.HasRight(RightEnum.ViewSupportfileEntrys))
         {
-            _entrys = _showDeletedEntrys ? 
-                model.Entrys
+            _entrys = _showDeletedEntrys ?
+                _model.Entrys
                     .OrderByDescending(x => x.Id)
-                    .ToList() : 
-                model.Entrys
+                    .ToList() :
+                _model.Entrys
                     .Where(x => !x.Deleted)
                     .OrderByDescending(x => x.Id)
                     .ToList();
@@ -566,13 +569,22 @@ else
         
         @if (UserAccessService.HasRight(RightEnum.SupportfileViewLogs))
         {
-            _logs = model.Logs
+            _logs = _model.Logs
                 .OrderByDescending(x => x.Id)
                 .ToList();;
         }
+        
+        _loading = false;
+        StateHasChanged();
+    }
 
-        _charEntrys = model.CharacterEntrys.Select(x => new CharEntry(x, true, "added")).ToList();
-        var addedCharIds = model.CharacterEntrys.Select(x => x.CharacterId);
+    private async Task LoadCharEntrys()
+    {
+        if (_model is null) return;
+        _charApiLoading = true;
+
+        _charEntrys = _model.CharacterEntrys.Select(x => new CharEntry(x, true, "added")).ToList();
+        var addedCharIds = _model.CharacterEntrys.Select(x => x.CharacterId);
 
         try
         {
@@ -584,7 +596,7 @@ else
                 foreach (var characterApiModel in allChars.Where(x => !addedCharIds.Contains(x.Id)))
                 {
                     var charEntry = new SupportfileCharacterEntryDbModel(_model.Id, characterApiModel.AccountId, characterApiModel.Id, characterApiModel.FirstName, characterApiModel.LastName);
-                    
+
                     _charEntrys.Add(new CharEntry(charEntry, false, "available"));
                 }
 
@@ -607,11 +619,11 @@ else
             _apiAvailable = false;
         }
 
+        _charApiLoading = false;
         _filteredCharEntrys = _charEntrys;
-        
         StateHasChanged();
     }
-    
+
     private async Task OnClickCreate()
     {
         var access = await UserAccessService.GetUserAccess();
@@ -677,7 +689,7 @@ else
             if (_model is null) return;
             if (id != _model.Id) return;
             
-            await InvokeAsync(LoadModel);
+            await InvokeAsync(Load);
             StateHasChanged();
         });
         
@@ -686,7 +698,7 @@ else
             if (_model is null) return;
             if (id != _model.Id) return;
             
-            await InvokeAsync(LoadModel);
+            await InvokeAsync(Load);
             StateHasChanged();
         });
         
@@ -701,7 +713,7 @@ else
                 return;
             }
 
-            await InvokeAsync(LoadModel);
+            await InvokeAsync(Load);
             StateHasChanged();
         });
         
@@ -1062,6 +1074,6 @@ else
     {
         _showDeletedEntrys = !_showDeletedEntrys;
 
-        await LoadModel();
+        await Load();
     }
 }
