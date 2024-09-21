@@ -22,6 +22,9 @@ else if (_model is not null)
                 <MudItem xs="8">
                     <MudPaper Class="pa-4">
                         <MudTextField Label="Ersteller" Variant="Variant.Outlined" ReadOnly Value="@_model.CreatorAccessModel.Name"/>
+                        
+                        <MudDivider Style="@_dividerStyle"/>
+                        <MudTextField Label="Erstellt am" Variant="Variant.Outlined" ReadOnly Value="@_model.CreatedAtLocal()"/>
 
                         <MudDivider Style="@_dividerStyle"/>
                         <MudTextField Label="Titel" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(RightEnum.SupportfileEditTitle))" @bind-Value="_model.Title"/>
