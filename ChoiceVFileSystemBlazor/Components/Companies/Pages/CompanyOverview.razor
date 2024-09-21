@@ -1,5 +1,4 @@
 @page "/companies"
-@using ChoiceVSharedApiModels.Companys
 
 @code {
     public const string Url = "/companies";
@@ -140,6 +139,6 @@ else
     
     void RowClicked(DataGridRowClickEventArgs<CompanyApiModel> args)
     {
-        // Navigation.NavigateTo(CharacterView.GetRedirectUrl(args.Item.Id.ToString()));
+        Navigation.NavigateTo(CompanyView.GetRedirectUrl(args.Item.Id.ToString()));
     }
 }
