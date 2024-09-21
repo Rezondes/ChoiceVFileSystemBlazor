@@ -7,6 +7,7 @@ using ChoiceVFileSystemBlazor.Components._Base;
 using ChoiceVFileSystemBlazor.Components._Layout.Hubs;
 using ChoiceVFileSystemBlazor.Components.Supportfiles.Hubs;
 using ChoiceVFileSystemBlazor.Database;
+using ChoiceVFileSystemBlazor.Database._Shared;
 using ChoiceVFileSystemBlazor.Database.Accesses.Proxies;
 using ChoiceVFileSystemBlazor.Database.Accesses.Proxies.Interfaces;
 using ChoiceVFileSystemBlazor.Database.Discord.Proxies;
@@ -168,11 +169,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 #endregion
 
 #region ChoiceV Api
-var choiceVApiBaseAddress = builder.Configuration.GetValue<string>("ChoiceVApi:BaseAddress");
+var choiceVApiBaseAddress = builder.Configuration.GetValue<string>("ChoiceVApi:BaseAddress")!;
 Assert(string.IsNullOrEmpty(choiceVApiBaseAddress), "ChoiceVApi Address is missing");
-var choiceVApiUsername = builder.Configuration.GetValue<string>("ChoiceVApi:BasicAuthUsername");
+var choiceVApiUsername = builder.Configuration.GetValue<string>("ChoiceVApi:BasicAuthUsername")!;
 Assert(string.IsNullOrEmpty(choiceVApiUsername), "ChoiceVApi BasicAuthUsername is missing");
-var choiceVApiPassword = builder.Configuration.GetValue<string>("ChoiceVApi:BasicAuthPassword");
+var choiceVApiPassword = builder.Configuration.GetValue<string>("ChoiceVApi:BasicAuthPassword")!;
 Assert(string.IsNullOrEmpty(choiceVApiPassword), "ChoiceVApi BasicAuthPassword is missing");
 
 builder.Services.ConfigureHttpClient<IAccountApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
@@ -190,11 +191,11 @@ builder.Services.AddDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>(opt
                 builder.Configuration.GetConnectionString("DefaultConnection"))),
     ServiceLifetime.Scoped);
 
+builder.Services.AddScoped<IAccessProxy, AccessProxy>();
 builder.Services.AddScoped<IRankProxy, RankProxy>();
 builder.Services.AddScoped<ISupportfileProxy, SupportfileProxy>();
 builder.Services.AddScoped<ISupportfileLogsProxy, SupportfileLogsProxy>();
 builder.Services.AddScoped<ISupportfileEntryProxy, SupportfileEntryProxy>();
-builder.Services.AddScoped<IAccessProxy, AccessProxy>();
 builder.Services.AddScoped<IAccessLogsProxy, AccessLogsProxy>();
 builder.Services.AddScoped<IDiscordRolesProxy, DiscordRoleProxy>();
 builder.Services.AddScoped<IDiscordRoleLogsProxy, DiscordRoleLogsProxy>();
@@ -215,6 +216,7 @@ if (!builder.Environment.IsDevelopment())
         });
     });
 }
+builder.Services.AddHostedService<StartupService>();
 
 var app = builder.Build();
 
