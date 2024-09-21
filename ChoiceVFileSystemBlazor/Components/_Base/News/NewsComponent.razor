@@ -8,7 +8,7 @@
             {
                 foreach (var news in _newsList.OrderByDescending(x => x.Id))
                 {
-                    <NewsItem Label="@news.Title" Content="@news.Content"/>
+                    <NewsItem Model="@news"/>
                 }
             }
             else
