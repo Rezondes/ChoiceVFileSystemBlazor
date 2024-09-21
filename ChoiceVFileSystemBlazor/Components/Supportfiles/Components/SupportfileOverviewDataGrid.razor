@@ -1,6 +1,6 @@
 ﻿@if (_loading)
 {
-    <PageLoading/>
+    <LoadingComponent/>
 }
 else if (!_loading && _supportfiles is null)
 {
@@ -19,7 +19,7 @@ else
 
             @if (UserAccessService.HasRight(RightEnum.ViewDeletedFiles))
             {
-                @if (_showDeletedFiles)
+                if (_showDeletedFiles)
                 {
                     <MudTooltip Text="Gelöschte Akten ausblenden" Duration="@Constants.TOOLTIP_DURATION">
                         <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" OnClick="() => ToggleShowDeletedFiles()"/>

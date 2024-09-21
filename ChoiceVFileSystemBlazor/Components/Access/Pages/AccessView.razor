@@ -10,52 +10,40 @@
         <MudText Typo="Typo.h3">@UserAccessService.GetUserAccess().Result.Name</MudText>
     </MudItem>
     <MudGrid Justify="Justify.Center">
-        <MudItem xs="5" >
-            <MudGrid>
-                <MudItem xs="12">
-                    <MudPaper Height="240px">
-                        <div class="d-flex flex-row align-items-center px-5 mud-width-full">
-                            <MudIcon Icon="@Icons.Material.Filled.Info"/>
-                            <MudText Class="px-5" Typo="Typo.h5">Accessinformationen</MudText>
-                        </div>
-                        <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
-                            <MudText>Id: @UserAccessService.GetUserAccess().Result.Id</MudText>
-                            <MudText>Rank: @UserAccessService.GetUserAccess().Result.Rank</MudText>
-                            <MudText>AccountId: @UserAccessService.GetUserAccess().Result.AccountId</MudText>
-                            <MudText>DiscordId: @UserAccessService.GetUserAccess().Result.DiscordId</MudText>
-                            <MudText>Zeitzone: @UserAccessService.GetUserAccess().Result.Settings.TimeZone</MudText>
-                        </MudContainer>
-                    </MudPaper>
-                </MudItem>
-                <MudItem xs="12">
-                    <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
-                        <CharacterOverviewDataGrid AccountId="@UserAccessService.GetUserAccess().Result.AccountId" Height="300px" @ref="_characterOverviewDataGrid"/>
-                    </MudPaper>
-                </MudItem>
-            </MudGrid>
+        <MudItem xs="12">
+            <MudPaper>
+                <MudToolBar>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OverrideName">Namen aktualisieren</MudButton>
+                    <MudSpacer />
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OverrideTimezone">Zeitzone aktualisieren</MudButton>
+                </MudToolBar>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="5">
+            <MudPaper Height="240px">
+                <div class="d-flex flex-row align-items-center px-5 mud-width-full">
+                    <MudIcon Icon="@Icons.Material.Filled.Info"/>
+                    <MudText Class="px-5" Typo="Typo.h5">Accessinformationen</MudText>
+                </div>
+                <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
+                    <MudText>Id: @UserAccessService.GetUserAccess().Result.Id</MudText>
+                    <MudText>Rank: @UserAccessService.GetUserAccess().Result.Rank</MudText>
+                    <MudText>AccountId: @UserAccessService.GetUserAccess().Result.AccountId</MudText>
+                    <MudText>DiscordId: @UserAccessService.GetUserAccess().Result.DiscordId</MudText>
+                    <MudText>Zeitzone: @UserAccessService.GetUserAccess().Result.Settings.TimeZone</MudText>
+                </MudContainer>
+            </MudPaper>
         </MudItem>
 
         <MudItem xs="7">
-            <MudGrid>
-                <MudItem xs="12">
-                    <MudPaper Height="140px">
-                        <div class="d-flex flex-row align-items-center px-5 mud-width-full">
-                            <MudIcon Icon="@Icons.Material.Filled.AdsClick"/>
-                            <MudText Class="px-5" Typo="Typo.h5">Funktionen</MudText>
-                        </div>
-                        <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OverrideName">Namen aktualisieren</MudButton>
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OverrideTimezone">Zeitzone aktualisieren</MudButton>
-                        </div>
-                    </MudPaper>
-
-                </MudItem>
-                <MudItem xs="12">
-                    <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
-                        <SupportfileOverviewDataGrid AccessId="@UserAccessService.GetUserAccess().Result.Id" Height="400px" Label="Erstellte Supportakten" @ref="_supportfileOverviewDataGrid"/>
-                    </MudPaper>
-                </MudItem>
-            </MudGrid>
+            <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
+                <SupportfileOverviewDataGrid AccessId="@UserAccessService.GetUserAccess().Result.Id" Height="400px" Label="Erstellte Supportakten" @ref="_supportfileOverviewDataGrid"/>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12">
+            <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
+                <CharacterOverviewDataGrid AccountId="@UserAccessService.GetUserAccess().Result.AccountId" Height="300px" @ref="_characterOverviewDataGrid"/>
+            </MudPaper>
         </MudItem>
     </MudGrid>
 </MudContainer>
