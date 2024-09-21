@@ -1,0 +1,125 @@
+<style>
+    .server-info-item {
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+        margin: 5px;
+        width: 300px;
+    }
+</style>
+
+<MudItem xs="12" sm="6" md="12">
+    <MudPaper Elevation="2" Class="pa-4" Style="height: 250px;">
+        <MudText Class="d-flex flex-column align-center justify-center mud-width-full" Typo="Typo.h5">
+            Aktuelle Serverinformationen
+        </MudText>
+
+        @if (_loading)
+        {
+            <LoadingComponent/>
+        }
+        else if (_data is null)
+        {
+            <MudAlert Severity="Severity.Error">Ein Fehler ist aufgetreten!</MudAlert>
+        }
+        else
+        {
+            <div class="d-flex mud-width-full justify-content-around">
+                <MudPaper class="d-flex server-info-item" Elevation="2">
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.AccountBox"/> Accounts
+                    </MudText>
+                    <MudText Typo="Typo.body1">@_data.OverallAccountCount</MudText>
+                </MudPaper>
+                <MudPaper class="d-flex server-info-item" Elevation="2">
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.PlaylistAddCheck"/> davon gewhitelisted
+                    </MudText>
+                    <MudText Typo="Typo.body1">@_data.WhitelistedAccountsCount</MudText>
+                </MudPaper>
+                <MudPaper class="d-flex server-info-item" Elevation="2">
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.PlaylistRemove"/> davon gebannt
+                    </MudText>
+                    <MudText Typo="Typo.body1">@_data.BannedAccountsCount</MudText>
+                </MudPaper>
+            </div>
+            <div class="d-flex mud-width-full justify-content-around">
+                <MudPaper class="d-flex server-info-item" Elevation="2">
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.AccountCircle"/> Spieler online
+                    </MudText>
+                    <MudText Typo="Typo.body1">@_data.PlayerOnlineCount</MudText>
+                </MudPaper>
+                <MudPaper class="d-flex server-info-item" Elevation="2">
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.LocalPolice"/> Cops Online
+                    </MudText>
+                    <MudText Typo="Typo.body1">@_data.PoliceInDutyCount</MudText>
+                </MudPaper>
+                <MudPaper class="d-flex server-info-item" Elevation="2">
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.MedicalInformation"/> Medics Online
+                    </MudText>
+                    <MudText Typo="Typo.body1">@_data.MedicInDutyCount</MudText>
+                </MudPaper>
+                <MudPaper class="d-flex server-info-item" Elevation="2">
+                    <MudText Typo="Typo.h6">
+                        <MudIcon Icon="@Icons.Material.Filled.LocalPolice"/> Sheriffs Online
+                    </MudText>
+                    <MudText Typo="Typo.body1">@_data.SheriffInDutyCount</MudText>
+                </MudPaper>
+            </div>
+            <div class="d-flex mud-width-full" style="opacity: 0.2;">
+                <MudText Typo="Typo.body1">@_lastFetched</MudText>
+            </div>
+        }
+    </MudPaper>
+</MudItem>
+
+@code {
+    private bool _loading;
+    private CurrentServerInfosApiModel? _data;
+    private DateTime _lastFetched = DateTime.UtcNow;
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        await Load();
+    }
+    
+    private async Task Load()
+    {
+        _loading = true;
+        StateHasChanged();
+        
+        try
+        {
+            var response = await ServerApi.GetCurrentServerInfosAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                _data = response.Content;
+                _lastFetched = DateTime.UtcNow;
+            }
+            else
+            {
+                Snackbar.Add(response.Error.Message, Severity.Error);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+        
+        StateHasChanged();
+    }
+}
