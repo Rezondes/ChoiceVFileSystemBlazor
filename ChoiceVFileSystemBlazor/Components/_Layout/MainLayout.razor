@@ -88,8 +88,17 @@ else
         await base.OnInitializedAsync();
         var access = await UserAccessService.GetUserAccess();
 
-        _isDarkMode = access.Settings.IsDarkMode;
-        _open = access.Settings.IsNavbarExpanded;
+        if (access.Settings is null)
+        {
+            _isDarkMode = true;
+            _open = true;
+        }
+        else
+        {
+            _isDarkMode = access.Settings.IsDarkMode;
+            _open = access.Settings.IsNavbarExpanded;
+        }
+        
     }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)

@@ -34,12 +34,18 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
             _userAccess = newAccess;
 
             await CheckUpdateRankByDiscordRolesAsync(roles);
+
+            if (_userAccess.Settings is null)
+            {
+                _userAccess.Settings = await accessProxy.AddSettingsAsync(_userAccess);
+            }
         }
         else
         {
             if (accessDbModel.Settings is null)
             {
                 await accessProxy.AddSettingsAsync(accessDbModel);
+                accessDbModel = await accessProxy.GetWithSettingsAsync(accessDbModel.Id);
             }
 
             if (accessDbModel.AccountId == -1)
@@ -98,8 +104,18 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
 
         var addResponse = await accessProxy.AddAccessModelAsync(newAccessModel);
         if (!addResponse)
-            throw new Exception(
-                $"Unable to add new Access: DiscordId {newAccessModel.DiscordId} | AccountId {newAccessModel.AccountId} | AccountName {newAccessModel.Name}");
+        {
+            var accountResponse = await accessProxy.GetAsync(discordId);
+            if (accountResponse is null)
+            {
+                throw new Exception(
+                    $"Unable to add new Access: " +
+                    $"DiscordId {newAccessModel.DiscordId} | " +
+                    $"AccountId {newAccessModel.AccountId} | " +
+                    $"AccountName {newAccessModel.Name}"
+                );
+            }
+        }
 
         return newAccessModel;
     }
@@ -133,7 +149,15 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
     }
     
     public async Task<AccessDbModel> GetUserAccess() {
-        if (_userAccess is not null) return _userAccess;
+        if (_userAccess is not null)
+        {
+            if (_userAccess.Settings is not null)
+            {
+                return _userAccess;
+            }
+            _userAccess = await accessProxy.GetWithSettingsAsync(_userAccess.Id);
+            return _userAccess;
+        }
         
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
         await InitializeUserAsync(authState.User);

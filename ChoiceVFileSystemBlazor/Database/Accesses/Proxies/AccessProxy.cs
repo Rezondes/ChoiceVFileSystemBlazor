@@ -99,21 +99,31 @@ public class AccessProxy : IAccessProxy
         return response;
     }
     
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+    
     public async Task<bool> AddAccessModelAsync(AccessDbModel accessModel)
     {
         try
         {
-            using var dbContext = await CreateDbContextAsync();
-            var checkDiscordId = await GetAsync(accessModel.DiscordId);
-            if (checkDiscordId is not null) return false;
-            // var checkAccountId = await GetAsync(accessModel.AccountId);
-            // if (checkAccountId is not null) return false;
+            await _semaphore.WaitAsync();
+            try
+            {
+                using var dbContext = await CreateDbContextAsync();
+                var checkDiscordId = await GetAsync(accessModel.DiscordId);
+                if (checkDiscordId is not null) return false;
+                var checkAccountId = await GetAsync(accessModel.AccountId);
+                if (checkAccountId is not null) return false;
 
-            await dbContext.AccessSettingsDbModels.AddAsync(new AccessSettingsDbModel(accessModel.Id));
-            await dbContext.AccessDbModels.AddAsync(accessModel);
-            var changes = await dbContext.SaveChangesAsync();
+                await dbContext.AccessSettingsDbModels.AddAsync(new AccessSettingsDbModel(accessModel.Id));
+                await dbContext.AccessDbModels.AddAsync(accessModel);
+                var changes = await dbContext.SaveChangesAsync();
 
-            return changes > 0;
+                return changes > 0;
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
         catch (Exception e)
         {
