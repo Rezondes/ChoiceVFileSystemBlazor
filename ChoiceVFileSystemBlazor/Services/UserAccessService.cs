@@ -44,8 +44,7 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
         {
             if (accessDbModel.Settings is null)
             {
-                await accessProxy.AddSettingsAsync(accessDbModel);
-                accessDbModel = await accessProxy.GetWithSettingsAsync(accessDbModel.Id);
+                accessDbModel.Settings = await accessProxy.AddSettingsAsync(accessDbModel);
             }
 
             if (accessDbModel.AccountId == -1)
