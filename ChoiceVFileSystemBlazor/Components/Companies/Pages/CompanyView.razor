@@ -135,14 +135,14 @@ else
     
     private bool ParseId()
     {
-        if (!int.TryParse(Id, out var characterId))
+        if (!int.TryParse(Id, out var companyId))
         {
             Snackbar.Add("Parsing failed", Severity.Error);
             _loading = false;
             return false;
         }
 
-        _id = characterId;
+        _id = companyId;
         return true;
     }
 
