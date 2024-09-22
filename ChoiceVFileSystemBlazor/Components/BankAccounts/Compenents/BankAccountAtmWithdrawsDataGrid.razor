@@ -1,0 +1,64 @@
+<MudDataGrid
+    T="BankAtmWithdrawApiModel" MultiSelection="true"
+    Items="@Data" SortMode="SortMode.Multiple" Filterable="true"
+    QuickFilter="@QuickFilter" Style="width: 100%;"
+    Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="@(Height is null ? "75vh" : Height)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">@(Label ?? "AtmWithdraws")</MudText>
+        <MudSpacer />
+        <MudTextField
+            T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+            Adornment="Adornment.Start" Immediate="true"
+            AdornmentIcon="@Icons.Material.Filled.Search"
+            IconSize="Size.Medium" Class="mt-0"/>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
+        <PropertyColumn Property="x => x.FromBankAccountId" Title="FromBankAccountId" />
+        <PropertyColumn Property="x => x.AtmId" Title="ToBankAccountId" />
+        <PropertyColumn Property="x => x.Amount" Title="Amount" />
+        <PropertyColumn Property="x => x.Cost" Title="Cost" />
+        <PropertyColumn Property="x => x.Date" Title="Date" />
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="BankAtmWithdrawApiModel" />
+    </PagerContent>
+</MudDataGrid>
+
+@code {
+    [Parameter] public List<BankAtmWithdrawApiModel> Data { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Height { get; set; }
+
+    private string? _searchString;
+
+    private Func<BankAtmWithdrawApiModel, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+
+        var lowerSearchString = _searchString.ToLower();
+
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+        return true;
+
+        if (x.FromBankAccountId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+        
+        if (x.AtmId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+        if (x.Amount.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+        if (x.Cost.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+
+        if (x.Date.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        return true;
+        
+        if ($"{x.Id}".ToLower().Contains(_searchString))
+        return true;
+
+        return false;
+    };
+}

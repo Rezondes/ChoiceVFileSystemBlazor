@@ -74,4 +74,16 @@ public class BankAccountApiModel {
 
     [JsonPropertyName("isInfinite")]
     public bool IsInfinite { get; set; }
+    
+    [JsonPropertyName("interestModel")]
+    public BankAccountInterestApiModel? InterestModel { get; set; }
+
+    [JsonPropertyName("transactions")]
+    public List<BankTransactionApiModel> Transactions { get; set; } = [];
+    
+    [JsonPropertyName("atmWithdraws")]
+    public List<BankAtmWithdrawApiModel> AtmWithdraws { get; set; } = [];
+    
+    [JsonPropertyName("bankWithdraws")]
+    public List<BankBankWithdrawApiModel> BankWithdraws { get; set; } = [];
 }

@@ -28,7 +28,7 @@ else
         </MudItem>
         <MudGrid Justify="Justify.Center">
             <MudItem xs="5" >
-                <MudPaper Height="350px">
+                <MudPaper Height="400px">
                     <div class="d-flex flex-row align-items-center px-5 mud-width-full">
                         <MudIcon Icon="@Icons.Material.Filled.Info"/>
                         <MudText Class="px-5" Typo="Typo.h5">Kontoinformationen</MudText>
@@ -40,28 +40,83 @@ else
                         <MudText>Balance: @_model.Balance</MudText>
                         <MudText>OwnerType: @_model.OwnerType</MudText>
                         <MudText>OwnerValue: @_model.OwnerValue</MudText>
-                        <MudText>IsFrozen: @_model.IsFrozen</MudText>
                         <MudText>CreationDate: @_model.CreationDate</MudText>
-                        <MudText>IsDeactivated: @_model.IsDeactivated</MudText>
                         <MudText>ConnectedPhoneNumber: @_model.ConnectedPhoneNumber</MudText>
+                        <MudText>IsFrozen: @_model.IsFrozen</MudText>
+                        <MudText>IsDeactivated: @_model.IsDeactivated</MudText>
                         <MudText>IsInfinite: @_model.IsInfinite</MudText>
                     </MudContainer>
                 </MudPaper>
             </MudItem>
 
             <MudItem xs="7">
-                <MudPaper Height="140px">
+                <MudPaper Height="200px">
+                    <div class="d-flex flex-row align-items-center px-5 mud-width-full">
+                        <MudIcon Icon="@Icons.Material.Filled.Info"/>
+                        <MudText Class="px-5" Typo="Typo.h5">Zinseninformationen</MudText>
+                    </div>
+                    <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
+                        @if (_model.InterestModel is null)
+                        {
+                            <MudAlert Severity="Severity.Info">Keine Zinsinformationen verfügbar</MudAlert>
+                        }
+                        else
+                        {
+                            <MudText>BankAccountId: @_model.InterestModel.BankAccountId</MudText>
+                            <MudText>InterestPercent: @_model.InterestModel.InterestPercent</MudText>
+                            <MudText>InterestAmount: @_model.InterestModel.InterestAmount</MudText>
+                            <MudText>NextInterest: @_model.InterestModel.NextInterest</MudText>
+                        }
+                    </MudContainer>
+                </MudPaper>
+                <MudPaper Height="175px" Style="margin-top: 24px">
                     <div class="d-flex flex-row align-items-center px-5 mud-width-full">
                         <MudIcon Icon="@Icons.Material.Filled.AdsClick"/>
                         <MudText Class="px-5" Typo="Typo.h5">Funktionen</MudText>
                     </div>
-                    <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
-                        @* <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Timeout/Bann</MudButton> *@
-                        @* <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Kicken</MudButton> *@
-                        @* <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Whitelisting</MudButton> *@
-                        @* <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Unstuck</MudButton> *@
-                    </div>
+                    @if (_model.OwnerType == BankAccountOwnerTypeApiEnum.Player)
+                    {
+                        <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
+                            <MudButton
+                                Color="Color.Primary"
+                                Variant="Variant.Filled"
+                                Size="Size.Large"
+                                OnClick="() => Navigation.NavigateTo(CharacterView.GetRedirectUrl(_model.OwnerValue))">
+                                Charakter öffnen
+                            </MudButton>
+                        </div>
+                    }
+                    else if (_model.OwnerType == BankAccountOwnerTypeApiEnum.Company)
+                    {
+                        <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
+                            <MudButton
+                                Color="Color.Primary"
+                                Variant="Variant.Filled"
+                                Size="Size.Large"
+                                OnClick="() => Navigation.NavigateTo(CompanyView.GetRedirectUrl(_model.OwnerValue))">
+                                Unternehmen öffnen
+                            </MudButton>
+                        </div>
+                    }
+                    else
+                    {
+                        <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
+                            <MudAlert Severity="Severity.Info">Keine Funktionen verfügbar</MudAlert>
+                        </MudContainer>
+                    }
                 </MudPaper>
+            </MudItem>
+            
+            <MudItem xs="12">
+                <BankAccountTransactionsDataGrid Data="@_model.Transactions" Height="400px" />
+            </MudItem>
+            
+            <MudItem xs="12">
+                <BankAccountAtmWithdrawsDataGrid Data="@_model.AtmWithdraws" Height="400px" />
+            </MudItem>
+            
+            <MudItem xs="12">
+                <BankAccountBankWithdrawsDataGrid Data="@_model.BankWithdraws" Height="400px" />
             </MudItem>
 
         </MudGrid>
