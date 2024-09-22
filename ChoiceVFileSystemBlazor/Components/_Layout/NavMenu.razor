@@ -10,6 +10,11 @@
 
 <MudNavMenu Style="height: 100%;">
     <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.SpaceDashboard">Dashboard</MudNavLink>
+    
+    @if (UserAccessService.HasRight(RightEnum.ViewCharactersArea))
+    {
+        <MudNavLink Href="@LiveCharacterOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.LiveTv">Online Charaktere</MudNavLink>
+    }
 
     @if (UserAccessService.HasRight(RightEnum.ViewSupportfilesArea))
     {
@@ -48,7 +53,7 @@
             }
             @if (UserAccessService.HasRight(RightEnum.ViewCharactersArea))
             {
-                <MudNavLink Href="@CharacterOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountCircle">Characterübersicht</MudNavLink>
+                <MudNavLink Href="@CharacterOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountCircle">Charakterübersicht</MudNavLink>
             }
             @if (UserAccessService.HasRight(RightEnum.ViewCompaniesArea))
             {

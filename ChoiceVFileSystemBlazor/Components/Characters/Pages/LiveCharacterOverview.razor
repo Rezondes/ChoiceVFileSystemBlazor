@@ -1,0 +1,40 @@
+@page "/characters/live"
+
+@code {
+    public const string Url = "/characters/live";
+    public static string GetRedirectUrl() => Url;
+}
+
+<PageTitle>Online Charaktere Übersicht</PageTitle>
+
+<CharacterOverviewDataGrid @ref="_characterOverviewDataGrid" OnlyLive="true" Label="Online Charaktere"/>
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+
+    private CharacterOverviewDataGrid _characterOverviewDataGrid;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
+        _shouldRedirect = !_isAuthorized;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+
+        await _characterOverviewDataGrid.Load();
+    }
+}

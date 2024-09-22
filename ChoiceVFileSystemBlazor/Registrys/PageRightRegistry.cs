@@ -36,6 +36,7 @@ public static class PageRightRegistry
         
         { CharacterOverview.Url, RightEnum.ViewCharacters },
         { CharacterView.Url, RightEnum.ViewCharacters },
+        { LiveCharacterOverview.Url, RightEnum.ViewCharacters },
         
         { CompanyOverview.Url, RightEnum.ViewCompanies },
         { CompanyView.Url, RightEnum.ViewCompanies },
