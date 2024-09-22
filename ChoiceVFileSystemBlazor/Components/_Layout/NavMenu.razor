@@ -1,5 +1,6 @@
 ﻿@using ChoiceVFileSystemBlazor.Components.Accounts.Pages
 @using ChoiceVFileSystemBlazor.Components.Admin.Pages
+@using ChoiceVFileSystemBlazor.Components.BankAccounts.Pages
 @using ChoiceVFileSystemBlazor.Components.Characters.Pages
 @using ChoiceVFileSystemBlazor.Components.Companies.Pages
 @using ChoiceVFileSystemBlazor.Components.Groupingfiles.Pages
@@ -52,6 +53,10 @@
             @if (UserAccessService.HasRight(RightEnum.ViewCompaniesArea))
             {
                 <MudNavLink Href="@CompanyOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Business">Unternehmensübersicht</MudNavLink>
+            }
+            @if (UserAccessService.HasRight(RightEnum.ViewBankAccountsArea))
+            {
+                <MudNavLink Href="@BankAccountOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBalance">Bankkontenübersicht</MudNavLink>
             }
             @if (UserAccessService.HasRight(RightEnum.ViewSupportKeyLogsArea))
             {

@@ -1,6 +1,6 @@
 ﻿namespace ChoiceVSharedApiModels.Companys;
 
-public enum CompanyType {
+public enum CompanyTypeApiEnum {
     Undefined = -1,
     Standard = 0,
     Police = 1,

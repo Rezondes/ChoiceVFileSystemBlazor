@@ -21,6 +21,7 @@ using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces;
 using ChoiceVFileSystemBlazor.Extensions;
 using ChoiceVFileSystemBlazor.Services;
 using ChoiceVRefitClient;
+using ChoiceVSharedApiModels.BankAccounts;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
@@ -177,6 +178,7 @@ var choiceVApiPassword = builder.Configuration.GetValue<string>("ChoiceVApi:Basi
 Assert(string.IsNullOrEmpty(choiceVApiPassword), "ChoiceVApi BasicAuthPassword is missing");
 
 builder.Services.ConfigureHttpClient<IAccountApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
+builder.Services.ConfigureHttpClient<IBankAccountApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
 builder.Services.ConfigureHttpClient<ICharacterApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
 builder.Services.ConfigureHttpClient<ICompanyApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
 builder.Services.ConfigureHttpClient<IInventoryApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);

@@ -1,6 +1,6 @@
 ﻿namespace ChoiceVSharedApiModels.Accounts;
 
-public enum AccountStateEnum {
+public enum AccountStateApiEnum {
     Undefined = -2,
     NotWhitelisted = -1,
     ScReseted = 0,

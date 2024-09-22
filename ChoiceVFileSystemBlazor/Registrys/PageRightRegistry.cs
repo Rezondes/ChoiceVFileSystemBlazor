@@ -2,6 +2,7 @@ using ChoiceVFileSystemBlazor.Components._Base;
 using ChoiceVFileSystemBlazor.Components.Access.Pages;
 using ChoiceVFileSystemBlazor.Components.Accounts.Pages;
 using ChoiceVFileSystemBlazor.Components.Admin.Pages;
+using ChoiceVFileSystemBlazor.Components.BankAccounts.Pages;
 using ChoiceVFileSystemBlazor.Components.Characters.Pages;
 using ChoiceVFileSystemBlazor.Components.Companies.Pages;
 using ChoiceVFileSystemBlazor.Components.Groupingfiles.Pages;
@@ -30,6 +31,8 @@ public static class PageRightRegistry
         { AccessLogs.Url, RightEnum.ViewAdminAccessLogs },
         { DiscordRolesControl.Url, RightEnum.ViewDiscordRolesControl },
         { NewsControl.Url, RightEnum.ViewNewsControl },
+        
+        { BankAccountOverview.Url, RightEnum.ViewBankAccounts },
         
         { CharacterOverview.Url, RightEnum.ViewCharacters },
         { CharacterView.Url, RightEnum.ViewCharacters },

@@ -10,7 +10,7 @@ public class CompanyApiModel {
         string shortName, 
         string cityName,
         string streetName, 
-        CompanyType companyType, 
+        CompanyTypeApiEnum companyType, 
         int maxEmployees, 
         long companyBankAccount,
         List<CompanyEmployeeApiModel> employees,
@@ -34,7 +34,7 @@ public class CompanyApiModel {
     public string ShortName { get; set; }
     public string CityName { get; set; }
     public string StreetName { get; set; }
-    public CompanyType CompanyType { get; set; }
+    public CompanyTypeApiEnum CompanyType { get; set; }
     public int MaxEmployees { get; set; }
     public long CompanyBankAccount { get; set; }
     public List<CompanyEmployeeApiModel> Employees { get; set; }
