@@ -442,6 +442,7 @@ else
     {
         var maxFileSize = SupportfileEntryProxy.GetMaxFileSize();
         
+        // should outsource the contentType in a enum, but i'm to lazy rn
         switch (file.ContentType)
         {
             case "image/png":

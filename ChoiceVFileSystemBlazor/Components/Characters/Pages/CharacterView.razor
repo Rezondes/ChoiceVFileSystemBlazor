@@ -17,7 +17,7 @@ else if (_inventory is null || _model is null)
 }
 else
 {
-    <MudContainer Class="px-8" MaxWidth="MaxWidth.False"  style="height: 100%; overflow-y: auto; padding: 16px 0;">
+    <MudContainer Class="px-8" MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: auto; padding: 16px 0;">
         <MudGrid Justify="Justify.Center">
             <MudItem xs="12">
                 <MudPaper>
@@ -76,21 +76,23 @@ else
                             </MudTooltip>
                         </MudItem>
                     </MudGrid>
-                
-                    <MudText Typo="Typo.h5">Weitere Infos:</MudText>
-                
-                    <MudText>Title: @(_model.Title ?? "Kein Titel")</MudText>
 
-                    <MudText>BirthDate: @_model.BirthDate</MudText>
+                    <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
+                        <MudText Typo="Typo.h5">Weitere Infos:</MudText>
 
-                    <MudText>Cash: @_model.Cash</MudText>
-                
-                    <MudText>Position: @_model.Position</MudText>
-                    <MudText>Rotation: @_model.Rotation</MudText>
-                    <MudText>Dimension: @_model.Dimension</MudText>
-                
-                    <MudText>LastLogin: @_model.LastLogin</MudText>
-                    <MudText>LastLogout: @_model.LastLogout</MudText>
+                        <MudText>Title: @(_model.Title ?? "Kein Titel")</MudText>
+
+                        <MudText>BirthDate: @_model.BirthDate</MudText>
+
+                        <MudText>Cash: @_model.Cash</MudText>
+
+                        <MudText>Position: @_model.Position</MudText>
+                        <MudText>Rotation: @_model.Rotation</MudText>
+                        <MudText>Dimension: @_model.Dimension</MudText>
+
+                        <MudText>LastLogin: @_model.LastLogin</MudText>
+                        <MudText>LastLogout: @_model.LastLogout</MudText>
+                    </MudContainer>
                 </MudPaper>
             </MudItem>
 

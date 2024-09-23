@@ -12,6 +12,8 @@
     <p>Total Time Elapsed: @totalTimeElapsed seconds</p>
 </div>
 
+<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="TestBearer">Test Api</MudButton>
+
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     private bool _isAuthorized;
@@ -215,4 +217,24 @@
             InvokeAsync(StateHasChanged);
         }
     }
+
+    private async Task TestBearer()
+    {
+        try
+        {
+            var result = await AccountApi.BanAccountByAccountIdAsync(1, "testban");
+            if (result.IsSuccessStatusCode)
+            {
+                Snackbar.Add(result.Content.ToString(), Severity.Success);
+                return;
+            }
+
+            Snackbar.Add(result.Error.Message, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
 }

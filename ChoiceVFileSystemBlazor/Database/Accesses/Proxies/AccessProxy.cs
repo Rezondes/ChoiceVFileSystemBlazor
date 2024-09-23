@@ -85,6 +85,7 @@ public class AccessProxy : IAccessProxy
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
+    private readonly Ulid _systemAccessId = Ulid.Empty;
     public async Task<bool> AddSystemAccessAsync()
     {
         using var dbContext = await CreateDbContextAsync();
@@ -93,7 +94,7 @@ public class AccessProxy : IAccessProxy
         if (serverAccess is not null) return false;
         
         var systemAccess = new AccessDbModel(0, "0", "System", RankEnum.None);
-        systemAccess.Id = Ulid.Empty;
+        systemAccess.Id = _systemAccessId;
             
         var response = await AddAccessModelAsync(systemAccess);
         return response;
@@ -134,6 +135,8 @@ public class AccessProxy : IAccessProxy
 
     public async Task<bool> UpdateNameAsync(Ulid id, string newName, Ulid accessId)
     {
+        if (IsIdEqualSystemAccessId(id)) return false;
+        
         using var dbContext = await CreateDbContextAsync();
         var accessDbModel = await GetAsync(id);
         if (accessDbModel is null) return false;
@@ -153,8 +156,15 @@ public class AccessProxy : IAccessProxy
         return changes > 0;
     }
 
+    private bool IsIdEqualSystemAccessId(Ulid id)
+    {
+        return id == _systemAccessId;
+    }
+
     public async Task<bool> UpdateAccountIdAsync(Ulid id, int accountId, Ulid accessId)
     {
+        if (IsIdEqualSystemAccessId(id)) return false;
+        
         using var dbContext = await CreateDbContextAsync();
         var accessDbModel = await GetAsync(id);
         if (accessDbModel is null) return false;
@@ -176,6 +186,8 @@ public class AccessProxy : IAccessProxy
 
     public async Task<bool> UpdateDiscordIdAsync(Ulid id, string newDiscordId, Ulid accessId)
     {
+        if (IsIdEqualSystemAccessId(id)) return false;
+
         using var dbContext = await CreateDbContextAsync();
         var accessDbModel = await GetAsync(id);
         if (accessDbModel is null) return false;
@@ -197,6 +209,8 @@ public class AccessProxy : IAccessProxy
 
     public async Task<bool> UpdateRankAsync(Ulid id, RankEnum newRank, Ulid accessId)
     {
+        if (IsIdEqualSystemAccessId(id)) return false;
+
         using var dbContext = await CreateDbContextAsync();
         var accessDbModel = await GetAsync(id);
         if (accessDbModel is null) return false;
@@ -226,6 +240,8 @@ public class AccessProxy : IAccessProxy
         bool updateRank = true
     )
     {
+        if (IsIdEqualSystemAccessId(accessDbModel.Id)) return false;
+
         using var dbContext = await CreateDbContextAsync();
         if (updateName && accessDbModel.Name != partialAccessModel.Name)
         {
@@ -281,6 +297,8 @@ public class AccessProxy : IAccessProxy
 
     public async Task<bool> UpdateIsDarkModeAsync(Ulid id, bool isDarkMode, Ulid accessId)
     {
+        if (IsIdEqualSystemAccessId(id)) return false;
+        
         var check = await GetWithSettingsAsync(id);
         if (check is null) return false;
         
@@ -306,6 +324,8 @@ public class AccessProxy : IAccessProxy
     
     public async Task<bool> UpdateIsNavbarExpandedAsync(Ulid id, bool isNavbarExpanded, Ulid accessId)
     {
+        if (IsIdEqualSystemAccessId(id)) return false;
+        
         var check = await GetWithSettingsAsync(id);
         if (check is null) return false;
         
@@ -331,6 +351,8 @@ public class AccessProxy : IAccessProxy
     
     public async Task<bool> UpdateTimeZoneAsync(Ulid id, string timeZone, Ulid accessId)
     {
+        if (IsIdEqualSystemAccessId(id)) return false;
+
         var check = await GetWithSettingsAsync(id);
         if (check is null) return false;
         

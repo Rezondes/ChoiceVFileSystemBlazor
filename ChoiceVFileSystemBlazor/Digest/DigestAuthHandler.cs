@@ -2,36 +2,58 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
+using ChoiceVFileSystemBlazor.Services;
 
 namespace ChoiceVFileSystemBlazor.Digest;
 
-public class DigestAuthHandler(HttpMessageHandler innerHandler, string username, string password) : DelegatingHandler(innerHandler)
+public class DigestAuthHandler : HttpClientHandler
 {
+    private readonly string username;
+    private readonly string password;
+    private readonly TokenService tokenService;
+    
+    public DigestAuthHandler(string username, string password, TokenService tokenService)
+    {
+        ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true;
+        
+        this.username = username;
+        this.password = password;
+        this.tokenService = tokenService;
+    }
+    
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        // Initiale Anfrage senden
+        var originalAuthHeader = request.Headers.Authorization;
+        
+        request.Headers.Authorization = new AuthenticationHeaderValue("Digest");
+        
         var initialResponse = await base.SendAsync(request, cancellationToken);
 
         if (initialResponse.StatusCode != HttpStatusCode.Unauthorized) return initialResponse;
         
-        // Digest-Authentifizierungs-Challenge erhalten
         var authenticateHeader = initialResponse.Headers.WwwAuthenticate.FirstOrDefault();
         if (authenticateHeader == null || !authenticateHeader.Scheme.Equals("Digest", StringComparison.OrdinalIgnoreCase))
-        {
-            return initialResponse; // Challenge war keine Digest-Authentifizierung
-        }
+            return initialResponse; 
 
-        if (authenticateHeader.Parameter == null) return initialResponse;
+        if (authenticateHeader.Parameter == null) 
+            return initialResponse;
         
         var digestHeader = ParseDigestHeader(authenticateHeader.Parameter);
-
-        if (digestHeader == null) return initialResponse;
+        if (digestHeader == null) 
+            return initialResponse;
         
-        // Digest Authorization Header erstellen
         var digestAuthHeader = CreateDigestAuthHeader(digestHeader, request.Method.Method, request.RequestUri!);
         request.Headers.Authorization = new AuthenticationHeaderValue("Digest", digestAuthHeader);
 
-        // Anfrage erneut senden mit Digest Authentication Header
+        if (originalAuthHeader is not null &&originalAuthHeader.Scheme == "Bearer")
+        {
+            var accessToken = await tokenService.GetAccessTokenAsync();
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                request.Headers.Add("X", accessToken);
+            }
+        }
+        
         return await base.SendAsync(request, cancellationToken);
     }
 

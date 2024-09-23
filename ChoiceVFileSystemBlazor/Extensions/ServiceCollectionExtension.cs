@@ -1,4 +1,5 @@
 using ChoiceVFileSystemBlazor.Digest;
+using ChoiceVFileSystemBlazor.Services;
 using Refit;
 
 namespace ChoiceVFileSystemBlazor.Extensions;
@@ -12,7 +13,11 @@ public static class ServiceCollectionExtension
             {
                 client.BaseAddress = new Uri(baseAddress);
             })
-            .ConfigurePrimaryHttpMessageHandler(() => new DigestAuthHandler(new HttpClientHandler(), username, password))
+            .ConfigurePrimaryHttpMessageHandler((sp) =>
+            {
+                var tokenService = sp.GetRequiredService<TokenService>();
+                return new DigestAuthHandler(username, password, tokenService);
+            })
             .AddTypedClient(RestService.For<TClient>);
     }
 }

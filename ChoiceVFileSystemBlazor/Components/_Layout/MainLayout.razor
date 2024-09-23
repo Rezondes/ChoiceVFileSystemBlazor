@@ -30,8 +30,13 @@ else
     <MudLayout Style="height: 100vh; overflow: hidden;">
         <MudAppBar> 
             <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
-            <MudImage Src="choicev_logo_full.png" Alt="ChoiceV Logo" Style="width: 100px; margin-bottom: 15px;" />
-            <MudText Typo="Typo.h5" Style="color: white;">Support Control Panel</MudText>
+            <MudImage Src="choicev_logo_full_full.png"
+                      Alt="ChoiceV Logo" 
+                      Style="
+                        width: 400px; 
+                        margin-bottom: 3px;
+                        margin-left: -5px;
+                        " />
             <MudSpacer/>
             <MudButtonGroup Color="Color.Inherit">
                 <MudTooltip Text="Zur Cloud" Duration="Constants.TOOLTIP_DURATION" Class="mr-5">
@@ -88,6 +93,7 @@ else
         await base.OnInitializedAsync();
         var access = await UserAccessService.GetUserAccess();
 
+        // nasty fix, but it works, so fuck it
         if (access.Settings is null)
         {
             _isDarkMode = true;
@@ -98,7 +104,6 @@ else
             _isDarkMode = access.Settings.IsDarkMode;
             _open = access.Settings.IsNavbarExpanded;
         }
-        
     }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -126,7 +131,7 @@ else
         }
         
         var access = await UserAccessService.GetUserAccess();
-        if (access is null)
+        if (access is null) // should never be null, but code does what it does
         {
             _shouldRedirect = true;
         }

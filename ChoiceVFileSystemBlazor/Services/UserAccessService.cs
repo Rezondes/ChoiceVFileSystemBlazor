@@ -101,6 +101,8 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
             newAccessModel = new AccessDbModel(-1, discordId, discordName);
         }
 
+        // sometimes blazor will trigger this event two times so the second time will fail
+        // fuck this shit and check if its already there
         var addResponse = await accessProxy.AddAccessModelAsync(newAccessModel);
         if (!addResponse)
         {

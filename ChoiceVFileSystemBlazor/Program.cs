@@ -7,7 +7,6 @@ using ChoiceVFileSystemBlazor.Components._Base;
 using ChoiceVFileSystemBlazor.Components._Layout.Hubs;
 using ChoiceVFileSystemBlazor.Components.Supportfiles.Hubs;
 using ChoiceVFileSystemBlazor.Database;
-using ChoiceVFileSystemBlazor.Database._Shared;
 using ChoiceVFileSystemBlazor.Database.Accesses.Proxies;
 using ChoiceVFileSystemBlazor.Database.Accesses.Proxies.Interfaces;
 using ChoiceVFileSystemBlazor.Database.Discord.Proxies;
@@ -21,7 +20,6 @@ using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces;
 using ChoiceVFileSystemBlazor.Extensions;
 using ChoiceVFileSystemBlazor.Services;
 using ChoiceVRefitClient;
-using ChoiceVSharedApiModels.BankAccounts;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
@@ -122,6 +120,8 @@ builder.Services.AddAuthentication(options =>
     {
         OnCreatingTicket = async context =>
         {
+            Console.WriteLine(context.AccessToken);
+            
             var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", context.AccessToken);
@@ -169,6 +169,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 #endregion
 
+builder.Services.AddHostedService<StartupService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<UserAccessService>();
+
 #region ChoiceV Api
 var choiceVApiBaseAddress = builder.Configuration.GetValue<string>("ChoiceVApi:BaseAddress")!;
 Assert(string.IsNullOrEmpty(choiceVApiBaseAddress), "ChoiceVApi Address is missing");
@@ -204,7 +209,6 @@ builder.Services.AddScoped<IDiscordRoleLogsProxy, DiscordRoleLogsProxy>();
 builder.Services.AddScoped<INewsProxy, NewsProxy>();
 #endregion
 
-builder.Services.AddScoped<UserAccessService>();
 
 builder.Services.AddSignalR();
 
@@ -218,7 +222,6 @@ if (!builder.Environment.IsDevelopment())
         });
     });
 }
-builder.Services.AddHostedService<StartupService>();
 
 var app = builder.Build();
 

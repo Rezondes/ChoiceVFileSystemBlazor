@@ -14,4 +14,8 @@ public interface IAccountApi
     
     [Get("/api/v1/account?discordId={discordId}")]
     Task<ApiResponse<AccountApiModel?>> GetByDiscordIdAsync(string discordId);
+    
+    [Get("/api/v1/account/ban?accountId={accountId}&message={message}")]
+    [Headers("Authorization: Bearer")]
+    Task<ApiResponse<object>> BanAccountByAccountIdAsync(int accountId, string message);
 }

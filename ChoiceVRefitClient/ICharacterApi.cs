@@ -14,7 +14,7 @@ public interface ICharacterApi
     [Get("/api/v1/character?characterId={characterId}")]
     Task<ApiResponse<CharacterApiModel?>> GetByCharacterIdAsync(int characterId); 
     
-    [Get("/api/v1/character?accountId={accountId}")]
+    [Get("/api/v1/character?accountId={accountId}")] 
     Task<ApiResponse<List<CharacterApiModel>>> GetByAccountIdAsync(int accountId); 
     
     [Get("/api/v1/character/live")]
