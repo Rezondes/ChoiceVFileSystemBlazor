@@ -54,7 +54,9 @@ else
         </MudDrawer>
 
         <MudMainContent Style="height: 100%; overflow: hidden;">
-            @Body
+            <MudContainer Class="px-8" MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: auto; padding: 16px 0;">
+                @Body
+            </MudContainer>
         </MudMainContent>
     </MudLayout>
 }
@@ -87,6 +89,9 @@ else
     private bool _isDarkMode = true;
 
     private NavMenu? _navMenu;
+
+    private Timer? _saveToggleDrawer;
+    private Timer? _saveLightMode;
     
     protected override async Task OnInitializedAsync()
     {
@@ -190,25 +195,23 @@ else
 
     private async Task ToggleDrawer()
     {
-        var access = await UserAccessService.GetUserAccess();
-
-        var response = await AccessProxy.UpdateIsNavbarExpandedAsync(access.Id, !_open, access.Id);
-        if (!response) return;
-        
         _open = !_open;
         StateHasChanged();
+
+        _saveToggleDrawer?.Dispose();
+        var access = await UserAccessService.GetUserAccess();
+        _saveToggleDrawer = new Timer(async _ => await AccessProxy.UpdateIsNavbarExpandedAsync(access.Id, _open, access.Id), null, TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
     }
     private async Task ToggleDarkMode(bool newValue)
     {
-        var access = await UserAccessService.GetUserAccess();
-
-        var response = await AccessProxy.UpdateIsDarkModeAsync(access.Id, newValue, access.Id);
-        if (!response) return;
-        
         _isDarkMode = newValue;
         StateHasChanged();
+        
+        _saveLightMode?.Dispose();
+        var access = await UserAccessService.GetUserAccess();
+        _saveLightMode = new Timer(async _ => await AccessProxy.UpdateIsDarkModeAsync(access.Id, newValue, access.Id), null, TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
     }
-
+    
     private async Task OpenAccessPage()
     {
         var access = await UserAccessService.GetUserAccess();

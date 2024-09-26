@@ -1,11 +1,11 @@
-@page "/companies/view/{id}"
+@page "/vehicles/view/{id}"
 
 @code {
-    public const string Url = "/companies/view/";
+    public const string Url = "/vehicles/view/";
     public static string GetRedirectUrl(string id) => Url + id;
 }
 
-<PageTitle>Unternehmen Ansicht</PageTitle>
+<PageTitle>Fahrzeug Ansicht</PageTitle>
 
 @if (_loading)
 {
@@ -22,24 +22,35 @@ else if (_model is null)
 else
 {
     <MudItem Style="height: 75px;">
-        <MudText Typo="Typo.h3">[@_model.Id] @_model.Name</MudText>
+        <MudText Typo="Typo.h3"> [@_model.Id] @_model.NumberPlate</MudText>
     </MudItem>
     <MudGrid Justify="Justify.Center">
         <MudItem xs="5" >
             <MudGrid>
                 <MudItem xs="12">
-                    <MudPaper Height="240px">
+                    <MudPaper Height="495px">
                         <div class="d-flex flex-row align-items-center px-5 mud-width-full">
                             <MudIcon Icon="@Icons.Material.Filled.Info"/>
                             <MudText Class="px-5" Typo="Typo.h5">Spielerinformationen</MudText>
                         </div>
                         <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
-                            <MudText>Id: @_model.Id</MudText>
-                            <MudText>ShortName: @_model.ShortName</MudText>
-                            <MudText>CompanyType: @_model.CompanyType</MudText>
-                            <MudText>StreetName: @_model.StreetName</MudText>
-                            <MudText>Reputation: @_model.Reputation</MudText>
-                            <MudText>RiskLevel: @_model.RiskLevel</MudText>
+                            <MudText>ModelId: @_model.ModelId</MudText>
+                            <MudText>ChassisNumber: @_model.ChassisNumber</MudText>
+                            <MudText>Position: @_model.Position</MudText>
+                            <MudText>Rotation: @_model.Rotation</MudText>
+                            <MudText>GarageId: @_model.GarageId</MudText>
+                            <MudText>RegisteredCompanyId: @_model.RegisteredCompanyId</MudText>
+                            <MudText>Dimension: @_model.Dimension</MudText>
+                            <MudText>LastMoved: @_model.LastMoved</MudText>
+                            <MudText>NumberPlate: @_model.NumberPlate</MudText>
+                            <MudText>CreateDate: @_model.CreateDate</MudText>
+                            <MudText>Fuel: @_model.Fuel</MudText>
+                            <MudText>DrivenDistance: @_model.DrivenDistance</MudText>
+                            <MudText>KeyLockVersion: @_model.KeyLockVersion</MudText>
+                            <MudText>DirtLevel: @_model.DirtLevel</MudText>
+                            <MudText>RandomlySpawnedDate: @_model.RandomlySpawnedDate</MudText>
+                            <MudText>ModelName: @_model.Config?.ModelName</MudText>
+                            <MudText>DisplayName: @_model.Config?.DisplayName</MudText>
                         </MudContainer>
                     </MudPaper>
                 </MudItem>
@@ -63,12 +74,12 @@ else
         <MudItem xs="12">
             <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
                 <MudDataGrid
-                    T="CompanyEmployeeApiModel" MultiSelection="true"
-                    Items="@_model.Employees" SortMode="SortMode.Multiple" Filterable="true"
+                    T="VehicleRegistrationApiModel" MultiSelection="true"
+                    Items="@_model.Registrations" SortMode="SortMode.Multiple" Filterable="true"
                     QuickFilter="@QuickFilter" RowClick="@RowClicked" Style="width: 100%;"
                     Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="400px">
                     <ToolBarContent>
-                        <MudText Typo="Typo.h6">Employee Übersicht</MudText>
+                        <MudText Typo="Typo.h6">Registration Übersicht</MudText>
                         <MudSpacer />
                         <MudTextField
                             T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
@@ -78,26 +89,22 @@ else
                     </ToolBarContent>
                     <Columns>
                         <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
-                        <PropertyColumn Property="x => x.CharacterId" Title="CharacterId" />
-                        <PropertyColumn Property="x => x.CharacterName" Title="CharacterName" />
-                        <PropertyColumn Property="x => x.Salary" Title="Salary" />
-                        <PropertyColumn Property="x => x.InDuty" Title="InDuty" />
-                        <PropertyColumn Property="x => x.PhoneNumber" Title="PhoneNumber" />
+                        <PropertyColumn Property="x => x.VehicleId" Title="VehicleId" />
+                        <PropertyColumn Property="x => x.OwnerId" Title="OwnerId" />
+                        <PropertyColumn Property="x => x.CompanyOwnerId" Title="CompanyOwnerId" />
+                        <PropertyColumn Property="x => x.NumberPlate" Title="NumberPlate" />
+                        <PropertyColumn Property="x => x.Start" Title="Start" />
+                        <PropertyColumn Property="x => x.End" Title="End" />
                     </Columns>
                     <PagerContent>
-                        <MudDataGridPager T="CompanyEmployeeApiModel" />
+                        <MudDataGridPager T="VehicleRegistrationApiModel" />
                     </PagerContent>
                 </MudDataGrid>
             </MudPaper>
         </MudItem>
-        <MudItem xs="12">
-            <VehicleOverviewDataGrid @ref="_vehiclesOverviewDataGrid" Height="400px" CompanyId="_id"/>
-        </MudItem>
-        <MudItem xs="12">
-            <BankAccountOverviewDataGrid @ref="_bankAccountOverviewDataGrid" Height="400px" CompanyId="_id"/>
-        </MudItem>
     </MudGrid>
 }
+
 
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
@@ -107,13 +114,10 @@ else
     
     [Parameter] public string Id { get; set; }
     private int _id;
-
-    private CompanyApiModel? _model;
-
+    
+    private VehicleApiModel? _model;
+    
     private string? _searchString;
-
-    private BankAccountOverviewDataGrid _bankAccountOverviewDataGrid;
-    private VehicleOverviewDataGrid _vehiclesOverviewDataGrid;
     
     protected override async Task OnInitializedAsync()
     {
@@ -122,7 +126,7 @@ else
         _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
-    
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -132,7 +136,7 @@ else
             Navigation.NavigateToNotAuthorized();
             return;
         }
-
+        
         var parsingSuccess = ParseId();
         if (!parsingSuccess)
         {
@@ -141,10 +145,8 @@ else
         }
 
         await Load();
-        await _bankAccountOverviewDataGrid.Load();
-        await _vehiclesOverviewDataGrid.Load();
     }
-    
+
     private bool ParseId()
     {
         if (!int.TryParse(Id, out var companyId))
@@ -157,15 +159,14 @@ else
         _id = companyId;
         return true;
     }
-
+    
     private async Task Load()
-    {
-        _loading = true;
+    {_loading = true;
         StateHasChanged();
 
         try
         {
-            var response = await CompanyApi.GetByCompanyIdAsync(_id);
+            var response = await VehicleApi.GetByVehicleIdAsync(_id);
             if (response.IsSuccessStatusCode)
             {
                 _model = response.Content;
@@ -190,8 +191,8 @@ else
         
         StateHasChanged();
     }
-    
-    private Func<CompanyEmployeeApiModel, bool> QuickFilter => x =>
+
+    private Func<VehicleRegistrationApiModel, bool> QuickFilter => x =>
     {
         if (_searchString == null) return true;
         
@@ -200,19 +201,22 @@ else
         if (string.IsNullOrWhiteSpace(lowerSearchString))
             return true;
 
-        if (x.CharacterId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.VehicleId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if (x.CharacterName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.OwnerId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
-        if (x.Salary.ToString(CultureInfo.CurrentCulture).ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.CompanyOwnerId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
-        if (x.InDuty.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.NumberPlate.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
-        if (x.PhoneNumber.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.Start.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.End.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
         if ($"{x.Id}".ToLower().Contains(_searchString))
@@ -220,9 +224,18 @@ else
 
         return false;
     };
-    
-    void RowClicked(DataGridRowClickEventArgs<CompanyEmployeeApiModel> args)
+
+    void RowClicked(DataGridRowClickEventArgs<VehicleRegistrationApiModel> args)
     {
-        Navigation.NavigateTo(CharacterView.GetRedirectUrl(args.Item.CharacterId.ToString()));
+        var item = args.Item;
+
+        if (item.OwnerId.HasValue)
+        {
+            Navigation.NavigateTo(CharacterView.GetRedirectUrl(item.OwnerId.Value.ToString()));
+        }
+        else if (item.CompanyOwnerId.HasValue)
+        {
+            Navigation.NavigateTo(CompanyView.GetRedirectUrl(item.CompanyOwnerId.Value.ToString()));
+        }
     }
 }

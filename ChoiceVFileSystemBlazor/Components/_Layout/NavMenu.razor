@@ -5,6 +5,7 @@
 @using ChoiceVFileSystemBlazor.Components.Companies.Pages
 @using ChoiceVFileSystemBlazor.Components.Groupingfiles.Pages
 @using ChoiceVFileSystemBlazor.Components.Supportfiles.Pages
+@using ChoiceVFileSystemBlazor.Components.Vehicles.Pages
 @using ChoiceVFileSystemBlazor.Components.Supportkeylogs.Pages
 @namespace ChoiceVFileSystemBlazor.Components._Layout
 
@@ -63,6 +64,7 @@
             {
                 <MudNavLink Href="@BankAccountOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBalance">Bankkontenübersicht</MudNavLink>
             }
+            <MudNavLink Href="@VehicleOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.DirectionsCar">Fahrzeugübersicht</MudNavLink>
             @if (UserAccessService.HasRight(RightEnum.ViewSupportKeyLogsArea))
             {
                 <MudNavLink Href="@SupportkeylogsOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.KeyboardHide">Supporttastenlogs</MudNavLink>

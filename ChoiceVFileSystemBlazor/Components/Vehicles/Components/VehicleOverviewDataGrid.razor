@@ -1,3 +1,4 @@
+@using ChoiceVFileSystemBlazor.Components.Vehicles.Pages
 @if (_loading)
 {
     <LoadingComponent/>
@@ -5,12 +6,12 @@
 else
 {
     <MudDataGrid
-        T="BankAccountApiModel" MultiSelection="true"
+        T="VehicleApiModel" MultiSelection="true"
         Items="@_data" SortMode="SortMode.Multiple" Filterable="true"
         QuickFilter="@QuickFilter" RowClick="@RowClicked" Style="width: 100%;"
-        Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="@(Height is null ? "75vh" : Height)">
+        Hideable="true" Hover="true" Striped="true" FixedHeader="true"  Height="@(Height ?? "75vh")">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">@(Label ?? "Bankkonten Übersicht")</MudText>
+            <MudText Typo="Typo.h6">@(Label ?? "Fahrzeug Übersicht")</MudText>
             <MudSpacer />
             <MudTextField
                 T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
@@ -20,50 +21,50 @@ else
         </ToolBarContent>
         <Columns>
             <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
-            <PropertyColumn Property="x => x.AccountType" Title="AccountType" />
-            <PropertyColumn Property="x => x.Name" Title="Name" />
-            <PropertyColumn Property="x => x.Balance" Title="Balance" />
-            <PropertyColumn Property="x => x.OwnerType" Title="OwnerType" />
-            <PropertyColumn Property="x => x.OwnerValue" Title="OwnerValue" />
-            <PropertyColumn Property="x => x.BankCompany" Title="BankCompany" />
+            <PropertyColumn Property="x => x.NumberPlate" Title="NumberPlate" />
+            <PropertyColumn Property="x => x.Config!.ModelName" Title="ModelName" />
+            <PropertyColumn Property="x => x.Fuel" Title="Fuel" />
+            <PropertyColumn Property="x => x.DrivenDistance" Title="DrivenDistance" />
+            <PropertyColumn Property="x => x.LastMoved" Title="LastMoved" />
         </Columns>
         <PagerContent>
-            <MudDataGridPager T="BankAccountApiModel" />
+            <MudDataGridPager T="VehicleApiModel" />
         </PagerContent>
     </MudDataGrid>
 }
 
 @code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     [Parameter] public int? CharacterId { get; set; }
     [Parameter] public int? CompanyId { get; set; }
     [Parameter] public string? Label { get; set; }
     [Parameter] public string? Height { get; set; }
-    
+
     private bool _loading = true;
     private string? _searchString;
-    
-    private List<BankAccountApiModel> _data = [];
+
+    private List<VehicleApiModel> _data = [];
 
     public async Task Load()
     {
         _loading = true;
         StateHasChanged();
-        
+
         try
         {
-            ApiResponse<List<BankAccountApiModel>> response;
-            
+            ApiResponse<List<VehicleApiModel>> response;
+
             if (CharacterId.HasValue)
             {
-                response = await BankAccountApi.GetBankAccountsByCharacterIdAsync(CharacterId.Value);
+                response = await VehicleApi.GetAllByCharacterIdAsync(CharacterId.Value);
             }
             else if (CompanyId.HasValue)
             {
-                response = await BankAccountApi.GetBankAccountsByCompanyIdAsync(CompanyId.Value);
+                response = await VehicleApi.GetAllByCompanyIdAsync(CompanyId.Value);
             }
             else
             {
-                response = await BankAccountApi.GetAllAsync();
+                response = await VehicleApi.GetAllAsync();
             }
 
             if (response.IsSuccessStatusCode)
@@ -87,46 +88,39 @@ else
         {
             _loading = false;
         }
-        
+
         StateHasChanged();
     }
-    
-    private Func<BankAccountApiModel, bool> QuickFilter => x =>
+
+    private Func<VehicleApiModel, bool> QuickFilter => x =>
     {
         if (_searchString == null) return true;
-        
+
         var lowerSearchString = _searchString.ToLower();
 
         if (string.IsNullOrWhiteSpace(lowerSearchString))
             return true;
 
-        if (x.AccountType.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.NumberPlate.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if (x.Name.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.Fuel.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.DrivenDistance.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.LastMoved.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
-        if (x.Balance.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        
-        if (x.OwnerType.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        
-        if (x.OwnerValue.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        
-        if (x.BankCompany.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        
-        if ($"{x.Id}".ToLower().Contains(_searchString))
+        if ($"{x.Id}".ToLower().Contains(lowerSearchString))
             return true;
 
         return false;
     };
-    
-    void RowClicked(DataGridRowClickEventArgs<BankAccountApiModel> args)
+
+    void RowClicked(DataGridRowClickEventArgs<VehicleApiModel> args)
     {
-        Navigation.NavigateTo(BankAccountView.GetRedirectUrl(args.Item.Id.ToString()));
+        Navigation.NavigateTo(VehicleView.GetRedirectUrl(args.Item.Id.ToString()));
     }
-    
 }

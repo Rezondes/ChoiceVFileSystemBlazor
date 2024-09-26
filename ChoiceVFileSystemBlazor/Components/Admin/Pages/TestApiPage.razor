@@ -12,7 +12,8 @@
     <p>Total Time Elapsed: @totalTimeElapsed seconds</p>
 </div>
 
-<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="TestBearer">Test Api</MudButton>
+<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="TestBan">Test Ban</MudButton>
+<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="TestUnban">Test Unban</MudButton>
 
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
@@ -218,14 +219,17 @@
         }
     }
 
-    private async Task TestBearer()
+    private async Task TestBan()
     {
         try
         {
-            var result = await AccountApi.BanAccountByAccountIdAsync(1, "testban");
+            var result = await AccountApi.BanAccountByAccountIdAsync(270, "testban");
             if (result.IsSuccessStatusCode)
             {
-                Snackbar.Add(result.Content.ToString(), Severity.Success);
+                var data = result.Content;
+                var message = $"isBanned: {data.IsBanned} | isKicked: {data.IsKicked}";
+                
+                Snackbar.Add(message, Severity.Success);
                 return;
             }
 
@@ -237,4 +241,25 @@
         }
     }
 
+    private async Task TestUnban()
+    {
+        try
+        {
+            var result = await AccountApi.UnbanAccountByAccountIdAsync(270);
+            if (result.IsSuccessStatusCode)
+            {
+                var data = result.Content;
+                var message = $"isUnbanned: {data.IsUnbanned}";
+                
+                Snackbar.Add(message, Severity.Success);
+                return;
+            }
+
+            Snackbar.Add(result.Error.Message, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
 }

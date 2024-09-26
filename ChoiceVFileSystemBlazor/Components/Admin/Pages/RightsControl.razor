@@ -22,42 +22,40 @@ else
         }
     </style>
     
-    <div style="height: 100%; overflow-y: auto;">
-        <div class="centered">
-            <h3>Rechteverteilungs</h3>
-        </div>
-
-        <MudTable Items="@_rightList" Striped="true" Bordered="true" FixedHeader>
-            <HeaderContent>
-                <MudTh>Rechtname</MudTh>
-                @foreach (var item in _ranksList)
-                {
-                    <MudTh>@item.Item2</MudTh>
-                }
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd DataLabel="Rechtname">@context.Item2</MudTd>
-                @{
-                    foreach (var item in _ranksList)
-                    {
-                        var rank = (RankEnum)item.Item1;
-                        var right = (RightEnum)context.Item1;
-
-                        if (!_checkboxValues.ContainsKey((rank, right)))
-                        {
-                            _checkboxValues[(rank, right)] = _rankWithRights.First(x => x.Item1 == rank).Item2.Contains(right);
-                        }
-
-                        <MudTd>
-                            <MudCheckBox T="bool" @bind-Value="_checkboxValues[(rank, right)]" Color="Color.Primary" UncheckedColor="Color.Default"/>
-                        </MudTd>
-                    }
-                }
-            </RowTemplate>
-        </MudTable>
-
-        <MudFab StartIcon="@Icons.Material.Filled.Save" OnClick="SaveRights" Color="Color.Tertiary" Size="Size.Large" Class="fixed-button"/>
+    <div class="centered">
+        <h3>Rechteverteilungs</h3>
     </div>
+
+    <MudTable Items="@_rightList" Striped="true" Bordered="true" FixedHeader>
+        <HeaderContent>
+            <MudTh>Rechtname</MudTh>
+            @foreach (var item in _ranksList)
+            {
+                <MudTh>@item.Item2</MudTh>
+            }
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Rechtname">@context.Item2</MudTd>
+            @{
+                foreach (var item in _ranksList)
+                {
+                    var rank = (RankEnum)item.Item1;
+                    var right = (RightEnum)context.Item1;
+
+                    if (!_checkboxValues.ContainsKey((rank, right)))
+                    {
+                        _checkboxValues[(rank, right)] = _rankWithRights.First(x => x.Item1 == rank).Item2.Contains(right);
+                    }
+
+                    <MudTd>
+                        <MudCheckBox T="bool" @bind-Value="_checkboxValues[(rank, right)]" Color="Color.Primary" UncheckedColor="Color.Default"/>
+                    </MudTd>
+                }
+            }
+        </RowTemplate>
+    </MudTable>
+
+    <MudFab StartIcon="@Icons.Material.Filled.Save" OnClick="SaveRights" Color="Color.Tertiary" Size="Size.Large" Class="fixed-button"/>
 }
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }

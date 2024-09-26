@@ -13,7 +13,8 @@ public class AccountApiModel
         string discordId, 
         DateTime? lastLogin, 
         AccountStateApiEnum state, 
-        string? stateReason)
+        string? stateReason,
+        bool isCurrentlyOnline)
     {
         Id = id;
         Name = name;
@@ -22,8 +23,9 @@ public class AccountApiModel
         LastLogin = lastLogin;
         State = state;
         StateReason = stateReason;
+        IsCurrentlyOnline = isCurrentlyOnline;
     }
-
+    
     [JsonPropertyName("id")]
     public int Id { get; set; }
     
@@ -44,4 +46,7 @@ public class AccountApiModel
     
     [JsonPropertyName("stateReason")]
     public string? StateReason { get; set; }
+    
+    [JsonPropertyName("isCurrentlyOnline")]
+    public bool IsCurrentlyOnline { get; set; }
 }

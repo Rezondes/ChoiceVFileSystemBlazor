@@ -36,14 +36,16 @@
 @using ChoiceVFileSystemBlazor.Components.Access.Pages
 @using ChoiceVFileSystemBlazor.Components.Accounts.Pages
 @using ChoiceVFileSystemBlazor.Components.BankAccounts.Compenents
-@using ChoiceVFileSystemBlazor.Components.Companies.Pages
 @using ChoiceVFileSystemBlazor.Components.BankAccounts.Pages
+@using ChoiceVFileSystemBlazor.Components.Companies.Pages
+@using ChoiceVFileSystemBlazor.Components.Companies.Components
 @using ChoiceVFileSystemBlazor.Components.Characters.Pages
 @using ChoiceVFileSystemBlazor.Components.Characters.Components
 @using ChoiceVFileSystemBlazor.Components.Supportfiles.Hubs
 @using ChoiceVFileSystemBlazor.Components.Supportfiles.Enums
 @using ChoiceVFileSystemBlazor.Components.Supportfiles.Pages
 @using ChoiceVFileSystemBlazor.Components.Supportfiles.Components
+@using ChoiceVFileSystemBlazor.Components.Vehicles.Components
 @using ChoiceVFileSystemBlazor.Database
 @using ChoiceVFileSystemBlazor.Database._Shared
 @using ChoiceVFileSystemBlazor.Database.Accesses.Extensions
@@ -71,6 +73,7 @@
 @using ChoiceVSharedApiModels.Companys
 @using ChoiceVSharedApiModels.Inventory
 @using ChoiceVSharedApiModels.Server
+@using ChoiceVSharedApiModels.Vehicles
 
 @using Refit
 
@@ -92,6 +95,7 @@
 @inject ICompanyApi CompanyApi
 @inject IInventoryApi InventoryApi
 @inject IServerApi ServerApi
+@inject IVehicleApi VehicleApi
 
 // SCP Database Proxies
 @inject IAccessProxy AccessProxy

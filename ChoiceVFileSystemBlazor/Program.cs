@@ -188,6 +188,7 @@ builder.Services.ConfigureHttpClient<ICharacterApi>(choiceVApiBaseAddress, choic
 builder.Services.ConfigureHttpClient<ICompanyApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
 builder.Services.ConfigureHttpClient<IInventoryApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
 builder.Services.ConfigureHttpClient<IServerApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
+builder.Services.ConfigureHttpClient<IVehicleApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
 #endregion
 
 #region Database

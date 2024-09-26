@@ -13,5 +13,8 @@ public interface IBankAccountApi
     Task<ApiResponse<BankAccountApiModel?>> GetBankAccountByIdAsync(int bankaccountId); 
     
     [Get("/api/v1/bankaccount?characterId={characterId}")]
-    Task<ApiResponse<List<BankAccountApiModel>>>  GetBankAccountsByCharacterIdAsync(int characterId); 
+    Task<ApiResponse<List<BankAccountApiModel>>> GetBankAccountsByCharacterIdAsync(int characterId); 
+    
+    [Get("/api/v1/bankaccount?companyId={companyId}")]
+    Task<ApiResponse<List<BankAccountApiModel>>> GetBankAccountsByCompanyIdAsync(int companyId); 
 }

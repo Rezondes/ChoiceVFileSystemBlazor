@@ -1,21 +1,20 @@
-@page "/companies"
-@using ChoiceVFileSystemBlazor.Components.Companies.Components
+@page "/vehicles"
 
 @code {
-    public const string Url = "/companies";
+    public const string Url = "/vehicles";
     public static string GetRedirectUrl() => Url;
 }
 
-<PageTitle>Unternehmen Übersicht</PageTitle>
+<PageTitle>Fahrzeug Übersicht</PageTitle>
 
-<CompanyOverviewDataGrid @ref="_companyOverview"/>
+<VehicleOverviewDataGrid @ref="_vehiclesOverviewDataGrid"/>
 
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     private bool _isAuthorized;
     private bool _shouldRedirect;
 
-    private CompanyOverviewDataGrid _companyOverview;
+    private VehicleOverviewDataGrid _vehiclesOverviewDataGrid;
     
     protected override async Task OnInitializedAsync()
     {
@@ -24,7 +23,7 @@
         _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
-    
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -35,6 +34,6 @@
             return;
         }
 
-        await _companyOverview.Load();
+        await _vehiclesOverviewDataGrid.Load();
     }
 }

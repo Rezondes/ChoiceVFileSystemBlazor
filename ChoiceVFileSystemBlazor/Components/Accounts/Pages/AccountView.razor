@@ -13,60 +13,68 @@
 }
 else if (_model is null)
 {
-    <MudAlert Severity="Severity.Error">Ein Fehler ist aufgetreten!</MudAlert>
+    <ErrorComponent/>
 }
 else
 {
-    <MudContainer Class="px-8" MaxWidth="MaxWidth.False"  style="height: 100%; overflow-y: auto; padding: 16px 0;">
-        <MudItem Style="height: 75px;">
-            <MudText Typo="Typo.h3">@_model.Name</MudText>
+    <MudItem Style="height: 75px;">
+        <MudText Typo="Typo.h3">[@_model.Id] @_model.Name</MudText>
+    </MudItem>
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="5" >
+            <MudPaper Height="240px">
+                <div class="d-flex flex-row align-items-center px-5 mud-width-full">
+                    <MudIcon Icon="@Icons.Material.Filled.Info"/>
+                    <MudText Class="px-5" Typo="Typo.h5">Spielerinformationen</MudText>
+                </div>
+                <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
+                    <MudText>Spieler-Id: @_model.Id</MudText>
+                    <MudText>SocialClubName: @_model.SocialClubName</MudText>
+                    <MudText>DiscordId: @_model.DiscordId</MudText>
+                    <MudText>LastLogin: @_model.LastLogin</MudText>
+                    <MudText>State: @_model.State</MudText>
+                    <MudText>StateReason: @_model.StateReason</MudText>
+                </MudContainer>
+            </MudPaper>
         </MudItem>
-        <MudGrid Justify="Justify.Center">
-            <MudItem xs="5" >
-                <MudPaper Height="240px">
-                    <div class="d-flex flex-row align-items-center px-5 mud-width-full">
-                        <MudIcon Icon="@Icons.Material.Filled.Info"/>
-                        <MudText Class="px-5" Typo="Typo.h5">Spielerinformationen</MudText>
-                    </div>
-                    <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
-                        <MudText>Spieler-Id: @_model.Id</MudText>
-                        <MudText>SocialClubName: @_model.SocialClubName</MudText>
-                        <MudText>DiscordId: @_model.DiscordId</MudText>
-                        <MudText>LastLogin: @_model.LastLogin</MudText>
-                        <MudText>State: @_model.State</MudText>
-                        <MudText>StateReason: @_model.StateReason</MudText>
-                    </MudContainer>
-                </MudPaper>
-            </MudItem>
 
-            <MudItem xs="7">
-                <MudPaper Height="140px">
-                    <div class="d-flex flex-row align-items-center px-5 mud-width-full">
-                        <MudIcon Icon="@Icons.Material.Filled.AdsClick"/>
-                        <MudText Class="px-5" Typo="Typo.h5">Support-Funktionen</MudText>
-                    </div>
-                    <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
-                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Timeout/Bann</MudButton>
-                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Kicken</MudButton>
-                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Whitelisting</MudButton>
+        <MudItem xs="7">
+            <MudPaper Height="140px">
+                <div class="d-flex flex-row align-items-center px-5 mud-width-full">
+                    <MudIcon Icon="@Icons.Material.Filled.AdsClick"/>
+                    <MudText Class="px-5" Typo="Typo.h5">Support-Funktionen</MudText>
+                </div>
+                <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
+                    @if (_model.IsCurrentlyOnline)
+                    {
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="KickAccount">Kicken</MudButton>
                         <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Unstuck</MudButton>
-                    </div>
-                </MudPaper>
-            </MudItem>
+                    }
+                    
+                    @if (_model.State == AccountStateApiEnum.Banned)
+                    {
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="UnbanAccount">Unban</MudButton>
+                    }
+                    else 
+                    {
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="BanAccount">Bann</MudButton>
+                    }
+                </div>
+            </MudPaper>
+        </MudItem>
 
-            <MudItem xs="12">
-                <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
-                    <CharacterOverviewDataGrid AccountId="_id" Height="400px" @ref="_characterOverviewDataGrid"/>
-                </MudPaper>
-            </MudItem>
+        <MudItem xs="12">
+            <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
+                <CharacterOverviewDataGrid AccountId="_id" Height="400px" @ref="_characterOverviewDataGrid"/>
+            </MudPaper>
+        </MudItem>
 
-            <MudItem xs="12">
-                <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
-                    <SupportfileOverviewDataGrid @ref="_supportfileOverviewDataGrid" AccountId="_id" Height="400px" Label="Support-Fälle"/>
-                </MudPaper>
-            </MudItem>
-        </MudGrid>
-    </MudContainer>
+        <MudItem xs="12">
+            <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
+                <SupportfileOverviewDataGrid @ref="_supportfileOverviewDataGrid" AccountId="_id" Height="400px" Label="Support-Fälle"/>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
 }
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
@@ -110,7 +118,6 @@ else
         }
 
         await LoadAllAsync();
-        await _supportfileOverviewDataGrid.Load();
     }
     
     private bool ParseId()
@@ -137,6 +144,7 @@ else
         StateHasChanged();
         
         await _characterOverviewDataGrid.Load();
+        await _supportfileOverviewDataGrid.Load();
     }
 
     private async Task LoadAccountAsync()
@@ -163,35 +171,122 @@ else
         }
     }
     
-    private Func<CharacterApiModel, bool> QuickFilter => x =>
+    private async Task KickAccount()
     {
-        if (_searchString == null) return true;
+        if (_model is null) return;
         
-        var lowerSearchString = _searchString.ToLower();
+        var message = "Du wurdest gekickt!";
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                "Nachricht",
+                string.Empty,
+                message
+            ),
+        };
 
-        if (string.IsNullOrWhiteSpace(lowerSearchString))
-            return true;
+        var dialogData = await DialogService.OpenDialog(
+            "Spieler bannen", 
+            "Bist du dir sicher, dass du diesen Spieler bannen willst?", 
+            "Spieler bannen",
+            inputs);
+        if (dialogData is null) return;
 
-        if (x.FirstName != null && x.FirstName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-
-        if (x.LastName != null && x.LastName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
-            return true;
+        var (validated, parsedMessage) = dialogData[0].ValidateInput<string>();
+        if (validated)
+        {
+            message = parsedMessage;
+        }
         
-        if (x.MiddleName != null && x.MiddleName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
-            return true;
+        var response = await AccountApi.KickAccountByAccountIdAsync(_model.Id, message!);
+        if (!response.IsSuccessStatusCode)
+        {
+            if (response.Error.Content == "AuthErrorMessage")
+            {
+                Snackbar.Add("Du hast kein Recht dazu das zu machen!", Severity.Error);
+                return;
+            }
+            
+            Snackbar.Add(response.Error.Message, Severity.Error);
+            return;
+        }
         
-        if (x.AccountId != null && x.AccountId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
-            return true;
-        
-        if ($"{x.Id}".ToLower().Contains(_searchString))
-            return true;
+        Snackbar.Add("Account wurde gekickt!", Severity.Success);
+        await LoadAllAsync();
+    }
 
-        return false;
-    };
-    
-    void RowClicked(DataGridRowClickEventArgs<CharacterApiModel> args)
+    private async Task UnbanAccount()
     {
-        Navigation.NavigateTo(CharacterView.GetRedirectUrl(args.Item.Id.ToString()));
+        if (_model is null) return;
+        
+        var result = await DialogService.ShowMessageBox(
+            "Spieler entbannen", 
+            "Bist du dir sicher, dass du diesen Spieler entbannen willst?", 
+            yesText:"Spieler entbannen!", cancelText:"Abbrechen"
+        );
+
+        if (result is null or false) return;
+        
+        var response = await AccountApi.UnbanAccountByAccountIdAsync(_model.Id);
+        if (!response.IsSuccessStatusCode)
+        {
+            if (response.Error.Content == "AuthErrorMessage")
+            {
+                Snackbar.Add("Du hast kein Recht dazu das zu machen!", Severity.Error);
+                return;
+            }
+            
+            Snackbar.Add(response.Error.Message, Severity.Error);
+            return;
+        }
+        
+        Snackbar.Add("Account wurde entbannt!", Severity.Success);
+        await LoadAllAsync();
+    }
+
+    private async Task BanAccount()
+    {
+        if (_model is null) return;
+        
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                "Nachricht",
+                string.Empty,
+                "Du bist gebannt!"
+            ),
+        };
+
+        var dialogData = await DialogService.OpenDialog(
+            "Spieler bannen", 
+            "Bist du dir sicher, dass du diesen Spieler bannen willst?", 
+            "Spieler bannen",
+            inputs);
+        if (dialogData is null) return;
+
+        var message = "Du bist gebannt!";
+        var (validated, parsedMessage) = dialogData[0].ValidateInput<string>();
+        if (validated)
+        {
+            message = parsedMessage;
+        }
+        
+        var response = await AccountApi.BanAccountByAccountIdAsync(_model.Id, message!);
+        if (!response.IsSuccessStatusCode)
+        {
+            if (response.Error.Content == "AuthErrorMessage")
+            {
+                Snackbar.Add("Du hast kein Recht dazu das zu machen!", Severity.Error);
+                return;
+            }
+            
+            Snackbar.Add(response.Error.Message, Severity.Error);
+            return;
+        }
+        
+        Snackbar.Add("Account wurde gebannt!", Severity.Success);
+        await LoadAllAsync();
     }
 }

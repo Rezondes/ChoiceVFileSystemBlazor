@@ -11,93 +11,103 @@
 {
     <PageLoading/>
 }
-else if (_inventory is null || _model is null)
+else if (_model is null)
 {
     <PageLoading/>
 }
 else
 {
-    <MudContainer Class="px-8" MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: auto; padding: 16px 0;">
-        <MudGrid Justify="Justify.Center">
-            <MudItem xs="12">
-                <MudPaper>
-                    <MudToolBar>
-                        <MudTooltip Text="Account öffnen" Duration="@Constants.TOOLTIP_DURATION">
-                            <MudIconButton Icon="@Icons.Material.Filled.AccountBox" OnClick="OpenAccount"/>
+    <MudItem Style="height: 75px;">
+        <MudText Typo="Typo.h3">[@_model.Id] @_model.FirstName @_model.MiddleName @_model.LastName</MudText>
+    </MudItem>
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="5">
+            <MudPaper Class="mud-width-full mud-height-full">
+                <div class="d-flex align-items-center" style="padding: 15px 0 25px 0">
+                    @if (_model.Gender == "M")
+                    {
+                        <MudTooltip Text="Männlich" Duration="@Constants.TOOLTIP_DURATION">
+                            <MudAvatar Color="Color.Primary">M</MudAvatar>
                         </MudTooltip>
-                        <MudSpacer />
-                        <MudIconButton Icon="@Icons.Material.Outlined.MoreVert" Color="Color.Inherit"/>
-                    </MudToolBar>
-                </MudPaper>
-            </MudItem>
-            <MudItem xs="6">
-                <MudPaper Class="mud-width-full mud-height-full">
-                    <div class="d-flex align-items-center justify-content-center" style="padding: 15px 0 25px 0">
-                        <MudText Typo="Typo.h5">[@_model.Id] @_model.FirstName @_model.MiddleName @_model.LastName</MudText>
-                    
-                        @if (_model.Gender == "M")
-                        {
-                            <MudTooltip Text="Männlich" Duration="@Constants.TOOLTIP_DURATION">
-                                <MudAvatar Color="Color.Primary">M</MudAvatar>
-                            </MudTooltip>
-                        }
-                        else
-                        {
-                            <MudTooltip Text="Weiblich" Duration="@Constants.TOOLTIP_DURATION">
-                                <MudAvatar Color="Color.Secondary">W</MudAvatar>
-                            </MudTooltip>
-                        }
+                    }
+                    else
+                    {
+                        <MudTooltip Text="Weiblich" Duration="@Constants.TOOLTIP_DURATION">
+                            <MudAvatar Color="Color.Secondary">W</MudAvatar>
+                        </MudTooltip>
+                    }
+                </div>
+            
+                <MudGrid>
+                    <MudItem xs="6" Class="centered">
+                        <MudText Color="Color.Warning">Hunger</MudText>
+                        <MudTooltip Text="@_model.Hunger.ToString()" Duration="@Constants.TOOLTIP_DURATION" Color="Color.Warning">
+                            <MudProgressCircular Color="Color.Warning" Value="@_model.Hunger" Max="100" Min="0"/>
+                        </MudTooltip> 
+                    </MudItem>
+                    <MudItem xs="6" Class="centered">
+                        <MudText Color="Color.Info">Thirst</MudText>
+                        <MudTooltip Text="@_model.Thirst.ToString()" Duration="@Constants.TOOLTIP_DURATION" Color="Color.Info">
+                            <MudProgressCircular Color="Color.Info" Value="@_model.Thirst" Max="100" Min="0"/>
+                        </MudTooltip>
+                    </MudItem>
+                    <MudItem xs="6" Class="centered">
+                        <MudText Color="Color.Primary">Energy</MudText>
+                        <MudTooltip Text="@_model.Energy.ToString()" Duration="@Constants.TOOLTIP_DURATION" Color="Color.Primary">
+                            <MudProgressCircular Color="Color.Primary" Value="@_model.Energy" Max="100" Min="0"/>
+                        </MudTooltip>
+                    </MudItem>
+                    <MudItem xs="6" Class="centered">
+                        <MudText Color="Color.Secondary">Health</MudText>
+                        <MudTooltip Text="@_model.Health.ToString()" Duration="@Constants.TOOLTIP_DURATION" Color="Color.Secondary">
+                            <MudProgressCircular Color="Color.Secondary" Value="@_model.Health" Max="100" Min="0"/>
+                        </MudTooltip>
+                    </MudItem>
+                </MudGrid>
 
-                    </div>
-                
-                    <MudGrid>
-                        <MudItem xs="6" Class="centered">
-                            <MudText Color="Color.Warning">Hunger</MudText>
-                            <MudTooltip Text="@_model.Hunger.ToString()" Duration="@Constants.TOOLTIP_DURATION" Color="Color.Warning">
-                                <MudProgressCircular Color="Color.Warning" Value="@_model.Hunger" Max="100" Min="0"/>
-                            </MudTooltip> 
-                        </MudItem>
-                        <MudItem xs="6" Class="centered">
-                            <MudText Color="Color.Info">Thirst</MudText>
-                            <MudTooltip Text="@_model.Thirst.ToString()" Duration="@Constants.TOOLTIP_DURATION" Color="Color.Info">
-                                <MudProgressCircular Color="Color.Info" Value="@_model.Thirst" Max="100" Min="0"/>
-                            </MudTooltip>
-                        </MudItem>
-                        <MudItem xs="6" Class="centered">
-                            <MudText Color="Color.Primary">Energy</MudText>
-                            <MudTooltip Text="@_model.Energy.ToString()" Duration="@Constants.TOOLTIP_DURATION" Color="Color.Primary">
-                                <MudProgressCircular Color="Color.Primary" Value="@_model.Energy" Max="100" Min="0"/>
-                            </MudTooltip>
-                        </MudItem>
-                        <MudItem xs="6" Class="centered">
-                            <MudText Color="Color.Secondary">Health</MudText>
-                            <MudTooltip Text="@_model.Health.ToString()" Duration="@Constants.TOOLTIP_DURATION" Color="Color.Secondary">
-                                <MudProgressCircular Color="Color.Secondary" Value="@_model.Health" Max="100" Min="0"/>
-                            </MudTooltip>
-                        </MudItem>
-                    </MudGrid>
+                <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
+                    <MudText Typo="Typo.h5">Weitere Infos:</MudText>
 
-                    <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
-                        <MudText Typo="Typo.h5">Weitere Infos:</MudText>
+                    <MudText>Title: @(_model.Title ?? "Kein Titel")</MudText>
 
-                        <MudText>Title: @(_model.Title ?? "Kein Titel")</MudText>
+                    <MudText>BirthDate: @_model.BirthDate</MudText>
 
-                        <MudText>BirthDate: @_model.BirthDate</MudText>
+                    <MudText>Cash: @_model.Cash</MudText>
 
-                        <MudText>Cash: @_model.Cash</MudText>
+                    <MudText>Position: @_model.Position</MudText>
+                    <MudText>Rotation: @_model.Rotation</MudText>
+                    <MudText>Dimension: @_model.Dimension</MudText>
 
-                        <MudText>Position: @_model.Position</MudText>
-                        <MudText>Rotation: @_model.Rotation</MudText>
-                        <MudText>Dimension: @_model.Dimension</MudText>
+                    <MudText>LastLogin: @_model.LastLogin</MudText>
+                    <MudText>LastLogout: @_model.LastLogout</MudText>
+                </MudContainer>
+            </MudPaper>
+        </MudItem>
 
-                        <MudText>LastLogin: @_model.LastLogin</MudText>
-                        <MudText>LastLogout: @_model.LastLogout</MudText>
-                    </MudContainer>
-                </MudPaper>
-            </MudItem>
-
-            <MudItem xs="6">
-                <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-8">
+        <MudItem xs="7">
+            <MudPaper Height="140px">
+                <div class="d-flex flex-row align-items-center px-5 mud-width-full">
+                    <MudIcon Icon="@Icons.Material.Filled.AdsClick"/>
+                    <MudText Class="px-5" Typo="Typo.h5">Funktionen</MudText>
+                </div>
+                <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="OpenAccount">Account anzeigen</MudButton>
+                </div>
+            </MudPaper>
+        </MudItem>
+        
+        <MudItem xs="12">
+            <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-8">
+                @if (_inventoryLoading)
+                {
+                    <LoadingComponent/>
+                }
+                else if (_inventory is null)
+                {
+                    <ErrorComponent/>
+                }
+                else
+                {
                     <MudDataGrid
                         T="InventoryItemApiModel" MultiSelection="true"
                         Items="@_inventory.Items" SortMode="SortMode.Multiple" Filterable="true"
@@ -122,15 +132,23 @@ else
                             <MudDataGridPager T="InventoryItemApiModel"/>
                         </PagerContent>
                     </MudDataGrid>
-                </MudPaper>
-            </MudItem>
+                }
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12">
+            <VehicleOverviewDataGrid @ref="_vehicleOverviewDataGrid" Height="400px" CharacterId="_id"/>
+        </MudItem>
         
-            <MudItem xs="12">
-                <BankAccountOverviewDataGrid @ref="_bankAccountOverviewDataGrid" Height="400px" CharacterId="_id"/>
-            </MudItem>
-        
-        </MudGrid>
-    </MudContainer>
+        <MudItem xs="12">
+            <CompanyOverviewDataGrid @ref="_companyOverviewDataGrid" Height="400px" CharacterId="_id"/>
+        </MudItem>
+    
+        <MudItem xs="12">
+            <BankAccountOverviewDataGrid @ref="_bankAccountOverviewDataGrid" Height="400px" CharacterId="_id"/>
+        </MudItem>
+    
+    </MudGrid>
 }
 
 @code {
@@ -146,7 +164,10 @@ else
     
     private InventoryApiModel? _inventory;
     private string? _searchString;
-
+    private bool _inventoryLoading = true;
+    
+    private VehicleOverviewDataGrid _vehicleOverviewDataGrid;
+    private CompanyOverviewDataGrid _companyOverviewDataGrid;
     private BankAccountOverviewDataGrid _bankAccountOverviewDataGrid;
     
     protected override async Task OnInitializedAsync()
@@ -175,7 +196,6 @@ else
         }
         
         await LoadAllAsync();
-        await _bankAccountOverviewDataGrid.Load();
     }
 
     private bool ParseId()
@@ -194,13 +214,18 @@ else
     private async Task LoadAllAsync()
     {
         _loading = true;
+        _inventory = null;
         StateHasChanged();
 
         await LoadCharacterAsync();
-        await LoadInventoryAsync();
         
         _loading = false;
         StateHasChanged();
+
+        await LoadInventoryAsync();
+        await _vehicleOverviewDataGrid.Load();
+        await _companyOverviewDataGrid.Load();
+        await _bankAccountOverviewDataGrid.Load();
     }
 
     private async Task LoadCharacterAsync()
@@ -229,6 +254,9 @@ else
 
     private async Task LoadInventoryAsync()
     {
+        _inventoryLoading = true;
+        StateHasChanged();
+        
         try
         {
             var response = await InventoryApi.GetByCharacterIdAsync(_id);
@@ -249,6 +277,9 @@ else
         {
             Snackbar.Add(ex.Message, Severity.Error);
         }
+
+        _inventoryLoading = false;
+        StateHasChanged();
     }
     
     private Func<InventoryItemApiModel, bool> QuickFilter => x =>

@@ -15,7 +15,15 @@ public interface IAccountApi
     [Get("/api/v1/account?discordId={discordId}")]
     Task<ApiResponse<AccountApiModel?>> GetByDiscordIdAsync(string discordId);
     
-    [Get("/api/v1/account/ban?accountId={accountId}&message={message}")]
+    [Put("/api/v1/account/ban?accountId={accountId}&message={message}")]
     [Headers("Authorization: Bearer")]
-    Task<ApiResponse<object>> BanAccountByAccountIdAsync(int accountId, string message);
+    Task<ApiResponse<AccountBanResultApiModel>> BanAccountByAccountIdAsync(int accountId, string message);
+    
+    [Put("/api/v1/account/unban?accountId={accountId}")]
+    [Headers("Authorization: Bearer")]
+    Task<ApiResponse<AccountUnbanResultApiModel>> UnbanAccountByAccountIdAsync(int accountId);
+    
+    [Put("/api/v1/account/kick?accountId={accountId}&message={message}")]
+    [Headers("Authorization: Bearer")]
+    Task<ApiResponse<AccountKickResultApiModel>> KickAccountByAccountIdAsync(int accountId, string message);
 }

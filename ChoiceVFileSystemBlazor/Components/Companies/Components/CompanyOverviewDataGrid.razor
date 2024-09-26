@@ -2,19 +2,15 @@
 {
     <LoadingComponent/>
 }
-else if (!_loading && _data is null)
-{
-    <ErrorComponent/>
-}
 else
 {
     <MudDataGrid
-        T="CharacterApiModel" MultiSelection="true"
+        T="CompanyApiModel" MultiSelection="true"
         Items="@_data" SortMode="SortMode.Multiple" Filterable="true"
         QuickFilter="@QuickFilter" RowClick="@RowClicked" Style="width: 100%;"
-        Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="@(Height is null ? "75vh" : Height)">
+        Hideable="true" Hover="true" Striped="true" FixedHeader="true"  Height="@(Height ?? "75vh")">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">@(Label ?? "Charakter Übersicht")</MudText>
+            <MudText Typo="Typo.h6">@(Label ?? "Unternehmen Übersicht")</MudText>
             <MudSpacer />
             <MudTextField
                 T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
@@ -24,30 +20,28 @@ else
         </ToolBarContent>
         <Columns>
             <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
-            <PropertyColumn Property="x => x.AccountId" Title="AccountId" />
-            <PropertyColumn Property="x => x.FirstName" Title="FirstName" />
-            <PropertyColumn Property="x => x.MiddleName" Title="MiddleName" />
-            <PropertyColumn Property="x => x.LastName" Title="LastName" />
-            <PropertyColumn Property="x => x.Dimension" Title="Dimension" />
+            <PropertyColumn Property="x => x.Name" Title="Name" />
+            <PropertyColumn Property="x => x.ShortName" Title="ShortName" />
+            <PropertyColumn Property="x => x.CompanyType" Title="CompanyType" />
+            <PropertyColumn Property="x => x.Employees.Count" Title="Employees" />
         </Columns>
         <PagerContent>
-            <MudDataGridPager T="CharacterApiModel" />
+            <MudDataGridPager T="CompanyApiModel" />
         </PagerContent>
     </MudDataGrid>
 }
 
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
-    [Parameter] public int? AccountId { get; set; }
+    [Parameter] public int? CharacterId { get; set; }
     [Parameter] public string? Label { get; set; }
     [Parameter] public string? Height { get; set; }
-    [Parameter] public bool OnlyLive { get; set; }
     
     private bool _loading = true;
     private string? _searchString;
-    
-    private List<CharacterApiModel>? _data = [];
-    
+
+    private List<CompanyApiModel> _data = [];
+
     public async Task Load()
     {
         _loading = true;
@@ -55,22 +49,15 @@ else
 
         try
         {
-            ApiResponse<List<CharacterApiModel>> response;
+            ApiResponse<List<CompanyApiModel>> response;
             
-            if (AccountId.HasValue)
+            if (CharacterId.HasValue)
             {
-                response = await CharacterApi.GetByAccountIdAsync(AccountId.Value);
+                response = await CompanyApi.GetAllByCharacterIdAsync(CharacterId.Value);
             }
             else
             {
-                if (OnlyLive)
-                {
-                    response = await CharacterApi.GetAllLiveAsync();
-                }
-                else
-                {
-                    response = await CharacterApi.GetAllAsync();
-                }
+                response = await CompanyApi.GetAllAsync();
             }
             
             if (response.IsSuccessStatusCode)
@@ -97,36 +84,39 @@ else
         
         StateHasChanged();
     }
-    
-    private Func<CharacterApiModel, bool> QuickFilter => x =>
+
+    private Func<CompanyApiModel, bool> QuickFilter => x =>
     {
         if (_searchString == null) return true;
         
         var lowerSearchString = _searchString.ToLower();
-
+        
         if (string.IsNullOrWhiteSpace(lowerSearchString))
             return true;
 
-        if (x.FirstName != null && x.FirstName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.Name.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if (x.LastName != null && x.LastName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.ShortName.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
-        if (x.MiddleName != null && x.MiddleName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.CompanyType.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
-        if (x.AccountId != null && x.AccountId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.MaxEmployees.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
-        if ($"{x.Id}".ToLower().Contains(_searchString))
+        if (x.Employees.Count.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if ($"{x.Id}".ToLower().Contains(lowerSearchString))
             return true;
 
         return false;
     };
     
-    void RowClicked(DataGridRowClickEventArgs<CharacterApiModel> args)
+    void RowClicked(DataGridRowClickEventArgs<CompanyApiModel> args)
     {
-        Navigation.NavigateTo(CharacterView.GetRedirectUrl(args.Item.Id.ToString()));
+        Navigation.NavigateTo(CompanyView.GetRedirectUrl(args.Item.Id.ToString()));
     }
 }
