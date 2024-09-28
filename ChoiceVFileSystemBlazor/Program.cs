@@ -34,6 +34,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddSignalR();
+
 #region MudBlazor Configurations
 builder.Services.AddMudServices(config =>
 {
@@ -209,9 +211,6 @@ builder.Services.AddTransient<IDiscordRolesProxy, DiscordRoleProxy>();
 builder.Services.AddTransient<IDiscordRoleLogsProxy, DiscordRoleLogsProxy>();
 builder.Services.AddTransient<INewsProxy, NewsProxy>();
 #endregion
-
-
-builder.Services.AddSignalR();
 
 if (!builder.Environment.IsDevelopment())
 {
