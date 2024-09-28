@@ -21,7 +21,7 @@ public class InventoryItemApiModel
     public string Name { get; set; }
     
     [JsonPropertyName("description")]
-    public string Description { get; set; }
+    public string? Description { get; set; }
     
     [JsonPropertyName("quantity")]
     public int Quantity { get; set; }

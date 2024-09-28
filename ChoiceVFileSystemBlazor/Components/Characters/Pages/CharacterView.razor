@@ -284,7 +284,7 @@ else
     
     private Func<InventoryItemApiModel, bool> QuickFilter => x =>
     {
-        if (_searchString == null) return true;
+        if (_searchString is null) return true;
         
         var lowerSearchString = _searchString.ToLower();
         
@@ -294,7 +294,7 @@ else
         if (x.Name.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
-        if (x.Description.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.Description is not null && x.Description.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
         if (x.Quantity.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
