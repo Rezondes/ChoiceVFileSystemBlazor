@@ -21,4 +21,11 @@
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         await UserAccessService.InitializeUserAsync(authState.User);
     }
+    
+    [JSInvokable]
+    public static Task CustomReload()
+    {
+        // Console.WriteLine("Custom reload triggered");
+        return Task.CompletedTask;
+    }
 }
