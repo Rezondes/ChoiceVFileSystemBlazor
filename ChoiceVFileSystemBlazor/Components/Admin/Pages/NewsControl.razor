@@ -1,5 +1,7 @@
 @page "/admin/news"
 
+@implements IDisposable
+
 @code {
     public const string Url = "/admin/news";
     public static string GetRedirectUrl() => Url;
@@ -112,6 +114,13 @@ else
         }
             
         await Load();
+    
+        ReloadService.OnCustomReload += Load;
+    }
+    
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Load;
     }
     
     private async Task Load()

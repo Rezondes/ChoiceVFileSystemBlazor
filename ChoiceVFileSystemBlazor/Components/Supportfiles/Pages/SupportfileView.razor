@@ -1,6 +1,6 @@
 ﻿@page "/supportfiles/view/{id}"
 
-@implements IAsyncDisposable
+@implements IDisposable
 
 @code {
     public const string Url = "/supportfiles/view/";
@@ -519,6 +519,13 @@ else
             
         await StartHubConnection();
         await Load();
+        
+        ReloadService.OnCustomReload += Load;
+    }
+    
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Load;
     }
 
     private async Task Load()

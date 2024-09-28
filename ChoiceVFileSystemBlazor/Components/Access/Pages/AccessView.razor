@@ -1,5 +1,7 @@
 ﻿@page "/access/view/{id}"
 
+@implements IDisposable
+
 @code {
     public const string Url = "/access/view/";
     public static string GetRedirectUrl(string id) => Url + id;
@@ -72,6 +74,18 @@
     {
         if (!firstRender) return;
 
+        await Load();
+    
+        ReloadService.OnCustomReload += Load;
+    }
+    
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Load;
+    }
+
+    private async Task Load()
+    {
         var access = await UserAccessService.GetUserAccess();
         
         if (access is null)
@@ -103,6 +117,7 @@
         _checkModel = access.CreateShallowCopy();
         await _supportfileOverviewDataGrid.Load();
         await _characterOverviewDataGrid.Load();
+
     }
 
     private async Task OverrideName()

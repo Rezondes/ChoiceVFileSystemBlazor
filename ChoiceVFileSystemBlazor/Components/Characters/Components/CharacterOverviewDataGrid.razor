@@ -1,5 +1,3 @@
-@implements IDisposable
-
 @if (_loading)
 {
     <LoadingComponent/>
@@ -49,16 +47,6 @@ else
     private string? _searchString;
     
     private List<CharacterApiModel>? _data = [];
-    
-    protected override void OnInitialized()
-    {
-        ReloadService.OnCustomReload += Load;
-    }
-
-    public void Dispose()
-    {
-        ReloadService.OnCustomReload -= Load;
-    }
     
     public async Task Load()
     {

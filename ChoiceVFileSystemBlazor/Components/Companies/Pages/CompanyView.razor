@@ -1,5 +1,7 @@
 @page "/companies/view/{id}"
 
+@implements IDisposable
+
 @code {
     public const string Url = "/companies/view/";
     public static string GetRedirectUrl(string id) => Url + id;
@@ -140,6 +142,18 @@ else
             return;
         }
 
+        await Reload();
+    
+        ReloadService.OnCustomReload += Reload;
+    }
+    
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Reload;
+    }
+
+    private async Task Reload()
+    {
         await Load();
         await _bankAccountOverviewDataGrid.Load();
         await _vehiclesOverviewDataGrid.Load();

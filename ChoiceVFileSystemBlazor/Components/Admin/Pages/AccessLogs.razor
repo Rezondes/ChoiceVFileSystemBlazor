@@ -1,5 +1,6 @@
 ﻿@page "/admin/logs"
-@using System.Globalization
+
+@implements IDisposable
 
 @code {
     public const string Url = "/admin/logs";
@@ -77,6 +78,13 @@ else
         }
             
         await Load();
+    
+        ReloadService.OnCustomReload += Load;
+    }
+    
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Load;
     }
     
     private async Task Load()

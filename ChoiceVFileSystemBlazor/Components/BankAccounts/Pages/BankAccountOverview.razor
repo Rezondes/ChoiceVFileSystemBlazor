@@ -1,5 +1,7 @@
 @page "/bankaccounts"
 
+@implements IDisposable
+
 @code {
     public const string Url = "/bankaccounts";
     public static string GetRedirectUrl() => Url;
@@ -34,6 +36,18 @@
             return;
         }
 
+        await Reload();
+    
+        ReloadService.OnCustomReload += Reload;
+    }
+    
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Reload;
+    }
+
+    private async Task Reload()
+    {
         await _bankAccountOverviewDataGrid.Load();
     }
 

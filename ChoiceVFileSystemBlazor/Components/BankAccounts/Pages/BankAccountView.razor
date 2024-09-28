@@ -1,5 +1,7 @@
 @page "/bankaccounts/view/{id}"
 
+@implements IDisposable
+
 @code {
     public const string Url = "/bankaccounts/view/";
     public static string GetRedirectUrl(string id) => Url + id;
@@ -157,6 +159,13 @@ else
         }
 
         await Load();
+    
+        ReloadService.OnCustomReload += Load;
+    }
+    
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Load;
     }
     
     private bool ParseId()

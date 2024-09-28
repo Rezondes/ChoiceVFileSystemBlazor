@@ -1,5 +1,7 @@
 @page "/characters/live"
 
+@implements IDisposable
+
 @code {
     public const string Url = "/characters/live";
     public static string GetRedirectUrl() => Url;
@@ -35,6 +37,18 @@
             return;
         }
 
+        await _characterOverviewDataGrid.Load();
+        
+        ReloadService.OnCustomReload += Reload;
+    }
+    
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Reload;
+    }
+
+    private async Task Reload()
+    {
         await _characterOverviewDataGrid.Load();
     }
 }

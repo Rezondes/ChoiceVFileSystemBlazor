@@ -1,5 +1,7 @@
 ﻿@page "/characters/view/{id}"
 
+@implements IDisposable
+
 @code {
     public const string Url = "/characters/view/";
     public static string GetRedirectUrl(string id) => Url + id;
@@ -201,6 +203,13 @@ else
         }
         
         await LoadAllAsync();
+        
+        ReloadService.OnCustomReload += LoadAllAsync;
+    }
+    
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= LoadAllAsync;
     }
 
     private bool ParseId()

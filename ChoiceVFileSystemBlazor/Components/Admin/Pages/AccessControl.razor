@@ -1,5 +1,7 @@
 ﻿@page "/admin/access"
 
+@implements IDisposable
+
 @code {
     public const string Url = "/admin/access";
     public static string GetRedirectUrl() => Url;
@@ -65,6 +67,13 @@ else
             Navigation.NavigateToNotAuthorized();
 
         await Load();
+    
+        ReloadService.OnCustomReload += Load;
+    }
+    
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Load;
     }
 
     private async Task Load()
