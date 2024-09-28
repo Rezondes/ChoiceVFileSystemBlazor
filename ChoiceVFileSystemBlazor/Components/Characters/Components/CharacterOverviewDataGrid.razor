@@ -56,23 +56,16 @@ else
         try
         {
             ApiResponse<List<CharacterApiModel>> response;
-            
+
             if (AccountId.HasValue)
             {
                 response = await CharacterApi.GetByAccountIdAsync(AccountId.Value);
             }
             else
             {
-                if (OnlyLive)
-                {
-                    response = await CharacterApi.GetAllLiveAsync();
-                }
-                else
-                {
-                    response = await CharacterApi.GetAllAsync();
-                }
+                response = OnlyLive ? await CharacterApi.GetAllLiveAsync() : await CharacterApi.GetAllAsync();
             }
-            
+
             if (response.IsSuccessStatusCode)
             {
                 _data = response.Content;
