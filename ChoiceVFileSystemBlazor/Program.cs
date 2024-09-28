@@ -34,6 +34,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddServerSideBlazor()
+    .AddCircuitOptions(options => { options.DetailedErrors = true; });
+
 builder.Services.AddSignalR();
 
 #region MudBlazor Configurations
@@ -172,6 +175,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 #endregion
 
 builder.Services.AddHostedService<StartupService>();
+builder.Services.AddSingleton<ReloadService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddTransient<TokenService>();
 builder.Services.AddTransient<UserAccessService>();

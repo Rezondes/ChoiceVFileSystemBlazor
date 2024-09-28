@@ -1,5 +1,7 @@
 ﻿@inject UserAccessService UserAccessService
 
+@implements IDisposable
+
 <CascadingAuthenticationState>
     <CascadingValue Value="@UserAccessService">
         <Router AppAssembly="@typeof(Program).Assembly">
@@ -16,16 +18,37 @@
 </CascadingAuthenticationState>
 
 @code {
+    private static Routes? _instance;
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         await UserAccessService.InitializeUserAsync(authState.User);
     }
     
-    [JSInvokable]
-    public static Task CustomReload()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // Console.WriteLine("Custom reload triggered");
-        return Task.CompletedTask;
+        if (!firstRender) return;
+        _instance = this;
+        await JS.InvokeVoidAsync("initializeCustomReload");
+    }
+    
+    [JSInvokable]
+    public static async Task CustomReload()
+    {
+        if (_instance != null)
+        {
+            await _instance.Reload();
+        }
+    }
+    
+    private async Task Reload()
+    {
+        if (ReloadService is null) return;
+        await ReloadService.TriggerCustomReload();
+    }
+    
+    public void Dispose()
+    {
+        Console.WriteLine("Disposed");
     }
 }

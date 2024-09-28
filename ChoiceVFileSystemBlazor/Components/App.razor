@@ -18,15 +18,7 @@
 <Routes @rendermode="InteractiveServer" />
 <script src="_framework/blazor.web.js"></script>
 <script src="_content/MudBlazor/MudBlazor.min.js"></script>
-
-<script>
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'F5') {
-            event.preventDefault();
-            DotNet.invokeMethodAsync('ChoiceVFileSystemBlazor', 'CustomReload');
-        }
-    });
-</script>
+<script src="js/customReload.js"></script>
 </body>
  
 </html>
