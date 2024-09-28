@@ -171,8 +171,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddHostedService<StartupService>();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<TokenService>();
-builder.Services.AddScoped<UserAccessService>();
+builder.Services.AddTransient<TokenService>();
+builder.Services.AddTransient<UserAccessService>();
 
 #region ChoiceV Api
 var choiceVApiBaseAddress = builder.Configuration.GetValue<string>("ChoiceVApi:BaseAddress")!;
@@ -199,15 +199,15 @@ builder.Services.AddDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>(opt
                 builder.Configuration.GetConnectionString("DefaultConnection"))),
     ServiceLifetime.Scoped);
 
-builder.Services.AddScoped<IAccessProxy, AccessProxy>();
-builder.Services.AddScoped<IRankProxy, RankProxy>();
-builder.Services.AddScoped<ISupportfileProxy, SupportfileProxy>();
-builder.Services.AddScoped<ISupportfileLogsProxy, SupportfileLogsProxy>();
-builder.Services.AddScoped<ISupportfileEntryProxy, SupportfileEntryProxy>();
-builder.Services.AddScoped<IAccessLogsProxy, AccessLogsProxy>();
-builder.Services.AddScoped<IDiscordRolesProxy, DiscordRoleProxy>();
-builder.Services.AddScoped<IDiscordRoleLogsProxy, DiscordRoleLogsProxy>();
-builder.Services.AddScoped<INewsProxy, NewsProxy>();
+builder.Services.AddTransient<IAccessProxy, AccessProxy>();
+builder.Services.AddTransient<IRankProxy, RankProxy>();
+builder.Services.AddTransient<ISupportfileProxy, SupportfileProxy>();
+builder.Services.AddTransient<ISupportfileLogsProxy, SupportfileLogsProxy>();
+builder.Services.AddTransient<ISupportfileEntryProxy, SupportfileEntryProxy>();
+builder.Services.AddTransient<IAccessLogsProxy, AccessLogsProxy>();
+builder.Services.AddTransient<IDiscordRolesProxy, DiscordRoleProxy>();
+builder.Services.AddTransient<IDiscordRoleLogsProxy, DiscordRoleLogsProxy>();
+builder.Services.AddTransient<INewsProxy, NewsProxy>();
 #endregion
 
 
