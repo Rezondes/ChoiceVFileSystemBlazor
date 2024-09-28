@@ -27,7 +27,14 @@ public static class DateTimeExtension
             throw new ArgumentException($"Die Zeitzone '{timeZoneId}' ist ungültig.");
         }
     }
-    
+
+    public static string ConvertTimeFromUtcWithTimeZone(this DateTime? dateTime, string timeZoneId)
+    {
+        if (!dateTime.HasValue) throw new ArgumentNullException(nameof(dateTime));
+
+        return dateTime.Value.ConvertTimeFromUtcWithTimeZone(timeZoneId);
+    }
+
     public static string? TryConvertTimeFromUtcWithTimeZone(this DateTime dateTime, string timeZoneId)
     {
         try
