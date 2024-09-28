@@ -1,3 +1,5 @@
+@implements IDisposable
+
 <style>
     .server-info-item {
         flex-direction: column;
@@ -14,7 +16,6 @@
             <MudText Typo="Typo.h5">
                 Aktuelle Serverinformationen
             </MudText>
-            <MudIconButton Icon="@Icons.Material.Filled.Refresh" OnClick="Reload" Style="position: absolute; right: 0; top: 0;"/>
         </div>
 
         @if (_loading)
@@ -87,18 +88,32 @@
     private DateTime _lastFetchedUtc = DateTime.UtcNow;
     private string? _lastFetchedString;
     
+    private static ServerinformationComponent? _instance;
+    
+    protected override void OnInitialized()
+    {
+        ReloadService.OnCustomReload += Reload;
+    }
+
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Reload;
+    }
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
 
+        _instance = this;
+        
         await Load();
     }
-
+    
     private async Task Reload()
     {
         if (_loading) return;
         if (_lastFetchedString is null) return;
-        if ( DateTime.UtcNow - _lastFetchedUtc < TimeSpan.FromMinutes(1)) return;
+        if (DateTime.UtcNow - _lastFetchedUtc < TimeSpan.FromMinutes(1)) return;
 
         await Load();
     }
