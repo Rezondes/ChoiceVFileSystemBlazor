@@ -30,6 +30,15 @@ using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddLogging(config =>
+{
+    config.AddConsole();
+    config.AddDebug();
+    // config.AddEventSourceLogger();
+    // config.AddEventLog();
+    // config.AddFile("Logs/myapp-{Date}.txt"); 
+});
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -174,11 +183,14 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 #endregion
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddHostedService<StartupService>();
 builder.Services.AddSingleton<ReloadService>();
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserAccessService>();
+
+builder.Services.AddSingleton<ServerInformationCachedService>();
+builder.Services.AddHostedService<ServerInformationBackgroundService>();
 
 #region ChoiceV Api
 var choiceVApiBaseAddress = builder.Configuration.GetValue<string>("ChoiceVApi:BaseAddress")!;

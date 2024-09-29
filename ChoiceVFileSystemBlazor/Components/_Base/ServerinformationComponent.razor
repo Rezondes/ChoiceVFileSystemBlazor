@@ -112,8 +112,6 @@
     private async Task Reload()
     {
         if (_loading) return;
-        if (_lastFetchedString is null) return;
-        if (DateTime.UtcNow - _lastFetchedUtc < TimeSpan.FromMinutes(1)) return;
 
         await Load();
     }
@@ -125,33 +123,15 @@
 
         var access = await UserAccessService.GetUserAccess();
         
-        try
+        var (lastTrySuccess, lastTry, cachedLastUpdate, cachedData) = ServerInformationCachedService.GetCachedData();
+        if (lastTrySuccess.HasValue && lastTrySuccess.Value && cachedLastUpdate.HasValue)
         {
-            var response = await ServerApi.GetCurrentServerInfosAsync();
-            if (response.IsSuccessStatusCode)
-            {
-                _data = response.Content;
-                _lastFetchedUtc = DateTime.UtcNow;
-                _lastFetchedString = _lastFetchedUtc.ConvertTimeFromUtcWithTimeZone(access.Settings.TimeZone);
-            }
-            else
-            {
-                Snackbar.Add(response.Error.Message, Severity.Error);
-            }
-        }
-        catch (HttpRequestException ex)
-        {
-            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-        finally
-        {
-            _loading = false;
+            _data = cachedData;
+            _lastFetchedUtc = cachedLastUpdate.Value;
+            _lastFetchedString = _lastFetchedUtc.ConvertTimeFromUtcWithTimeZone(access.Settings.TimeZone);
         }
         
+        _loading = false;
         StateHasChanged();
     }
 }
