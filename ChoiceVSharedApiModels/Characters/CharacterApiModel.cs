@@ -24,7 +24,8 @@ public class CharacterApiModel
         decimal cash, 
         DateTime lastLogin, 
         DateTime lastLogout, 
-        int dimension)
+        int dimension,
+        bool isCurrentlyOnline)
     {
         Id = id;
         AccountId = accountId;
@@ -44,6 +45,7 @@ public class CharacterApiModel
         LastLogin = lastLogin;
         LastLogout = lastLogout;
         Dimension = dimension;
+        IsCurrentlyOnline = isCurrentlyOnline;
     }
 
     [JsonPropertyName("id")]
@@ -99,4 +101,7 @@ public class CharacterApiModel
         
     [JsonPropertyName("dimension")]
     public int Dimension { get; set; }
+    
+    [JsonPropertyName("isCurrentlyOnline")]
+    public bool IsCurrentlyOnline { get; set; }
 }

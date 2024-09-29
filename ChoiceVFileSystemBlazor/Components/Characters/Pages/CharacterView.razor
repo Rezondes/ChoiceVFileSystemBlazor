@@ -20,7 +20,7 @@ else if (_model is null)
 else
 {
     <MudItem Style="height: 75px;">
-        <MudText Typo="Typo.h3">[@_model.Id] @_model.FirstName @_model.MiddleName @_model.LastName</MudText>
+        <MudText Typo="Typo.h3">@GetTitleText()</MudText>
     </MudItem>
     <MudGrid Justify="Justify.Center">
         <MudItem xs="5">
@@ -99,6 +99,11 @@ else
                 </div>
                 <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
                     <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="OpenAccount">Account anzeigen</MudButton>
+                    
+                    @if (_model.IsCurrentlyOnline)
+                    {
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="ChangeDimension">Dimension ändern</MudButton>
+                    }
                 </div>
             </MudPaper>
         </MudItem>
@@ -320,6 +325,11 @@ else
         return false;
     };
 
+    private string GetTitleText()
+    {
+        return _model is null ? string.Empty : $"[{_model.Id}] {_model.FirstName} {_model.MiddleName} {_model.LastName}";
+    }
+    
     private void OpenAccount()
     {
         if (_model is null) return;
@@ -327,4 +337,67 @@ else
         Navigation.NavigateTo(AccountView.GetRedirectUrl(_model.AccountId.ToString()));
     }
 
+    private async Task ChangeDimension()
+    {
+        if (_model is null) return;
+        if (!_model.IsCurrentlyOnline) return;
+        
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Number,
+                "Dimension",
+                _model.Dimension.ToString(),
+                "0"
+            ),
+        };
+
+        var dialogData = await DialogService.OpenDialog(
+            "Dimension ändern", 
+            $"In welche Dimension willst du den Charakter {GetTitleText()} schicken?", 
+            "Dimension ändern",
+            inputs);
+        if (dialogData is null) return;
+
+        var (validated, dimension) = dialogData[0].ValidateInput<int>();
+        if (!validated)
+        {
+            Snackbar.Add("Es wurde keine richtige Dimension eingegeben!", Severity.Error);
+            return;
+        }
+        
+        try
+        {
+            var response = await CharacterApi.ChangeDimensionAsync(_id, dimension);
+            if (response.IsSuccessStatusCode)
+            {
+                var data = response.Content;
+                if (data.CharacterId != _id)
+                {
+                    Snackbar.Add("Wenn dieser Fehler auftritt sind wird geficket.", Severity.Error);
+                    return;
+                }
+                
+                Snackbar.Add($"Dimension von {data.OldDimension} zu {data.NewDimension} gewechselt!", Severity.Success);
+
+                _loading = true;
+                await Task.Delay(TimeSpan.FromSeconds(1));
+                await LoadAllAsync();
+            }
+            else
+            {
+                Snackbar.Add(response.Error.Message, Severity.Error);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        
+    }
+    
 }

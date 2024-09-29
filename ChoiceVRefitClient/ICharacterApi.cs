@@ -19,4 +19,8 @@ public interface ICharacterApi
     
     [Get("/api/v1/character/live")]
     Task<ApiResponse<List<CharacterApiModel>>> GetAllLiveAsync(); 
+    
+    [Put("/api/v1/character?characterId={characterId}&dimension={dimension}")]
+    [Headers("Authorization: Bearer")]
+    Task<ApiResponse<CharacterChangeDimensionResultApiModel>> ChangeDimensionAsync(int characterId, int dimension);
 }
