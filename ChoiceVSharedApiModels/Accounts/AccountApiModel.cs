@@ -5,27 +5,25 @@ namespace ChoiceVSharedApiModels.Accounts;
 public class AccountApiModel
 {
     public AccountApiModel() {}
-    
-    public AccountApiModel(
-        int id, 
-        string name,
-        string socialClubName,
-        string discordId, 
-        DateTime? lastLogin, 
-        AccountStateApiEnum state, 
-        string? stateReason,
-        bool isCurrentlyOnline)
+
+    public AccountApiModel(int id, string name, string socialClubName, string discordId, string teamspeakId, DateTime? lastLogin, AccountStateApiEnum state, string? stateReason, int failedLogins, int adminLevel, int charAmount, int strikes, int flag, bool isCurrentlyOnline)
     {
         Id = id;
         Name = name;
         SocialClubName = socialClubName;
         DiscordId = discordId;
+        TeamspeakId = teamspeakId;
         LastLogin = lastLogin;
         State = state;
         StateReason = stateReason;
+        FailedLogins = failedLogins;
+        AdminLevel = adminLevel;
+        CharAmount = charAmount;
+        Strikes = strikes;
+        Flag = flag;
         IsCurrentlyOnline = isCurrentlyOnline;
     }
-    
+
     [JsonPropertyName("id")]
     public int Id { get; set; }
     
@@ -38,6 +36,9 @@ public class AccountApiModel
     [JsonPropertyName("discordId")] 
     public string DiscordId { get; set; } = null!;
     
+    [JsonPropertyName("teamspeakId")] 
+    public string TeamspeakId { get; set; }
+    
     [JsonPropertyName("lastLogin")]
     public DateTime? LastLogin { get; set; }
     
@@ -46,6 +47,21 @@ public class AccountApiModel
     
     [JsonPropertyName("stateReason")]
     public string? StateReason { get; set; }
+    
+    [JsonPropertyName("failedLogins")] 
+    public int FailedLogins { get; set; }
+    
+    [JsonPropertyName("adminLevel")] 
+    public int AdminLevel { get; set; }
+    
+    [JsonPropertyName("charAmount")] 
+    public int CharAmount { get; set; }
+    
+    [JsonPropertyName("strikes")] 
+    public int Strikes { get; set; }
+    
+    [JsonPropertyName("flag")] 
+    public int Flag { get; set; }
     
     [JsonPropertyName("isCurrentlyOnline")]
     public bool IsCurrentlyOnline { get; set; }
