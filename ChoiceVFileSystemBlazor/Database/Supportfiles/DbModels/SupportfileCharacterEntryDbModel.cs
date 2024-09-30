@@ -4,11 +4,13 @@ public class SupportfileCharacterEntryDbModel
 {
     public SupportfileCharacterEntryDbModel() { }
 
-    public SupportfileCharacterEntryDbModel(Ulid supportfileId, int accountId, int characterId, string characterFirstName, string characterLastName)
+    public SupportfileCharacterEntryDbModel(Ulid supportfileId, int accountId, int characterId, string discordId, string accountName, string characterFirstName, string characterLastName)
     {
         SupportfileId = supportfileId;
         AccountId = accountId;
         CharacterId = characterId;
+        DiscordId = discordId;
+        AccountName = accountName;
         CharacterFirstName = characterFirstName;
         CharacterLastName = characterLastName;
     }
@@ -18,11 +20,13 @@ public class SupportfileCharacterEntryDbModel
     public Ulid SupportfileId { get; set; }
     public int AccountId { get; set; }
     public int CharacterId { get; set; }
+    public string DiscordId { get; set; }
     
+    public string AccountName { get; set; }
     public string CharacterFirstName { get; set; }
     public string CharacterLastName { get; set; }
 
-    public string GetFullDisplayString() => $"[{CharacterId}] {CharacterFirstName} {CharacterLastName}";
+    public string GetFullDisplayString() => $"[{AccountId}] {AccountName} | {DiscordId} | [{CharacterId}] {CharacterFirstName} {CharacterLastName}";
     
     // Navigation Properties
     public SupportfileDbModel Supportfile { get; set; }

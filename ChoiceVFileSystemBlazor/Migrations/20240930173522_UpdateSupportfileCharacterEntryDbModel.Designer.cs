@@ -3,6 +3,7 @@ using System;
 using ChoiceVFileSystemBlazor.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChoiceVFileSystemBlazor.Migrations
 {
     [DbContext(typeof(ChoiceVFileSystemBlazorDatabaseContext))]
-    partial class ChoiceVFileSystemBlazorDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240930173522_UpdateSupportfileCharacterEntryDbModel")]
+    partial class UpdateSupportfileCharacterEntryDbModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

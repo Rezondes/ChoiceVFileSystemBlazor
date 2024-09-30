@@ -110,14 +110,14 @@ else if (_model is not null)
                         <ChildContent>
                             <MudPaper Class="ma-4" Width="45%" style="height: 65vh; overflow-y: auto;">
                                 <MudList T="string" Class="mud-height-full">
-                                    <MudDropZone T="CharEntry" Identifier="available" Class="mud-height-full">
+                                    <MudDropZone T="CharEntry" Identifier="@_availableDropzoneIdentifier" Class="mud-height-full">
                                         <MudListSubheader>Verfügbar</MudListSubheader>
                                     </MudDropZone>
                                 </MudList>
                             </MudPaper>
                             <MudPaper Class="ma-4" Width="45%" style="height: 65vh; overflow-y: auto;">
                                 <MudList T="string" Class="mud-height-full">
-                                    <MudDropZone T="CharEntry" Identifier="added" Class="mud-height-full">
+                                    <MudDropZone T="CharEntry" Identifier="@_addedDropzoneIdentifier" Class="mud-height-full">
                                         <MudListSubheader>Hinzugefügt</MudListSubheader>
                                     </MudDropZone>
                                 </MudList>
@@ -330,6 +330,8 @@ else
     private Ulid _lockedByUser;
     private bool _isCurrentTabCharEntrys = false;
     private bool _charApiLoading = true;
+    private string _availableDropzoneIdentifier = "available";
+    private string _addedDropzoneIdentifier = "added";
     
     private class CharEntry(SupportfileCharacterEntryDbModel supportfileCharacterEntryDbModel, bool isAdded, string dropZoneIdentifier)
     {
@@ -594,28 +596,39 @@ else
         if (_model is null) return;
         _charApiLoading = true;
 
-        _charEntrys = _model.CharacterEntrys.Select(x => new CharEntry(x, true, "added")).ToList();
+        _charEntrys = _model.CharacterEntrys.Select(x => new CharEntry(x, true, _addedDropzoneIdentifier)).ToList();
         var addedCharIds = _model.CharacterEntrys.Select(x => x.CharacterId);
 
         try
         {
-            var response = await CharacterApi.GetAllAsync();
-            if (response.IsSuccessStatusCode)
+            var accountResponse = await AccountApi.GetAllAsync();
+            var characterResponse = await CharacterApi.GetAllAsync();
+            if (characterResponse.IsSuccessStatusCode && accountResponse.IsSuccessStatusCode)
             {
-                var allChars = response.Content;
+                var allChars = characterResponse.Content;
+                var allAccount = accountResponse.Content;
 
                 foreach (var characterApiModel in allChars.Where(x => !addedCharIds.Contains(x.Id)))
                 {
-                    var charEntry = new SupportfileCharacterEntryDbModel(_model.Id, characterApiModel.AccountId, characterApiModel.Id, characterApiModel.FirstName, characterApiModel.LastName);
+                    var account = allAccount.FirstOrDefault(x => x.Id == characterApiModel.AccountId);
+                    var charEntry = new SupportfileCharacterEntryDbModel(_model.Id, characterApiModel.AccountId, characterApiModel.Id, account!.DiscordId, account.Name, characterApiModel.FirstName, characterApiModel.LastName);
 
-                    _charEntrys.Add(new CharEntry(charEntry, false, "available"));
+                    _charEntrys.Add(new CharEntry(charEntry, false, _availableDropzoneIdentifier));
                 }
 
                 _apiAvailable = true;
             }
             else
             {
-                Snackbar.Add(response.Error.Message, Severity.Error);
+                if (!characterResponse.IsSuccessStatusCode)
+                {
+                    Snackbar.Add(characterResponse.Error.Message, Severity.Error);
+                }
+
+                if (!accountResponse.IsSuccessStatusCode)
+                {
+                    Snackbar.Add(accountResponse.Error.Message, Severity.Error);
+                }
                 _apiAvailable = false;
             }
         }
