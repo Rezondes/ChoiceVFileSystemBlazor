@@ -36,15 +36,15 @@ else if (_model is not null)
                         <MudSelect T="FileStatusEnum" Label="Status" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(RightEnum.SupportfileEditStatus))" @bind-Value="_model.Status">
                             @foreach (FileStatusEnum status in Enum.GetValues(typeof(FileStatusEnum)))
                             {
-                                <MudSelectItem Value="@(status)"/>
+                                <MudSelectItem Value="@(status)"></MudSelectItem>
                             }
                         </MudSelect>
 
                         <MudDivider Style="@_dividerStyle"/>
                         <MudSelect T="RankEnum" Label="MinRank" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(RightEnum.SupportfileEditMinRank))" @bind-Value="_model.MinRank">
-                            @foreach (RankEnum status in Enum.GetValues(typeof(RankEnum)))
+                            @foreach (RankEnum minRank in Enum.GetValues(typeof(RankEnum)))
                             {
-                                <MudSelectItem Value="@(status)"/>
+                                <MudSelectItem Value="@(minRank)"></MudSelectItem>
                             }
                         </MudSelect>
                     </MudPaper>
