@@ -44,7 +44,8 @@ else
             <PropertyColumn Property="x => x.Title" Title="Titel" />
             <PropertyColumn Property="x => x.CreatorAccessModel.Name" Title="Ersteller"/>
             <PropertyColumn Property="x => x.CreatorAccessModel.Id" Title="ErstellerId"/>
-            <PropertyColumn Property="x => x.Status" Title="Status" />
+            <PropertyColumn Property="x => x.Status.GetDisplayText()" Title="Status" />
+            <PropertyColumn Property="x => x.MinRank.GetDisplayText()" Title="MinRank" />
             <TemplateColumn Hideable="false" Sortable="true" Filterable="true" Title="Datum">
                 <CellTemplate>
                     @context.Item.CreatedAtLocal(UserAccessService.GetUserAccess().Result.Settings.TimeZone)

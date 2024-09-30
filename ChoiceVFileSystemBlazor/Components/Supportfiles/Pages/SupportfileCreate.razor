@@ -39,7 +39,7 @@ else
                                @bind-Value="_model.Status" For="@(() => _model.Status)">
                         @foreach (FileStatusEnum status in Enum.GetValues(typeof(FileStatusEnum)))
                         {
-                            <MudSelectItem Value="@(status)"/>
+                            <MudSelectItem Value="@(status)">@status.GetDisplayText()</MudSelectItem>
                         }
                     </MudSelect>
 
@@ -48,7 +48,7 @@ else
                                @bind-Value="_model.MinRank" For="@(() => _model.MinRank)">
                         @foreach (RankEnum rank in Enum.GetValues(typeof(RankEnum)))
                         {
-                            <MudSelectItem Value="@(rank)"/>
+                            <MudSelectItem Value="@(rank)">@rank.GetDisplayText()</MudSelectItem>
                         }
                     </MudSelect>
 
