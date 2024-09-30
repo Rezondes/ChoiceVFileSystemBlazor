@@ -1,9 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using ChoiceVFileSystemBlazor.Database._Shared;
+﻿using ChoiceVFileSystemBlazor.Database._Shared;
 using ChoiceVFileSystemBlazor.Database.Accesses.DbModels.Partials;
 using ChoiceVFileSystemBlazor.Database.News.DbModels;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
-using ChoiceVSharedApiModels.Accounts;
 
 namespace ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
 
