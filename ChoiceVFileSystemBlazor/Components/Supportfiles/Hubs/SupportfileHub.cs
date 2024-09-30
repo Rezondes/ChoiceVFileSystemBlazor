@@ -40,28 +40,40 @@ public class SupportfileHub : Hub
         await Clients.All.SendAsync(SupportfileHubMethodEnum.ToggleFileDeleted.ToString(), supportfileId);
     }
     
-    private static readonly Dictionary<Ulid, Ulid> LockedFiles = new Dictionary<Ulid, Ulid>();
+    private static readonly Dictionary<Ulid, Ulid> LockedFiles = new();
 
+    /// <summary>
+    /// SupportfileHubMethodEnum.LockFile
+    /// </summary>
     public async Task LockFile(Ulid supportfileId, Ulid userId)
     {
         if (!LockedFiles.TryAdd(supportfileId, userId)) return;
         
-        await Clients.Others.SendAsync("FileLocked", supportfileId, userId);
+        await Clients.Others.SendAsync(SupportfileHubMethodEnum.FileLocked.ToString(), supportfileId, userId);
     }
 
+    /// <summary>
+    /// SupportfileHubMethodEnum.UnlockFile
+    /// </summary>
     public async Task UnlockFile(Ulid supportfileId, Ulid userId)
     {
         if (!LockedFiles.TryGetValue(supportfileId, out var value) || value != userId) return;
        
         LockedFiles.Remove(supportfileId);
-        await Clients.Others.SendAsync("FileUnlocked", supportfileId, userId);
+        await Clients.Others.SendAsync(SupportfileHubMethodEnum.FileUnlocked.ToString(), supportfileId, userId);
     }
 
+    /// <summary>
+    /// SupportfileHubMethodEnum.IsFileLocked
+    /// </summary>
     public Task<bool> IsFileLocked(Ulid supportfileId)
     {
         return Task.FromResult(LockedFiles.ContainsKey(supportfileId));
     }
 
+    /// <summary>
+    /// SupportfileHubMethodEnum.GetLockedByUser
+    /// </summary>
     public Task<Ulid> GetLockedByUser(Ulid supportfileId)
     {
         return Task.FromResult(LockedFiles.GetValueOrDefault(supportfileId));

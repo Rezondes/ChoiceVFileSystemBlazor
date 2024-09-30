@@ -1,6 +1,6 @@
 ﻿@page "/supportfiles/view/{id}"
 
-@implements IDisposable
+@implements IAsyncDisposable
 
 @code {
     public const string Url = "/supportfiles/view/";
@@ -301,6 +301,13 @@ else if (_model is not null)
     </MudTabs>
     
     <FileUploadPreview @ref="_fileUploadPreview" Model="_model" HubConnection="_hubConnection" />
+    
+    @if (_isCurrentTabCharEntrys && _lockedByUser is not null && _lockedByUser.Id != UserAccessService.GetUserAccess().Result.Id)
+    {
+        <MudAlert Severity="Severity.Info" Style="position: absolute; top: 5rem; right: 31px">
+            Derzeit wird die Maske von [@_lockedByUser.Id] @_lockedByUser.Name bearbeitet!
+        </MudAlert>
+    }
 }
 else
 {
@@ -327,7 +334,7 @@ else
     private bool _charEntrysUpdating = false;
     private string? _charSearchString;
     private bool _isLocked;
-    private Ulid _lockedByUser;
+    private AccessDbModel? _lockedByUser;
     private bool _isCurrentTabCharEntrys = false;
     private bool _charApiLoading = true;
     private string _availableDropzoneIdentifier = "available";
@@ -525,9 +532,14 @@ else
         ReloadService.OnCustomReload += Load;
     }
     
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         ReloadService.OnCustomReload -= Load;
+        
+        if (_hubConnection is null) return;
+ 
+        await UnlockCharTab();
+        await _hubConnection.DisposeAsync();
     }
 
     private async Task Load()
@@ -701,7 +713,7 @@ else
             if (id != _model.Id) return;
             
             await InvokeAsync(Load);
-            StateHasChanged();
+            await InvokeAsync(StateHasChanged);
         });
         
         _hubConnection.On<Ulid>(SupportfileHubMethodEnum.UpdateEntrys.ToString(), async (id) =>
@@ -710,7 +722,7 @@ else
             if (id != _model.Id) return;
             
             await InvokeAsync(Load);
-            StateHasChanged();
+            await InvokeAsync(StateHasChanged);
         });
         
         _hubConnection.On<Ulid>(SupportfileHubMethodEnum.ToggleFileDeleted.ToString(), async (id) =>
@@ -725,32 +737,41 @@ else
             }
 
             await InvokeAsync(Load);
-            StateHasChanged();
+            await InvokeAsync(StateHasChanged);
         });
         
-        _hubConnection.On<Ulid, Ulid>("FileLocked", (fileId, userId) =>
+        _hubConnection.On<Ulid, Ulid>(SupportfileHubMethodEnum.FileLocked.ToString(), async (fileId, userId) =>
         {
             if (_model is null) return;
             if (fileId != _model.Id) return;
-            
+
             _isLocked = true;
-            _lockedByUser = userId;
-            InvokeAsync(StateHasChanged);
+
+            try
+            {
+                var user = await AccessProxy.GetAsync(userId);
+                _lockedByUser = user;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Exception: {ex.Message}");
+            }
+
+            await InvokeAsync(StateHasChanged);
         });
 
-        
-        _hubConnection.On<Ulid, Ulid>("FileUnlocked", (fileId, userId) =>
+        _hubConnection.On<Ulid, Ulid>(SupportfileHubMethodEnum.FileUnlocked.ToString(), async (fileId, userId) =>
         {
             if (_model is null) return;
             if (fileId != _model.Id) return;
 
             _isLocked = false;
-            _lockedByUser = Ulid.Empty;
-            InvokeAsync(StateHasChanged);
+            _lockedByUser = null;
+            await InvokeAsync(StateHasChanged);
 
             if (!_isCurrentTabCharEntrys) return;
 
-            InvokeAsync(LockCharTabAsync);
+            await InvokeAsync(LockCharTabAsync);
         });
         
         await _hubConnection.StartAsync();
@@ -760,7 +781,8 @@ else
         _isLocked = await GetLockCharTabAsync();
         if (_isLocked)
         {
-            _lockedByUser = await _hubConnection.InvokeAsync<Ulid>("GetLockedByUser", _model.Id);
+            var lockedByUserId = await _hubConnection.InvokeAsync<Ulid>(SupportfileHubMethodEnum.GetLockedByUser.ToString(), _model.Id);
+            _lockedByUser = await AccessProxy.GetAsync(lockedByUserId);
         }
     }
 
@@ -774,7 +796,8 @@ else
         _isLocked = await GetLockCharTabAsync();
         if (_isLocked)
         {
-            _lockedByUser = await _hubConnection.InvokeAsync<Ulid>("GetLockedByUser", _model.Id);
+            var lockedByUserId = await _hubConnection.InvokeAsync<Ulid>(SupportfileHubMethodEnum.GetLockedByUser.ToString(), _model.Id);
+            _lockedByUser = await AccessProxy.GetAsync(lockedByUserId);
             return;
         }
 
@@ -786,7 +809,7 @@ else
         if (_model is null) return false;
         if (_hubConnection is null) return false;
         
-        return await _hubConnection.InvokeAsync<bool>("IsFileLocked", _model.Id);
+        return await _hubConnection.InvokeAsync<bool>(SupportfileHubMethodEnum.IsFileLocked.ToString(), _model.Id);
     }
     
     private async Task LockCharTabAsync()
@@ -794,10 +817,21 @@ else
         if (_model is null) return;
         if (_hubConnection is null) return;
         
-        var access = await UserAccessService.GetUserAccess();
-        
-        await _hubConnection.InvokeAsync("LockFile", _model.Id, access.Id);
-        _lockedByUser = access.Id;
+        try
+        {
+            var access = await UserAccessService.GetUserAccess();
+
+            await _hubConnection.InvokeAsync(SupportfileHubMethodEnum.LockFile.ToString(), _model.Id, access.Id);
+            _lockedByUser = access;
+        }
+        catch (HubException ex)
+        {
+            Console.Error.WriteLine($"HubException: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Exception: {ex.Message}");
+        }
     }
 
     private async Task UnlockCharTab()
@@ -810,10 +844,10 @@ else
         
         var access = await UserAccessService.GetUserAccess();
 
-        if (_lockedByUser != access.Id) return;
+        if (_lockedByUser?.Id != access.Id) return;
         
-        await _hubConnection.InvokeAsync("UnlockFile", _model.Id, access.Id);
-        _lockedByUser = Ulid.Empty;
+        await _hubConnection.InvokeAsync(SupportfileHubMethodEnum.UnlockFile.ToString(), _model.Id, access.Id);
+        _lockedByUser = null;
     }
     
     private async Task SendUpdateEntryToHub()
@@ -822,14 +856,6 @@ else
         if (_hubConnection is null) return;
         
         await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateEntrys.ToString(), _model.Id);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_hubConnection is null) return;
- 
-        await UnlockCharTab();
-        await _hubConnection.DisposeAsync();
     }
     
     private async Task EditEntry(SupportfileEntryDbModel entry)

@@ -6,5 +6,12 @@ public enum SupportfileHubMethodEnum
     ToggleFileDeleted,
     
     UpdateEntrys,
-    EntryCreated
+    EntryCreated,
+    
+    LockFile,
+    UnlockFile,
+    IsFileLocked,
+    GetLockedByUser,
+    FileLocked,
+    FileUnlocked
 }
