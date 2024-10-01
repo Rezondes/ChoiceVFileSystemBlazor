@@ -34,6 +34,7 @@ else
             <PropertyColumn Property="x => x.Name" Title="Name" />
             <PropertyColumn Property="x => x.SocialClubName" Title="SocialClubName" />
             <PropertyColumn Property="x => x.DiscordId" Title="DiscordId" />
+            <PropertyColumn Property="x => x.State" Title="State" />
         </Columns>
         <PagerContent>
             <MudDataGridPager T="AccountApiModel" />
@@ -128,6 +129,9 @@ else
             return true;
         
         if (x.DiscordId != null && x.DiscordId.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.State != null && x.State.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
         if ($"{x.Id}".ToLower().Contains(_searchString))
