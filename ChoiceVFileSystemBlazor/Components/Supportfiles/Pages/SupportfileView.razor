@@ -47,6 +47,15 @@ else if (_model is not null)
                                 <MudSelectItem Value="@(minRank)">@minRank.GetDisplayText()</MudSelectItem>
                             }
                         </MudSelect>
+
+                        <MudDivider Style="@_dividerStyle"/>
+                        <MudSelect T="Ulid?" Label="Kategorie" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(RightEnum.SupportfileEditMinRank))" @bind-Value="_model.CategoryId">
+                            <MudSelectItem T="Ulid?" Value="@null">Keine Kategorie</MudSelectItem>
+                            @foreach (var category in _categoryDbModels)
+                            {
+                                <MudSelectItem T="Ulid?" Value="@(category.Id)">[@category.Nummer] @category.Name</MudSelectItem>
+                            }
+                        </MudSelect>
                     </MudPaper>
                 </MudItem>
 
@@ -340,6 +349,8 @@ else
     private string _availableDropzoneIdentifier = "available";
     private string _addedDropzoneIdentifier = "added";
     
+    private List<SupportfileCategoryDbModel> _categoryDbModels = [];
+    
     private class CharEntry(SupportfileCharacterEntryDbModel supportfileCharacterEntryDbModel, bool isAdded, string dropZoneIdentifier)
     {
         public SupportfileCharacterEntryDbModel SupportfileCharacterEntryDbModel { get; } = supportfileCharacterEntryDbModel;
@@ -547,6 +558,13 @@ else
         await LoadModel();
 
         await LoadCharEntrys();
+
+        await LoadCategories();
+    }
+
+    private async Task LoadCategories()
+    {
+        _categoryDbModels = await SupportfileCategoryProxy.GetAllAsync();
     }
     
     private async Task LoadModel()
@@ -1046,7 +1064,7 @@ else
 
         var shouldReload = false;
         
-        if (_checkModel.Title != _model.Title && UserAccessService.HasRight(RightEnum.SupportfileEditTitle))
+        if (_checkModel.Title != _model.Title && await UserAccessService.HasRightAsync(RightEnum.SupportfileEditTitle))
         {
             var updateResponse = await SupportfileProxy.UpdateTitleAsync(_model.Id, _model.Title, access.Id);
             if (!updateResponse)
@@ -1060,7 +1078,7 @@ else
             }
         }
         
-        if (_checkModel.Description != _model.Description && UserAccessService.HasRight(RightEnum.SupportfileEditDescription))
+        if (_checkModel.Description != _model.Description && await UserAccessService.HasRightAsync(RightEnum.SupportfileEditDescription))
         {
             var updateResponse = await SupportfileProxy.UpdateDescriptionAsync(_model.Id, _model.Description, access.Id);
             if (!updateResponse)
@@ -1074,7 +1092,7 @@ else
             }
         }
         
-        if (_checkModel.Status != _model.Status && UserAccessService.HasRight(RightEnum.SupportfileEditStatus))
+        if (_checkModel.Status != _model.Status && await UserAccessService.HasRightAsync(RightEnum.SupportfileEditStatus))
         {
             var updateResponse = await SupportfileProxy.UpdateStatusAsync(_model.Id, _model.Status, access.Id);
             if (!updateResponse)
@@ -1088,7 +1106,7 @@ else
             }
         }
         
-        if (_checkModel.MinRank != _model.MinRank && UserAccessService.HasRight(RightEnum.SupportfileEditMinRank))
+        if (_checkModel.MinRank != _model.MinRank && await UserAccessService.HasRightAsync(RightEnum.SupportfileEditMinRank))
         {
             var updateResponse = await SupportfileProxy.UpdateMinRankAsync(_model.Id, _model.MinRank, access.Id);
             if (!updateResponse)
@@ -1098,6 +1116,20 @@ else
             else
             {
                 Snackbar.Add("MinRank wurde aktualisiert.", Severity.Success);
+                shouldReload = true;
+            }
+        }
+        
+        if (_checkModel.CategoryId != _model.CategoryId && await UserAccessService.HasRightAsync(RightEnum.SupportfileEditCategory))
+        {
+            var updateResponse = await SupportfileProxy.ChangeCategoryAsync(_model.Id, _model.CategoryId, access.Id);
+            if (!updateResponse)
+            {
+                Snackbar.Add("Kategorie konnte nicht aktualisiert werden.", Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add("Kategorie wurde aktualisiert.", Severity.Success);
                 shouldReload = true;
             }
         }

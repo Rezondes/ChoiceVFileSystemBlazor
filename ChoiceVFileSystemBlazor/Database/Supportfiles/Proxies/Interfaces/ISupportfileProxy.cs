@@ -29,5 +29,5 @@ public interface ISupportfileProxy
 
     public Task<bool> UpdateMinRankAsync(Ulid id, RankEnum newMinRank, Ulid accessId);
     
-    public Task<bool> ChangeCategoryAsync(Ulid id, Ulid newCategoryId, Ulid accessId);
+    public Task<bool> ChangeCategoryAsync(Ulid id, Ulid? newCategoryId, Ulid accessId);
 }

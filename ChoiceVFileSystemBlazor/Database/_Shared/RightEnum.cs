@@ -13,6 +13,7 @@ public enum RightEnum
     SupportfileEditDescription = 1211,
     SupportfileEditStatus = 1212,
     SupportfileEditMinRank = 1213,
+    SupportfileEditCategory = 1214,
     SupportfileDelete = 1220,
     SupportfileRestore = 1221,
     SupportfileViewLogs = 1300,

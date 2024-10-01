@@ -251,14 +251,17 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
         return changes > 0;
     }
 
-    public async Task<bool> ChangeCategoryAsync(Ulid id, Ulid newCategoryId, Ulid accessId)
+    public async Task<bool> ChangeCategoryAsync(Ulid id, Ulid? newCategoryId, Ulid accessId)
     {
         var file = await GetAsync(id);
         if (file is null) return false;
-        
-        var newCategory = await supportfileCategoryProxy.GetAsync(newCategoryId);
-        if (newCategory is null) return false;
 
+        if (!newCategoryId.HasValue) return false;
+        {
+            var checkCategory = await supportfileCategoryProxy.GetAsync(newCategoryId.Value);
+            if (checkCategory is null) return false;
+        }
+        
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
         var oldCategoryId = file.CategoryId; 
