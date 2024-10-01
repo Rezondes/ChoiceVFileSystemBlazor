@@ -167,7 +167,35 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
 
     public List<RightEnum> GetUserRights() => _userRights;
 
-    public bool HasRight(RightEnum right) => right == RightEnum.None || _userAccess.Rank == RankEnum.Admin || _userRights.Contains(right);
+    public bool HasRight(RightEnum right) 
+    {
+        return HasRightAsync(right).GetAwaiter().GetResult();
+    }
     
-    public bool HasAnyRights(List<RightEnum> rights) => _userAccess.Rank == RankEnum.Admin || _userRights.Any(rights.Contains);
+    public async Task<bool> HasRightAsync(RightEnum right) 
+    {
+        if (_userAccess is null)
+        {
+            var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+            await InitializeUserAsync(authState.User);
+        }
+        
+        return right == RightEnum.None || _userAccess.Rank == RankEnum.Admin || _userRights.Contains(right);   
+    }
+
+    public bool HasAnyRights(List<RightEnum> rights)
+    {
+        return HasAnyRightsAsync(rights).GetAwaiter().GetResult();
+    }
+    
+    public async Task<bool> HasAnyRightsAsync(List<RightEnum> rights)
+    {
+        if (_userAccess is null)
+        {
+            var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+            await InitializeUserAsync(authState.User);
+        }
+        
+        return _userAccess.Rank == RankEnum.Admin || _userRights.Any(rights.Contains);
+    }
 }

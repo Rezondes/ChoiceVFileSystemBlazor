@@ -99,7 +99,7 @@ else
     {
         await base.OnInitializedAsync();
         
-        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
     
@@ -167,7 +167,7 @@ else
     {
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
-        if (!UserAccessService.HasRight(RightEnum.NewsCreate)) return;
+        if (!await UserAccessService.HasRightAsync(RightEnum.NewsCreate)) return;
         
         const string title = "News hinzufügen";
         const string description = "Was möchtest du hinzufügen?";
@@ -239,7 +239,7 @@ else
     {
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
-        if (!UserAccessService.HasRight(RightEnum.NewsEdit)) return;
+        if (!await UserAccessService.HasRightAsync(RightEnum.NewsEdit)) return;
         
         const string title = "News bearbeiten";
         const string description = "Wie möchtest du die News bearbeiten?";
@@ -335,7 +335,7 @@ else
     {
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
-        if (!UserAccessService.HasRight(RightEnum.NewsDelete)) return;
+        if (!await UserAccessService.HasRightAsync(RightEnum.NewsDelete)) return;
         
         var result = await DialogService.ShowMessageBox(
             "News löschen", 

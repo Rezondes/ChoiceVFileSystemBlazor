@@ -21,7 +21,7 @@ else
         QuickFilter="@QuickFilter"
         Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">News Übersicht</MudText>
+            <MudText Typo="Typo.h6">Supportakten Kategorien Übersicht</MudText>
             <MudSpacer />
 
             @if (UserAccessService.HasRight(RightEnum.SupportfileCategoryCreate))
@@ -92,7 +92,7 @@ else
     {
         await base.OnInitializedAsync();
         
-        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
     
@@ -150,19 +150,142 @@ else
         return false;
     };
 
-    private Task CreateEntry()
+    private async Task CreateEntry()
     {
-        throw new NotImplementedException();
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
+        if (!UserAccessService.HasRight(RightEnum.SupportfileCategoryCreate)) return;
+        
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                "Name",
+                string.Empty,
+                "Super kuhle Kategorie"
+            ),
+            new(
+                InputTypes.Number,
+                "Nummer",
+                string.Empty,
+                "187"
+            ),
+        };
+
+        var dialogData = await DialogService.OpenDialog(
+            "Kategorie hinzufügen", 
+            "Welche Kategorie willst du hinzufügen?", 
+            "Kategorie hinzufügen",
+            inputs);
+        if (dialogData is null) return;
+
+        var (validatedName, parsedName) = dialogData[0].ValidateInput<string>();
+        if (!validatedName)
+        {
+            Snackbar.Add("Es wurde kein Name eingetragen!", Severity.Error);
+            return;
+        }
+        
+        var (validatedNumber, parsedNumber) = dialogData[1].ValidateInput<int>();
+        if (!validatedNumber)
+        {
+            Snackbar.Add("Es wurde keine Nummer eingetragen!", Severity.Error);
+            return;
+        }
+
+        var category = new SupportfileCategoryDbModel(parsedName!, parsedNumber);
+
+        var response = await SupportfileCategoryProxy.AddAsync(category);
+        if (response is null)
+        {
+            Snackbar.Add("Kategorie konnte nicht hinzugefügt werden!", Severity.Error);
+            return;
+        }
+
+        Snackbar.Add("Kategorie wurde hinzugefügt!", Severity.Success);
+        await Load();
     }
 
-    private Task EditEntry(SupportfileCategoryDbModel category)
+    private async Task EditEntry(SupportfileCategoryDbModel category)
     {
-        throw new NotImplementedException();
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
+        if (!UserAccessService.HasRight(RightEnum.SupportfileCategoryEdit)) return;
+        
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                "Name",
+                category.Name,
+                "Super kuhle Kategorie"
+            ),
+            new(
+                InputTypes.Number,
+                "Nummer",
+                category.Nummer.ToString(),
+                "187"
+            ),
+        };
+
+        var dialogData = await DialogService.OpenDialog(
+            "Kategorie hinzufügen", 
+            "Welche Kategorie willst du hinzufügen?", 
+            "Kategorie hinzufügen",
+            inputs);
+        if (dialogData is null) return;
+
+        var (validatedName, parsedName) = dialogData[0].ValidateInput<string>();
+        if (!validatedName)
+        {
+            Snackbar.Add("Es wurde kein Name eingetragen!", Severity.Error);
+            return;
+        }
+        
+        var (validatedNumber, parsedNumber) = dialogData[1].ValidateInput<int>();
+        if (!validatedNumber)
+        {
+            Snackbar.Add("Es wurde keine Nummer eingetragen!", Severity.Error);
+            return;
+        }
+
+        category.Name = parsedName!;
+        category.Nummer = parsedNumber;
+
+        var response = await SupportfileCategoryProxy.UpdateAsync(category);
+        if (!response)
+        {
+            Snackbar.Add("Kategorie konnte nicht aktualisiert werden!", Severity.Error);
+            return;
+        }
+
+        Snackbar.Add("Kategorie wurde aktualisiert!", Severity.Success);
+        await Load();
     }
 
-    private Task DeleteEntry(SupportfileCategoryDbModel category)
+    private async Task DeleteEntry(SupportfileCategoryDbModel category)
     {
-        throw new NotImplementedException();
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
+        if (!UserAccessService.HasRight(RightEnum.SupportfileCategoryDelete)) return;
+        
+        var result = await DialogService.ShowMessageBox(
+            "Kategorie löschen", 
+            "Bist du dir sicher diese Kategorie zu löschen? Dies kann nicht mehr rückgängig gemacht werden!", 
+            yesText:"Löschen!", cancelText:"Abbrechen"
+        );
+
+        if (result is null or false) return;
+
+        var response = await SupportfileCategoryProxy.DeleteAsync(category.Id);
+        if (!response)
+        {
+            Snackbar.Add("Diese Kategorie konnte nicht gelöscht werden!");
+            return;
+        }
+        
+        Snackbar.Add("Kategorie wurde gelöscht!", Severity.Success);
+        await Load();
     }
 
 }

@@ -129,7 +129,7 @@ else
         
         var relativePath = Navigation.ToBaseRelativePath(Navigation.Uri);
         var right = PageRightRegistry.GetNeededRankForPage(relativePath);
-        var hasRight = UserAccessService.HasRight(right);
+        var hasRight = await UserAccessService.HasRightAsync(right);
         if (!hasRight)
         {
             _shouldRedirect = true;
