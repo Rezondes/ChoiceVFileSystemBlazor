@@ -220,6 +220,7 @@ builder.Services.AddDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>(opt
 builder.Services.AddSingleton<IAccessProxy, AccessProxy>();
 builder.Services.AddSingleton<IRankProxy, RankProxy>();
 builder.Services.AddSingleton<ISupportfileProxy, SupportfileProxy>();
+builder.Services.AddSingleton<ISupportfileCategoryProxy, SupportfileCategoryProxy>();
 builder.Services.AddSingleton<ISupportfileLogsProxy, SupportfileLogsProxy>();
 builder.Services.AddSingleton<ISupportfileEntryProxy, SupportfileEntryProxy>();
 builder.Services.AddSingleton<IAccessLogsProxy, AccessLogsProxy>();
