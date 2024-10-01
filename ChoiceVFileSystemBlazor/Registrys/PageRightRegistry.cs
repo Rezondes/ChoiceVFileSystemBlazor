@@ -31,6 +31,7 @@ public static class PageRightRegistry
         { AccessLogs.Url, RightEnum.ViewAdminAccessLogs },
         { DiscordRolesControl.Url, RightEnum.ViewDiscordRolesControl },
         { NewsControl.Url, RightEnum.ViewNewsControl },
+        { SupportfileCategoryControl.Url, RightEnum.ViewSupportfileCategoryControl },
         
         { BankAccountOverview.Url, RightEnum.ViewBankAccounts },
         

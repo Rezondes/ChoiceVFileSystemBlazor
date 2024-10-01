@@ -1,0 +1,168 @@
+@page "/admin/supportfiles/categories"
+
+@implements IDisposable
+
+@code {
+    public const string Url = "/admin/supportfiles/categories";
+    public static string GetRedirectUrl() => Url;
+}
+
+<PageTitle>NewsControl</PageTitle>
+
+@if (_loading || !_isAuthorized || _shouldRedirect)
+{
+    <PageLoading/>
+}
+else
+{
+    <MudDataGrid
+        T="SupportfileCategoryDbModel" MultiSelection="true"
+        Items="@_data" SortMode="SortMode.Multiple" Filterable="true"
+        QuickFilter="@QuickFilter"
+        Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">News Übersicht</MudText>
+            <MudSpacer />
+
+            @if (UserAccessService.HasRight(RightEnum.SupportfileCategoryCreate))
+            {
+                <MudTooltip Text="Kategorie hinzufügen" Duration="@Constants.TOOLTIP_DURATION">
+                    <MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.Add" OnClick="() => CreateEntry()"/>
+                </MudTooltip>
+            }
+
+            <MudTextField
+                T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+                Adornment="Adornment.Start" Immediate="true"
+                AdornmentIcon="@Icons.Material.Filled.Search"
+                IconSize="Size.Medium" Class="mt-0"/>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Hideable="false" Property="x => x.Id" Title="#" Filterable="false"/>
+            <PropertyColumn Hideable="false" Property="x => x.Name" Title="Title" />
+            <PropertyColumn Hideable="false" Property="x => x.Nummer" Title="Content" />
+            @if (UserAccessService.HasRight(RightEnum.SupportfileCategoryEdit) || UserAccessService.HasRight(RightEnum.SupportfileCategoryDelete))
+            {
+            <TemplateColumn CellClass="d-flex justify-end">
+                <CellTemplate>
+                    <MudStack Row>
+                        @if (UserAccessService.HasRight(RightEnum.SupportfileCategoryEdit))
+                        {
+                        <MudTooltip Text="Bearbeiten" Duration="@Constants.TOOLTIP_DURATION">
+                            <MudIconButton
+                                Size="@Size.Small"
+                                Variant="@Variant.Filled"
+                                Icon="@Icons.Material.Filled.Edit"
+                                Color="@Color.Primary"
+                                OnClick="() => EditEntry(context.Item)"/>
+                        </MudTooltip>
+                        }
+                        @if (UserAccessService.HasRight(RightEnum.SupportfileCategoryDelete))
+                        {
+                        <MudTooltip Text="Löschen" Duration="@Constants.TOOLTIP_DURATION">
+                            <MudIconButton
+                                Size="@Size.Small"
+                                Variant="@Variant.Filled"
+                                Icon="@Icons.Material.Filled.DeleteForever"
+                                Color="@Color.Error"
+                                OnClick="() => DeleteEntry(context.Item)"/>
+                        </MudTooltip>
+                        }
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
+            }
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="SupportfileCategoryDbModel" />
+        </PagerContent>
+    </MudDataGrid>
+}
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+    private bool _loading;
+    private string? _searchString;
+
+    private List<SupportfileCategoryDbModel> _data = [];
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        
+        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
+        _shouldRedirect = !_isAuthorized;
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+            
+        await Load();
+    
+        ReloadService.OnCustomReload += Load;
+    }
+    
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Load;
+    }
+    
+    private async Task Load()
+    {
+        if (_loading) return;
+        
+        _loading = true;
+        StateHasChanged();
+
+        _data = await SupportfileCategoryProxy.GetAllAsync();
+        
+        _loading = false;
+        StateHasChanged();
+    }
+    
+    private Func<SupportfileCategoryDbModel, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+        
+        var lowerSearchString = _searchString.ToLower();
+        
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.Name.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.Nummer.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if ($"{x.Id}".ToLower().Contains(lowerSearchString))
+            return true;
+
+        return false;
+    };
+
+    private Task CreateEntry()
+    {
+        throw new NotImplementedException();
+    }
+
+    private Task EditEntry(SupportfileCategoryDbModel category)
+    {
+        throw new NotImplementedException();
+    }
+
+    private Task DeleteEntry(SupportfileCategoryDbModel category)
+    {
+        throw new NotImplementedException();
+    }
+
+}

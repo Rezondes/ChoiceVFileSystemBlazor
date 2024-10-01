@@ -190,8 +190,8 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
                 .HasForeignKey(s => s.CreatedByAccessId);
             
             entity.HasOne(e => e.Category)
-                .WithOne(c => c.Supportfile)
-                .HasForeignKey<SupportfileCategoryDbModel>(c => c.SupportfileId)
+                .WithMany(c => c.Supportfiles)
+                .HasForeignKey(e => e.CategoryId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
@@ -202,14 +202,9 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
                     v => v.ToString(),
                     v => Ulid.Parse(v));
             
-            entity.Property(e => e.SupportfileId)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => Ulid.Parse(v));
-            
-            entity.HasOne(e => e.Supportfile)
+            entity.HasMany(e => e.Supportfiles)
                 .WithOne(s => s.Category)
-                .HasForeignKey<SupportfileCategoryDbModel>(e => e.SupportfileId)
+                .HasForeignKey(s => s.CategoryId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

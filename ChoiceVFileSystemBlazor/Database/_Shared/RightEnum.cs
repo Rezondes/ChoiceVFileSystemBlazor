@@ -62,4 +62,8 @@ public enum RightEnum
     NewsCreate = 9410,
     NewsDelete = 9420,
     NewsEdit = 9430,
+    ViewSupportfileCategoryControl = 9500,
+    SupportfileCategoryCreate = 9510,
+    SupportfileCategoryDelete = 9520,
+    SupportfileCategoryEdit = 9530,
 }
