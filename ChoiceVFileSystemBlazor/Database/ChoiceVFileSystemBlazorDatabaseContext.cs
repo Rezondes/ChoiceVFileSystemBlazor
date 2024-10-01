@@ -32,6 +32,7 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
     #region Supportfiles 
     public DbSet<SupportfileCharacterEntryDbModel> SupportfileCharacterEntryDbModels { get; set; }
     public DbSet<SupportfileDbModel> SupportfileDbModels { get; set; }
+    public DbSet<SupportfileCategoryDbModel> SupportfileCategoryDbModels { get; set; }
     public DbSet<SupportfileEntryDbModel> SupportfileEntryDbModels { get; set; }
     public DbSet<SupportfileLogsDbModel> SupportfileLogsDbModels  { get; set; }
     public DbSet<SupportfileFileUploadDbModel> SupportfileFileUploadDbModels  { get; set; }
@@ -150,98 +151,136 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
         
         #region Supportfiles
 
-        modelBuilder.Entity<SupportfileCharacterEntryDbModel>()
-            .Property(e => e.Id)
-            .HasConversion(
-                v => v.ToString(),
-                v => Ulid.Parse(v));
-        modelBuilder.Entity<SupportfileCharacterEntryDbModel>()
-            .Property(e => e.SupportfileId)
-            .HasConversion(
-                v => v.ToString(),
-                v => Ulid.Parse(v));
-        modelBuilder.Entity<SupportfileCharacterEntryDbModel>()
-            .HasOne(s => s.Supportfile)
-            .WithMany(a => a.CharacterEntrys)
-            .HasForeignKey(s => s.SupportfileId);
-        
-        modelBuilder.Entity<SupportfileDbModel>()
-            .Property(e => e.Id)
-            .HasConversion(
-                v => v.ToString(),
-                v => Ulid.Parse(v));
-        modelBuilder.Entity<SupportfileDbModel>()
-            .Property(e => e.CreatedByAccessId)
-            .HasConversion(
-                v => v.ToString(),
-                v => Ulid.Parse(v));
-        modelBuilder.Entity<SupportfileDbModel>()
-            .HasOne(s => s.CreatorAccessModel)
-            .WithMany(a => a.Supportfiles) 
-            .HasForeignKey(s => s.CreatedByAccessId); 
+        modelBuilder.Entity<SupportfileCharacterEntryDbModel>(entity => 
+        {
+            entity.Property(e => e.Id)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
 
-        modelBuilder.Entity<SupportfileLogsDbModel>()
-            .Property(e => e.Id)
-            .HasConversion(
-                v => v.ToString(),
-                v => Ulid.Parse(v));
-        modelBuilder.Entity<SupportfileLogsDbModel>()
-            .Property(e => e.SupportfileId)
-            .HasConversion(
-                v => v.ToString(),
-                v => Ulid.Parse(v));
-        modelBuilder.Entity<SupportfileLogsDbModel>()
-            .Property(e => e.AccessId)
-            .HasConversion(
-                v => v.ToString(),
-                v => Ulid.Parse(v)); 
-        modelBuilder.Entity<SupportfileLogsDbModel>()
-            .HasOne(s => s.AccessModel)
-            .WithMany(a => a.SupportfileLogs) 
-            .HasForeignKey(s => s.AccessId); 
-        modelBuilder.Entity<SupportfileLogsDbModel>()
-            .HasOne(s => s.SupportfileDbModel)
-            .WithMany(a => a.Logs) 
-            .HasForeignKey(s => s.SupportfileId); 
-        
-        modelBuilder.Entity<SupportfileEntryDbModel>()
-            .Property(e => e.Id)
-            .HasConversion(
-                v => v.ToString(),
-                v => Ulid.Parse(v));
-        modelBuilder.Entity<SupportfileEntryDbModel>()
-            .Property(e => e.SupportfileId)
-            .HasConversion(
-                v => v.ToString(),
-                v => Ulid.Parse(v));
-        modelBuilder.Entity<SupportfileEntryDbModel>()
-            .Property(e => e.CreatedByAccessId)
-            .HasConversion(
-                v => v.ToString(),
-                v => Ulid.Parse(v));
-        modelBuilder.Entity<SupportfileEntryDbModel>()
-            .HasOne(s => s.CreatorAccessModel)
-            .WithMany(a => a.SupportfileEntrys) 
-            .HasForeignKey(s => s.CreatedByAccessId); 
-        modelBuilder.Entity<SupportfileEntryDbModel>()
-            .HasOne(s => s.SupportfileDbModel)
-            .WithMany(a => a.Entrys) 
-            .HasForeignKey(s => s.SupportfileId); 
-        
-        modelBuilder.Entity<SupportfileFileUploadDbModel>()
-            .Property(e => e.Id)
-            .HasConversion(
-                v => v.ToString(),
-                v => Ulid.Parse(v));
-        modelBuilder.Entity<SupportfileFileUploadDbModel>()
-            .Property(e => e.EntryId)
-            .HasConversion(
-                v => v.ToString(),
-                v => Ulid.Parse(v));
-        modelBuilder.Entity<SupportfileFileUploadDbModel>()
-            .HasOne(s => s.EntryModel)
-            .WithMany(a => a.FileUploads) 
-            .HasForeignKey(s => s.EntryId); 
+            entity.Property(e => e.SupportfileId)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+
+            entity.HasOne(s => s.Supportfile)
+                .WithMany(a => a.CharacterEntrys)
+                .HasForeignKey(s => s.SupportfileId);
+        });
+
+        modelBuilder.Entity<SupportfileDbModel>(entity =>
+        {
+            entity.Property(e => e.Id)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+            
+            entity.Property(e => e.CreatedByAccessId)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+            
+            entity.Property(e => e.CategoryId)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+            
+            entity.HasOne(s => s.CreatorAccessModel)
+                .WithMany(a => a.Supportfiles)
+                .HasForeignKey(s => s.CreatedByAccessId);
+            
+            entity.HasOne(e => e.Category)
+                .WithOne(c => c.Supportfile)
+                .HasForeignKey<SupportfileCategoryDbModel>(c => c.SupportfileId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<SupportfileCategoryDbModel>(entity =>
+        {
+            entity.Property(e => e.Id)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+            
+            entity.Property(e => e.SupportfileId)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+            
+            entity.HasOne(e => e.Supportfile)
+                .WithOne(s => s.Category)
+                .HasForeignKey<SupportfileCategoryDbModel>(e => e.SupportfileId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SupportfileLogsDbModel>(entity =>
+        {
+            entity.Property(e => e.Id)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+            
+            entity.Property(e => e.SupportfileId)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+            
+            entity.Property(e => e.AccessId)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+            
+            entity.HasOne(s => s.AccessModel)
+                .WithMany(a => a.SupportfileLogs)
+                .HasForeignKey(s => s.AccessId);
+            
+            entity.HasOne(s => s.SupportfileDbModel)
+                .WithMany(a => a.Logs)
+                .HasForeignKey(s => s.SupportfileId);
+        });
+
+        modelBuilder.Entity<SupportfileEntryDbModel>(entity =>
+        {
+            entity.Property(e => e.Id)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+            
+            entity.Property(e => e.SupportfileId)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+            
+            entity.Property(e => e.CreatedByAccessId)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+            
+            entity.HasOne(s => s.CreatorAccessModel)
+                .WithMany(a => a.SupportfileEntrys)
+                .HasForeignKey(s => s.CreatedByAccessId);
+            
+            entity.HasOne(s => s.SupportfileDbModel)
+                .WithMany(a => a.Entrys)
+                .HasForeignKey(s => s.SupportfileId);
+        });
+
+        modelBuilder.Entity<SupportfileFileUploadDbModel>(entity =>
+        {
+            entity.Property(e => e.Id)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+            
+            entity.Property(e => e.EntryId)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+            
+            entity.HasOne(s => s.EntryModel)
+                .WithMany(a => a.FileUploads)
+                .HasForeignKey(s => s.EntryId);
+        });
         #endregion
     }
 }

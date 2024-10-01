@@ -50,10 +50,14 @@ public class SupportfileDbModel
     [Required] 
     public RankEnum MinRank { get; set; } = RankEnum.Rank1;
 
+    
+    public Ulid? CategoryId { get; set; }
+    
     public bool Deleted { get; set; } = false;
     
     // Navigation Properties
     public AccessDbModel CreatorAccessModel { get; set; }
+    public SupportfileCategoryDbModel? Category { get; set; }
     
     public List<SupportfileCharacterEntryDbModel> CharacterEntrys { get; set; }
     public List<SupportfileEntryDbModel> Entrys { get; set; }
