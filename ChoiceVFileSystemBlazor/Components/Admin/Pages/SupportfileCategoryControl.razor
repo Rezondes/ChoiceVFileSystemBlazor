@@ -39,8 +39,8 @@ else
         </ToolBarContent>
         <Columns>
             <PropertyColumn Hideable="false" Property="x => x.Id" Title="#" Filterable="false"/>
-            <PropertyColumn Hideable="false" Property="x => x.Name" Title="Title" />
-            <PropertyColumn Hideable="false" Property="x => x.Nummer" Title="Content" />
+            <PropertyColumn Hideable="false" Property="x => x.Name" Title="Name" />
+            <PropertyColumn Hideable="false" Property="x => x.Nummer" Title="Nummer" />
             @if (UserAccessService.HasRight(RightEnum.SupportfileCategoryEdit) || UserAccessService.HasRight(RightEnum.SupportfileCategoryDelete))
             {
             <TemplateColumn CellClass="d-flex justify-end">
