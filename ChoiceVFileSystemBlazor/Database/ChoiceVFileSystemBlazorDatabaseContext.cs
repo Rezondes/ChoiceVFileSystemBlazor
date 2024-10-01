@@ -205,7 +205,7 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
             entity.HasMany(e => e.Supportfiles)
                 .WithOne(s => s.Category)
                 .HasForeignKey(s => s.CategoryId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<SupportfileLogsDbModel>(entity =>

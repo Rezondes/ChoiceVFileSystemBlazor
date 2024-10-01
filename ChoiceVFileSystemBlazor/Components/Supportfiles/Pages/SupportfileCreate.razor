@@ -1,5 +1,8 @@
 ﻿@page "/supportfiles/create"
 
+@using ChoiceVFileSystemBlazor.Components.Admin.Pages
+@implements IDisposable
+
 @code {
     public const string Url = "/supportfiles/create";
     public static string GetRedirectUrl() => Url;
@@ -14,7 +17,7 @@
     }
 </style>
 
-@if (_hubConnection is null || !_isAuthorized)
+@if (_loading || _hubConnection is null || !_isAuthorized)
 {
     <PageLoading/>
 }
@@ -53,6 +56,16 @@ else
                     </MudSelect>
 
                     <MudDivider Class="divider-class"/>
+                    <MudSelect T="Ulid?" Label="Kategorie" Variant="Variant.Outlined"
+                               @bind-Value="_model.CategoryId" For="@(() => _model.CategoryId)">
+                        <MudSelectItem T="Ulid?" Value="@null">Keine Kategorie</MudSelectItem>
+                        @foreach (var category in _categoryDbModels)
+                        {
+                            <MudSelectItem T="Ulid?" Value="@(category.Id)">[@category.Nummer] @category.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudDivider Class="divider-class"/>
                     <div class="d-flex align-center justify-space-between">
                         <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_success)" Class="ml-auto" OnClick="() => OnSubmit()">Erstellen</MudButton>
                     </div>
@@ -73,6 +86,9 @@ else
     private bool _success;
     private MudForm _form = null!;
 
+    private bool _loading = true;
+    private List<SupportfileCategoryDbModel> _categoryDbModels = [];
+    
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -81,7 +97,7 @@ else
         
         _model = new SupportfileDbModel(access!.Id);
         
-        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
         StateHasChanged();
     }
@@ -97,6 +113,24 @@ else
         }
             
         await StartHubConnection();
+        await Reload();
+        ReloadService.OnCustomReload += Reload;
+    }
+    
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Reload;
+    }
+
+    private async Task Reload()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        _categoryDbModels = await SupportfileCategoryProxy.GetAllAsync();
+        
+        _loading = false;
+        StateHasChanged();
     }
 
     private async Task OnSubmit()
@@ -109,7 +143,7 @@ else
             Snackbar.Add("Validation failed!", Severity.Error);
             return;
         }
-
+        
        var response = await SupportfileProxy.AddAsync(_model);
        if (response is null)
        {
@@ -136,4 +170,5 @@ else
         
         await _hubConnection.SendAsync(SupportfileHubMethodEnum.EntryCreated.ToString());
     }
+
 }
