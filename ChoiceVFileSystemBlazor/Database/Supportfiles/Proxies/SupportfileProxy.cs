@@ -15,6 +15,7 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
         return await dbContext.SupportfileDbModels
             .AsNoTracking()
             .Include(x => x.CreatorAccessModel)
+            .Include(x => x.Category)
             .ToListAsync();
     }
     
@@ -26,6 +27,7 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
         return await dbContext.SupportfileDbModels
             .AsNoTracking()
             .Include(x => x.CreatorAccessModel)
+            .Include(x => x.Category)
             .Include(x => x.CharacterEntrys)
             .Include(x => x.Entrys)
                 .ThenInclude(x => x.FileUploads)
