@@ -21,4 +21,6 @@ public enum SupportfileLogTypeEnum
     
     AddCharEntry = 4000,
     RemoveCharEntry = 4001,
+    
+    ModifyCategory = 5000
 }

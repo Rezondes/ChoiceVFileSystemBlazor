@@ -28,4 +28,6 @@ public interface ISupportfileProxy
     public Task<bool> UpdateStatusAsync(Ulid id, FileStatusEnum newStatus, Ulid accessId);
 
     public Task<bool> UpdateMinRankAsync(Ulid id, RankEnum newMinRank, Ulid accessId);
+    
+    public Task<bool> ChangeCategoryAsync(Ulid id, Ulid newCategoryId, Ulid accessId);
 }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies;
 
-public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext> dbContextFactory, ISupportfileLogsProxy supportfileLogsProxy) : ISupportfileProxy
+public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext> dbContextFactory, ISupportfileLogsProxy supportfileLogsProxy, ISupportfileCategoryProxy supportfileCategoryProxy) : ISupportfileProxy
 {
     public async Task<List<SupportfileDbModel>> GetAllAsync()
     {
@@ -245,6 +245,32 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
             accessId,
             $"OldMinRank: {oldMinRank} \n" +
             $"NewMinRank: {file.MinRank}"
+        ));
+        var changes = await dbContext.SaveChangesAsync();
+        
+        return changes > 0;
+    }
+
+    public async Task<bool> ChangeCategoryAsync(Ulid id, Ulid newCategoryId, Ulid accessId)
+    {
+        var file = await GetAsync(id);
+        if (file is null) return false;
+        
+        var newCategory = await supportfileCategoryProxy.GetAsync(newCategoryId);
+        if (newCategory is null) return false;
+
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        var oldCategoryId = file.CategoryId; 
+        file.CategoryId = newCategoryId;
+        
+        dbContext.SupportfileDbModels.Update(file);
+        await supportfileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+            file.Id,
+            SupportfileLogTypeEnum.ModifyCategory,
+            accessId,
+            $"OldCategoryId: {oldCategoryId} \n" +
+                $"NewCategoryId: {file.CategoryId}"
         ));
         var changes = await dbContext.SaveChangesAsync();
         
