@@ -555,16 +555,19 @@ else
 
     private async Task Load()
     {
+        await LoadCategories();
+        
         await LoadModel();
 
         await LoadCharEntrys();
-
-        await LoadCategories();
+        
+        StateHasChanged();
     }
 
     private async Task LoadCategories()
     {
         _categoryDbModels = await SupportfileCategoryProxy.GetAllAsync();
+        StateHasChanged();
     }
     
     private async Task LoadModel()
