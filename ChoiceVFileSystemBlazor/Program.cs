@@ -185,7 +185,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHostedService<StartupService>();
-builder.Services.AddSingleton<ReloadService>();
+builder.Services.AddScoped<ReloadService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserAccessService>();
 
@@ -215,18 +215,18 @@ builder.Services.AddDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>(opt
             builder.Configuration.GetConnectionString("DefaultConnection"),
             ServerVersion.AutoDetect(
                 builder.Configuration.GetConnectionString("DefaultConnection"))),
-    ServiceLifetime.Singleton);
+    ServiceLifetime.Scoped);
 
-builder.Services.AddSingleton<IAccessProxy, AccessProxy>();
-builder.Services.AddSingleton<IRankProxy, RankProxy>();
-builder.Services.AddSingleton<ISupportfileProxy, SupportfileProxy>();
-builder.Services.AddSingleton<ISupportfileCategoryProxy, SupportfileCategoryProxy>();
-builder.Services.AddSingleton<ISupportfileLogsProxy, SupportfileLogsProxy>();
-builder.Services.AddSingleton<ISupportfileEntryProxy, SupportfileEntryProxy>();
-builder.Services.AddSingleton<IAccessLogsProxy, AccessLogsProxy>();
-builder.Services.AddSingleton<IDiscordRolesProxy, DiscordRoleProxy>();
-builder.Services.AddSingleton<IDiscordRoleLogsProxy, DiscordRoleLogsProxy>();
-builder.Services.AddSingleton<INewsProxy, NewsProxy>();
+builder.Services.AddScoped<IAccessProxy, AccessProxy>();
+builder.Services.AddScoped<IRankProxy, RankProxy>();
+builder.Services.AddScoped<ISupportfileProxy, SupportfileProxy>();
+builder.Services.AddScoped<ISupportfileCategoryProxy, SupportfileCategoryProxy>();
+builder.Services.AddScoped<ISupportfileLogsProxy, SupportfileLogsProxy>();
+builder.Services.AddScoped<ISupportfileEntryProxy, SupportfileEntryProxy>();
+builder.Services.AddScoped<IAccessLogsProxy, AccessLogsProxy>();
+builder.Services.AddScoped<IDiscordRolesProxy, DiscordRoleProxy>();
+builder.Services.AddScoped<IDiscordRoleLogsProxy, DiscordRoleLogsProxy>();
+builder.Services.AddScoped<INewsProxy, NewsProxy>();
 #endregion
 
 if (!builder.Environment.IsDevelopment())
