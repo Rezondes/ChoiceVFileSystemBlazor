@@ -100,7 +100,7 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
             characterEntry.SupportfileId,
             SupportfileLogTypeEnum.AddCharEntry,
             accessId,
-            $"Id: {characterEntry.Id} \n" +
+            $"Id: {characterEntry.Id} \n\n" +
             $"CharacterId: {characterEntry.CharacterId}"
         ));
         var changes = await dbContext.SaveChangesAsync();
@@ -126,7 +126,7 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
             characterEntry.SupportfileId,
             SupportfileLogTypeEnum.RemoveCharEntry,
             accessId,
-            $"Id: {characterEntry.Id} \n" +
+            $"Id: {characterEntry.Id} \n\n" +
             $"CharacterId: {characterEntry.CharacterId}"
         ));
         var changes = await dbContext.SaveChangesAsync();
@@ -173,7 +173,7 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
             file.Id,
             SupportfileLogTypeEnum.ModifyTitle,
             accessId,
-            $"OldTitle: {oldTitle} \n" +
+            $"OldTitle: {oldTitle} \n\n" +
             $"NewTitle: {file.Title}"
         ));
         var changes = await dbContext.SaveChangesAsync();
@@ -197,7 +197,7 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
             file.Id,
             SupportfileLogTypeEnum.ModifyDescription,
             accessId,
-            $"OldDescription: {oldDescription} \n" +
+            $"OldDescription: {oldDescription} \n\n" +
             $"NewDescription: {file.Description}"
         ));
         var changes = await dbContext.SaveChangesAsync();
@@ -221,7 +221,7 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
             file.Id,
             SupportfileLogTypeEnum.ModifyStatus,
             accessId,
-            $"OldStatus: {oldStatus} \n" +
+            $"OldStatus: {oldStatus} \n\n" +
             $"NewStatus: {file.Status}"
         ));
         var changes = await dbContext.SaveChangesAsync();
@@ -245,7 +245,7 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
             file.Id,
             SupportfileLogTypeEnum.ModifyMinRank,
             accessId,
-            $"OldMinRank: {oldMinRank} \n" +
+            $"OldMinRank: {oldMinRank} \n\n" +
             $"NewMinRank: {file.MinRank}"
         ));
         var changes = await dbContext.SaveChangesAsync();
@@ -274,7 +274,7 @@ public class SupportfileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseC
             file.Id,
             SupportfileLogTypeEnum.ModifyCategory,
             accessId,
-            $"OldCategoryId: {oldCategoryId} \n" +
+            $"OldCategoryId: {oldCategoryId} \n\n" +
                 $"NewCategoryId: {file.CategoryId}"
         ));
         var changes = await dbContext.SaveChangesAsync();

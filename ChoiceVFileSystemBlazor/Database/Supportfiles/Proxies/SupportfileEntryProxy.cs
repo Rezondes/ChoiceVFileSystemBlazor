@@ -42,7 +42,7 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
             supportfileEntry.SupportfileId,
             SupportfileLogTypeEnum.AddEntry,
             supportfileEntry.CreatedByAccessId,
-            $"Id: {supportfileEntry.Id} \n"
+            $"Id: {supportfileEntry.Id}"
         ));
         
         var changes = await dbContext.SaveChangesAsync();
@@ -67,9 +67,9 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
             entry.SupportfileId,
             SupportfileLogTypeEnum.ModifyEntry,
             accessId,
-            $"Id: {entry.Id} \n" +
-            $"OldContent: {oldContent} \n " +
-            $"NewContent: {newContent} \n "
+            $"Id: {entry.Id} \n\n" +
+            $"OldContent: {oldContent} \n\n" +
+            $"NewContent: {newContent}"
         ));
         var changes = await dbContext.SaveChangesAsync();
         
@@ -91,9 +91,9 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
             entry.SupportfileId,
             SupportfileLogTypeEnum.RemoveEntry,
             accessId,
-            $"Id: {entry.Id} \n" +
-            $"Content: {entry.Content} \n " +
-            $"Creator: {entry.CreatedByAccessId} \n "
+            $"Id: {entry.Id} \n\n" +
+            $"Content: {entry.Content} \n\n" +
+            $"Creator: {entry.CreatedByAccessId}"
         ));
         var changes = await dbContext.SaveChangesAsync();
         
@@ -115,9 +115,9 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
             entry.SupportfileId,
             SupportfileLogTypeEnum.RestoreEntry,
             accessId,
-            $"Id: {entry.Id} \n" +
-            $"Content: {entry.Content} \n " +
-            $"Creator: {entry.CreatedByAccessId} \n "
+            $"Id: {entry.Id} \n\n" +
+            $"Content: {entry.Content} \n\n" +
+            $"Creator: {entry.CreatedByAccessId}"
         ));
         var changes = await dbContext.SaveChangesAsync();
         
@@ -160,9 +160,9 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
             supportfileId,
             SupportfileLogTypeEnum.AddFileUpload,
             accessId,
-            $"FileId: {file.Id} \n" +
-            $"FileName: {file.FileName} \n " +
-            $"ContentType: {file.ContentType} \n " +
+            $"FileId: {file.Id} \n\n" +
+            $"FileName: {file.FileName} \n\n" +
+            $"ContentType: {file.ContentType} \n\n" +
             $"FileSize: {file.SizeText}"
         ));
         var changes = await dbContext.SaveChangesAsync();
@@ -185,9 +185,9 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
             supportfileId,
             SupportfileLogTypeEnum.DeleteFileUpload,
             accessId,
-            $"FileId: {file.Id} \n" +
-            $"OldName: {oldName} \n " +
-            $"NewName: {file.FileName} \n "
+            $"FileId: {file.Id} \n\n" +
+            $"OldName: {oldName} \n\n" +
+            $"NewName: {file.FileName}"
         ));
         var changes = await dbContext.SaveChangesAsync();
         
@@ -206,9 +206,9 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
             supportfileId,
             SupportfileLogTypeEnum.DeleteFileUpload,
             accessId,
-            $"FileId: {file.Id} \n" +
-            $"FileName: {file.FileName} \n " +
-            $"ContentType: {file.ContentType} \n "
+            $"FileId: {file.Id} \n\n" +
+            $"FileName: {file.FileName} \n\n" +
+            $"ContentType: {file.ContentType}"
         ));
         var changes = await dbContext.SaveChangesAsync();
         
