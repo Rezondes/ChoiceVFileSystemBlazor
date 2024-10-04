@@ -149,7 +149,8 @@ public class AccessProxy : IAccessProxy
             accessDbModel.Id,
             AccessLogTypeEnum.ModifyName,
             accessId,
-            $"OldName: {oldName} \nNewName: {accessDbModel.Name}"
+            $"OldName: {oldName} \n\n" +
+            $"NewName: {accessDbModel.Name}"
         ));
         var changes = await dbContext.SaveChangesAsync();
 
@@ -177,7 +178,8 @@ public class AccessProxy : IAccessProxy
             accessDbModel.Id,
             AccessLogTypeEnum.ModifyAccountId,
             accessId,
-            $"OldAccountId: {oldAccountId} \nNewAccountId: {accessDbModel.AccountId}"
+            $"OldAccountId: {oldAccountId} \n\n" +
+            $"NewAccountId: {accessDbModel.AccountId}"
         ));
         var changes = await dbContext.SaveChangesAsync();
 
@@ -200,7 +202,8 @@ public class AccessProxy : IAccessProxy
             accessDbModel.Id,
             AccessLogTypeEnum.ModifyDiscordId,
             accessId,
-            $"OldDiscordId: {oldDiscordId} \nNewDiscordId: {accessDbModel.DiscordId}"
+            $"OldDiscordId: {oldDiscordId} \n\n" +
+            $"NewDiscordId: {accessDbModel.DiscordId}"
         ));
         var changes = await dbContext.SaveChangesAsync();
 
@@ -223,7 +226,8 @@ public class AccessProxy : IAccessProxy
             accessDbModel.Id,
             AccessLogTypeEnum.ModifyRank,
             accessId,
-            $"OldRank: {oldRank} \nNewRank: {accessDbModel.Rank}"
+            $"OldRank: {oldRank} \n\n" +
+            $"NewRank: {accessDbModel.Rank}"
         ));
         var changes = await dbContext.SaveChangesAsync();
 
@@ -251,7 +255,8 @@ public class AccessProxy : IAccessProxy
                 accessDbModel.Id,
                 AccessLogTypeEnum.ModifyName,
                 accessId,
-                $"OldName: {oldName} \nNewName: {accessDbModel.Name}"
+                $"OldName: {oldName} \n\n" +
+                $"NewName: {accessDbModel.Name}"
             ));
         }
         if (updateAccountId && accessDbModel.AccountId != partialAccessModel.AccountId)
@@ -262,7 +267,8 @@ public class AccessProxy : IAccessProxy
                 accessDbModel.Id,
                 AccessLogTypeEnum.ModifyAccountId,
                 accessId,
-                $"OldAccountId: {oldAccountId} \nNewAccountId: {accessDbModel.AccountId}"
+                $"OldAccountId: {oldAccountId} \n\n" +
+                $"NewAccountId: {accessDbModel.AccountId}"
             ));
         }
         if (updateDiscordId && accessDbModel.DiscordId != partialAccessModel.DiscordId)
@@ -273,7 +279,8 @@ public class AccessProxy : IAccessProxy
                 accessDbModel.Id,
                 AccessLogTypeEnum.ModifyDiscordId,
                 accessId,
-                $"OldDiscordId: {oldDiscordId} \nNewDiscordId: {accessDbModel.DiscordId}"
+                $"OldDiscordId: {oldDiscordId} \n\n" +
+                $"NewDiscordId: {accessDbModel.DiscordId}"
             ));
         }
         if (updateRank && accessDbModel.Rank != partialAccessModel.Rank)
@@ -284,7 +291,8 @@ public class AccessProxy : IAccessProxy
                 accessDbModel.Id,
                 AccessLogTypeEnum.ModifyRank,
                 accessId,
-                $"OldRank: {oldRank} \nNewRank: {accessDbModel.Rank}"
+                $"OldRank: {oldRank} \n\n" +
+                $"NewRank: {accessDbModel.Rank}"
             ));
         }
 
@@ -314,7 +322,7 @@ public class AccessProxy : IAccessProxy
             check.Id,
             AccessLogTypeEnum.ModifyIsDarkMode,
             accessId,
-            $"OldIsDarkMode: {oldIsDarkMode} \n" +
+            $"OldIsDarkMode: {oldIsDarkMode} \n\n" +
             $"NewIsDarkMode: {check.Settings.IsDarkMode}"
         ));
         var changes = await dbContext.SaveChangesAsync();
@@ -341,7 +349,7 @@ public class AccessProxy : IAccessProxy
             check.Id,
             AccessLogTypeEnum.ModifyIsNavbarExpanded,
             accessId,
-            $"OldIsNavbarExpanded: {oldIsNavbarExpanded} \n" +
+            $"OldIsNavbarExpanded: {oldIsNavbarExpanded} \n\n" +
             $"NewIsNavbarExpanded: {check.Settings.IsNavbarExpanded}"
         ));
         var changes = await dbContext.SaveChangesAsync();
@@ -368,7 +376,7 @@ public class AccessProxy : IAccessProxy
             check.Id,
             AccessLogTypeEnum.ModifyTimezone,
             accessId,
-            $"OldTimezone: {oldTimeZone} \n" +
+            $"OldTimezone: {oldTimeZone} \n\n" +
             $"NewTimezone: {check.Settings.TimeZone}"
         ));
         var changes = await dbContext.SaveChangesAsync();
