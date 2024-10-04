@@ -46,11 +46,8 @@ else
                     <MudText Class="px-5" Typo="Typo.h5">Support-Funktionen</MudText>
                 </div>
                 <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
-                    @if (_model.IsCurrentlyOnline)
-                    {
-                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="KickAccount">Kicken</MudButton>
-                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Unstuck</MudButton>
-                    }
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled="@(!_model.IsCurrentlyOnline)" OnClick="KickAccount">Kicken</MudButton>
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Unstuck</MudButton>
                     
                     @if (_model.State == AccountStateApiEnum.Banned)
                     {
