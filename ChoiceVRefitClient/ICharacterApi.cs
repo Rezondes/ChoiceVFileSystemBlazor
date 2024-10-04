@@ -26,5 +26,5 @@ public interface ICharacterApi
     
     [Put("/api/v1/character/dead?characterId={characterId}&state={state}")]
     [Headers("Authorization: Bearer")]
-    Task<ApiResponse<CharacterChangeDimensionResultApiModel>> SetPermadeathActivatedAsync(int characterId, bool state);
+    Task<ApiResponse<CharacterSetPermadeathActivatedResultApiModel>> SetPermadeathActivatedAsync(int characterId, bool state);
 }
