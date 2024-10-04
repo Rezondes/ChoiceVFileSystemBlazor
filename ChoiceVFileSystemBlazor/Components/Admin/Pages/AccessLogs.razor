@@ -18,7 +18,7 @@ else
     <MudDataGrid
         T="AccessLogsDbModel" MultiSelection="true"
         Items="@_data" SortMode="SortMode.Multiple" Filterable="true"
-        QuickFilter="@QuickFilter"
+        QuickFilter="@QuickFilter" RowClick="OpenLogContent"
         Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh">
         <ToolBarContent>
             <MudText Typo="Typo.h6">AccessLogs Übersicht</MudText>
@@ -102,7 +102,7 @@ else
     {
         if (_searchString == null) return true;
         
-        var lowerSearchString = _searchString.ToLower();
+        var lowerSearchString = _searchString.Trim().ToLower();
         
         if (string.IsNullOrWhiteSpace(lowerSearchString))
             return true;
@@ -121,4 +121,12 @@ else
 
         return false;
     };
+
+    private async Task OpenLogContent(DataGridRowClickEventArgs<AccessLogsDbModel> args)
+    {
+        var log = args.Item;
+        
+        await DialogService.OpenDialogAsync(log.Id, log.CreatedAt, log.Content);
+    }
+
 }

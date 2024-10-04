@@ -278,7 +278,7 @@ else if (_model is not null)
                 <MudDataGrid
                     T="SupportfileLogsDbModel" MultiSelection="true"
                     Items="@_logs" SortMode="SortMode.Multiple" Filterable="true"
-                    QuickFilter="@QuickFilter"
+                    QuickFilter="@QuickFilter" RowClick="OpenLogContent"
                     Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="55vh">
                     <ToolBarContent>
                         <MudText Typo="Typo.h6">Logs für @_model.Id</MudText>
@@ -1148,4 +1148,12 @@ else
 
         await Load();
     }
+
+    private async Task OpenLogContent(DataGridRowClickEventArgs<SupportfileLogsDbModel> args)
+    {
+        var log = args.Item;
+        
+        await DialogService.OpenDialogAsync(log.Id, log.CreatedAt, log.Content);
+    }
+
 }
