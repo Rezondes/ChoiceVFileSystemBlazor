@@ -87,6 +87,8 @@ else
 
                     <MudText>LastLogin: @_model.LastLogin</MudText>
                     <MudText>LastLogout: @_model.LastLogout</MudText>
+                    
+                    <MudText>PermadeathActivated: @_model.PermadeathActivated</MudText>
                 </MudContainer>
             </MudPaper>
         </MudItem>
@@ -99,11 +101,19 @@ else
                 </div>
                 <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
                     <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="OpenAccount">Account anzeigen</MudButton>
-                    
-                    @if (_model.IsCurrentlyOnline)
-                    {
-                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="ChangeDimension">Dimension ändern</MudButton>
-                    }
+
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled="@(!_model.IsCurrentlyOnline)" OnClick="ChangeDimension">Dimension ändern</MudButton>
+
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="TogglePermadeathMode">
+                        @if (_model.PermadeathActivated)
+                        {
+                            <span>Permadeathmode deaktivieren</span>
+                        }
+                        else
+                        {
+                            <span>Permadeathmode aktivieren</span>
+                        }
+                    </MudButton>
                 </div>
             </MudPaper>
         </MudItem>
@@ -397,7 +407,34 @@ else
         {
             Snackbar.Add(ex.Message, Severity.Error);
         }
-        
     }
-    
+
+    private async Task TogglePermadeathMode()
+    {
+        if (_model is null) return;
+
+        var title = _model.PermadeathActivated ? "Permadeathmode deaktivieren" : "Permadeathmode aktivieren";
+        var message = _model.PermadeathActivated ? 
+            "Möchtest du den Permadeathmode deaktivieren?" : 
+            "Möchtest du den Permadeathmode aktivieren? " +
+            "Das nächste Mal, wenn der Charakter durch einen anderen Charakter getötet wird stirbt dieser permanent und muss sich im Support melden.";
+        var yesText = _model.PermadeathActivated ? "Deaktivieren" : "Aktivieren";
+        
+        var result = await DialogService.ShowMessageBox(
+            title, 
+            message, 
+            yesText: yesText, cancelText: "Abbrechen"
+        );
+        if (result is null or false) return;
+
+        var response = await CharacterApi.SetPermadeathActivatedAsync(_model.Id, !_model.PermadeathActivated);
+        if (!response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Permadeathmode konnte nicht geändert werden.", Severity.Error);
+            return;
+        }
+
+        Snackbar.Add("Permadeathmode aktualisiert!", Severity.Success);
+        await LoadAllAsync();
+    }
 }

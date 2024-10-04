@@ -25,6 +25,7 @@ public class CharacterApiModel
         DateTime lastLogin, 
         DateTime lastLogout, 
         int dimension,
+        bool permadeathActivated,
         bool isCurrentlyOnline)
     {
         Id = id;
@@ -45,6 +46,7 @@ public class CharacterApiModel
         LastLogin = lastLogin;
         LastLogout = lastLogout;
         Dimension = dimension;
+        PermadeathActivated = permadeathActivated;
         IsCurrentlyOnline = isCurrentlyOnline;
     }
 
@@ -101,6 +103,9 @@ public class CharacterApiModel
         
     [JsonPropertyName("dimension")]
     public int Dimension { get; set; }
+    
+    [JsonPropertyName("permadeathActivated")]
+    public bool PermadeathActivated { get; set; }
     
     [JsonPropertyName("isCurrentlyOnline")]
     public bool IsCurrentlyOnline { get; set; }
