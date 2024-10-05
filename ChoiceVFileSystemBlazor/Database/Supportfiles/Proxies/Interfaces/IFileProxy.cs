@@ -3,21 +3,21 @@ using ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces;
 
-public interface ISupportfileProxy
+public interface IFileProxy
 {
-    public Task<List<SupportfileDbModel>> GetAllAsync();
+    public Task<List<FileDbModel>> GetAllSupportfilesAsync();
 
-    public Task<List<SupportfileDbModel>> GetAllFullAsync();
+    public Task<List<FileDbModel>> GetAllFullSupportfilesAsync();
     
-    public Task<SupportfileDbModel?> GetAsync(Ulid id);
+    public Task<FileDbModel?> GetAsync(Ulid id);
     
-    public Task<SupportfileDbModel?> GetFullAsync(Ulid id);
+    public Task<FileDbModel?> GetFullAsync(Ulid id);
     
-    public Task<SupportfileDbModel?> AddAsync(SupportfileDbModel file);
+    public Task<FileDbModel?> AddAsync(FileDbModel file);
 
-    public Task<bool> AddCharEntryAsync(SupportfileCharacterEntryDbModel characterEntry, Ulid accessId);
+    public Task<bool> AddCharEntryAsync(FileCharacterEntryDbModel characterEntry, Ulid accessId);
 
-    public Task<bool> RemoveCharEntryAsync(SupportfileCharacterEntryDbModel characterEntry, Ulid accessId);
+    public Task<bool> RemoveCharEntryAsync(FileCharacterEntryDbModel characterEntry, Ulid accessId);
 
     public Task<bool> ToggleDeletedAsync(Ulid id, Ulid accessId);
 

@@ -4,9 +4,9 @@ namespace ChoiceVFileSystemBlazor.Database.Supportfiles.Extensions;
 
 public static class SupportfileDbModelExtension
 {
-    public static SupportfileDbModel CreateShallowCopy(this SupportfileDbModel source)
+    public static FileDbModel CreateShallowCopy(this FileDbModel source)
     {
-        return new SupportfileDbModel
+        return new FileDbModel
         {
             Title = source.Title,
             Description = source.Description,

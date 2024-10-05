@@ -9,7 +9,7 @@ else if (!_loading && _supportfiles is null)
 else
 {
     <MudDataGrid
-        T="SupportfileDbModel" MultiSelection="true"
+        T="FileDbModel" MultiSelection="true"
         Items="@_supportfiles" SortMode="SortMode.Multiple" Filterable="true"
         QuickFilter="@QuickFilter" RowClick="@RowClicked" Style="width: 100%;" 
         Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="@(Height is null ? "75vh" : Height)">
@@ -54,7 +54,7 @@ else
                 }
                 else
                 {
-                    <span>[@context.Item.Category.Nummer] @context.Item.Category.Name</span>
+                    <span>[@context.Item.Category.Number] @context.Item.Category.Name</span>
                 }
                 </CellTemplate>
             </TemplateColumn>
@@ -69,7 +69,7 @@ else
             }
         </Columns>
         <PagerContent>
-            <MudDataGridPager T="SupportfileDbModel" />
+            <MudDataGridPager T="FileDbModel" />
         </PagerContent>
     </MudDataGrid>
 }
@@ -87,7 +87,7 @@ else
 
     private bool _showDeletedFiles = false;
     
-    private List<SupportfileDbModel>? _supportfiles = [];
+    private List<FileDbModel>? _supportfiles = [];
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -123,21 +123,21 @@ else
         
         _supportfiles = null;
 
-        List<SupportfileDbModel> response;
+        List<FileDbModel> response;
 
         if (AccessId is not null)
         {
-            response = await SupportfileProxy.GetAllAsync();
+            response = await FileProxy.GetAllSupportfilesAsync();
             response = response.Where(x => x.CreatedByAccessId == AccessId).ToList();
         }
         else if (AccountId is not null)
         {
-            response = await SupportfileProxy.GetAllFullAsync();
+            response = await FileProxy.GetAllFullSupportfilesAsync();
             response = response.Where(x => x.CharacterEntrys.Any(y => y.AccountId == AccountId)).ToList();
         }
         else
         {
-            response = await SupportfileProxy.GetAllAsync();
+            response = await FileProxy.GetAllSupportfilesAsync();
         }
         
         var filteredResponse = response.Where(x => x.MinRank <= access.Rank).ToList();
@@ -148,7 +148,7 @@ else
         StateHasChanged();
     }
     
-    private Func<SupportfileDbModel, bool> QuickFilter => x =>
+    private Func<FileDbModel, bool> QuickFilter => x =>
     {
         if (_searchString == null) return true;
         
@@ -169,7 +169,7 @@ else
         return false;
     };
     
-    void RowClicked(DataGridRowClickEventArgs<SupportfileDbModel> args)
+    void RowClicked(DataGridRowClickEventArgs<FileDbModel> args)
     {
         Navigation.NavigateTo(SupportfileView.GetRedirectUrl(args.Item.Id.ToString()));
     }

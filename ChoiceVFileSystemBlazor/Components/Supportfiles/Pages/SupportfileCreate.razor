@@ -1,6 +1,5 @@
 ﻿@page "/supportfiles/create"
 
-@using ChoiceVFileSystemBlazor.Components.Admin.Pages
 @implements IDisposable
 
 @code {
@@ -61,7 +60,7 @@ else
                         <MudSelectItem T="Ulid?" Value="@null">Keine Kategorie</MudSelectItem>
                         @foreach (var category in _categoryDbModels)
                         {
-                            <MudSelectItem T="Ulid?" Value="@(category.Id)">[@category.Nummer] @category.Name</MudSelectItem>
+                            <MudSelectItem T="Ulid?" Value="@(category.Id)">[@category.Number] @category.Name</MudSelectItem>
                         }
                     </MudSelect>
 
@@ -82,12 +81,12 @@ else
     
     private HubConnection?_hubConnection;
 
-    private SupportfileDbModel? _model;
+    private FileDbModel? _model;
     private bool _success;
     private MudForm _form = null!;
 
     private bool _loading = true;
-    private List<SupportfileCategoryDbModel> _categoryDbModels = [];
+    private List<FileCategoryDbModel> _categoryDbModels = [];
     
     protected override async Task OnInitializedAsync()
     {
@@ -95,7 +94,7 @@ else
 
         var access = await UserAccessService.GetUserAccess();
         
-        _model = new SupportfileDbModel(access!.Id);
+        _model = new FileDbModel(access!.Id, FileTypeEnum.Supportfile);
         
         _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
@@ -127,7 +126,7 @@ else
         _loading = true;
         StateHasChanged();
 
-        _categoryDbModels = await SupportfileCategoryProxy.GetAllAsync();
+        _categoryDbModels = await FileCategoryProxy.GetAllAsync();
         
         _loading = false;
         StateHasChanged();
@@ -144,7 +143,7 @@ else
             return;
         }
         
-       var response = await SupportfileProxy.AddAsync(_model);
+       var response = await FileProxy.AddAsync(_model);
        if (response is null)
        {
            Snackbar.Add("Ein Fehler beim hinzufügen ist aufgetreten.", Severity.Error);

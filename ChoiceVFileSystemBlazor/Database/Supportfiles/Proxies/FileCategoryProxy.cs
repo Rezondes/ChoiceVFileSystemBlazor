@@ -4,32 +4,32 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies;
 
-public class SupportfileCategoryProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext> dbContextFactory) : ISupportfileCategoryProxy
+public class FileCategoryProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext> dbContextFactory) : IFileCategoryProxy
 {
-    public async Task<SupportfileCategoryDbModel?> AddAsync(SupportfileCategoryDbModel entity)
+    public async Task<FileCategoryDbModel?> AddAsync(FileCategoryDbModel entity)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        dbContext.Set<SupportfileCategoryDbModel>().Add(entity);
+        dbContext.Set<FileCategoryDbModel>().Add(entity);
         var changes = await dbContext.SaveChangesAsync();
         return changes <= 0 ? null : entity;
     }
 
-    public async Task<SupportfileCategoryDbModel?> GetAsync(Ulid id)
+    public async Task<FileCategoryDbModel?> GetAsync(Ulid id)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        return await dbContext.Set<SupportfileCategoryDbModel>().FindAsync(id);
+        return await dbContext.Set<FileCategoryDbModel>().FindAsync(id);
     }
 
-    public async Task<List<SupportfileCategoryDbModel>> GetAllAsync()
+    public async Task<List<FileCategoryDbModel>> GetAllAsync()
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        return await dbContext.Set<SupportfileCategoryDbModel>().ToListAsync();
+        return await dbContext.Set<FileCategoryDbModel>().ToListAsync();
     }
 
-    public async Task<bool> UpdateAsync(SupportfileCategoryDbModel entity)
+    public async Task<bool> UpdateAsync(FileCategoryDbModel entity)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        dbContext.Set<SupportfileCategoryDbModel>().Update(entity);
+        dbContext.Set<FileCategoryDbModel>().Update(entity);
         var changes = await dbContext.SaveChangesAsync();
         return changes > 0;
     }
@@ -37,10 +37,10 @@ public class SupportfileCategoryProxy(IDbContextFactory<ChoiceVFileSystemBlazorD
     public async Task<bool> DeleteAsync(Ulid id)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
-        var entity = await dbContext.Set<SupportfileCategoryDbModel>().FindAsync(id);
+        var entity = await dbContext.Set<FileCategoryDbModel>().FindAsync(id);
         if (entity == null) return false;
         
-        dbContext.Set<SupportfileCategoryDbModel>().Remove(entity);
+        dbContext.Set<FileCategoryDbModel>().Remove(entity);
         var changes = await dbContext.SaveChangesAsync();
         return changes > 0;
     }

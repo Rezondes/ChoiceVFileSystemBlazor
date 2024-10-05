@@ -78,6 +78,7 @@
 @using ChoiceVSharedApiModels.Vehicles
 
 @using Refit
+@using FileProxy = ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces.IFileProxy
 
 @using Microsoft.AspNetCore.SignalR.Client
 
@@ -111,9 +112,9 @@
 
 @inject INewsProxy NewsProxy
 
-@inject ISupportfileProxy SupportfileProxy
-@inject ISupportfileCategoryProxy SupportfileCategoryProxy
-@inject ISupportfileLogsProxy SupportfileLogsProxy
-@inject ISupportfileEntryProxy SupportfileEntryProxy
+@inject IFileProxy FileProxy
+@inject IFileCategoryProxy FileCategoryProxy
+@inject IFileLogsProxy FileLogsProxy
+@inject IFileEntryProxy FileEntryProxy
 
 @inject IRankProxy RankProxy

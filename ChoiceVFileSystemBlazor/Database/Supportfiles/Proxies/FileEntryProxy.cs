@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies;
 
-public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext> dbContextFactory, ISupportfileLogsProxy supportfileLogsProxy) : ISupportfileEntryProxy
+public class FileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext> dbContextFactory, IFileLogsProxy fileLogsProxy) : IFileEntryProxy
 {
-    public async Task<List<SupportfileEntryDbModel>> GetAllEntrysForSupportfileIdAsync(Ulid id)
+    public async Task<List<FileEntryDbModel>> GetAllEntrysForSupportfileIdAsync(Ulid id)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
@@ -22,7 +22,7 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
         return list;
     }
 
-    public async Task<SupportfileEntryDbModel?> GetAsync(Ulid id)
+    public async Task<FileEntryDbModel?> GetAsync(Ulid id)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
@@ -33,21 +33,21 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
     }
 
     // Return null if adding failed
-    public async Task<SupportfileEntryDbModel?> AddEntryAsync(SupportfileEntryDbModel supportfileEntry)
+    public async Task<FileEntryDbModel?> AddEntryAsync(FileEntryDbModel fileEntry)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
-        await dbContext.SupportfileEntryDbModels.AddAsync(supportfileEntry);
-        await supportfileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
-            supportfileEntry.SupportfileId,
+        await dbContext.SupportfileEntryDbModels.AddAsync(fileEntry);
+        await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+            fileEntry.SupportfileId,
             SupportfileLogTypeEnum.AddEntry,
-            supportfileEntry.CreatedByAccessId,
-            $"Id: {supportfileEntry.Id}"
+            fileEntry.CreatedByAccessId,
+            $"Id: {fileEntry.Id}"
         ));
         
         var changes = await dbContext.SaveChangesAsync();
         
-        return changes <= 0 ? null : supportfileEntry;
+        return changes <= 0 ? null : fileEntry;
     }
 
     public async Task<bool> UpdateEntryContentAsync(Ulid id, string newContent, Ulid accessId)
@@ -63,7 +63,7 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
         entry.ModifiedAt = DateTime.UtcNow;
 
         dbContext.SupportfileEntryDbModels.Update(entry);
-        await supportfileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+        await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             entry.SupportfileId,
             SupportfileLogTypeEnum.ModifyEntry,
             accessId,
@@ -87,7 +87,7 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
         entry.Deleted = true;
         
         dbContext.Update(entry);
-        await supportfileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+        await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             entry.SupportfileId,
             SupportfileLogTypeEnum.RemoveEntry,
             accessId,
@@ -111,7 +111,7 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
         entry.Deleted = false;
         
         dbContext.Update(entry);
-        await supportfileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+        await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             entry.SupportfileId,
             SupportfileLogTypeEnum.RestoreEntry,
             accessId,
@@ -124,7 +124,7 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
         return changes > 0;
     }
     
-    public async Task<SupportfileFileUploadDbModel?> GetFileAsync(Ulid id)
+    public async Task<FileUploadDbModel?> GetFileAsync(Ulid id)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         return await dbContext.SupportfileFileUploadDbModels
@@ -135,7 +135,7 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
 
     public long GetMaxFileSize() => 10 * 1024 * 1024;
     
-    public async Task<bool> AddFileAsync(SupportfileFileUploadDbModel file, Ulid supportfileId, Ulid accessId)
+    public async Task<bool> AddFileAsync(FileUploadDbModel file, Ulid supportfileId, Ulid accessId)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
@@ -156,7 +156,7 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
         }
         
         await dbContext.SupportfileFileUploadDbModels.AddAsync(file);
-        await supportfileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+        await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             supportfileId,
             SupportfileLogTypeEnum.AddFileUpload,
             accessId,
@@ -181,7 +181,7 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
         file.FileName = newName;
         
         dbContext.SupportfileFileUploadDbModels.Update(file);
-        await supportfileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+        await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             supportfileId,
             SupportfileLogTypeEnum.DeleteFileUpload,
             accessId,
@@ -202,7 +202,7 @@ public class SupportfileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorData
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
         dbContext.SupportfileFileUploadDbModels.Remove(file);
-        await supportfileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+        await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             supportfileId,
             SupportfileLogTypeEnum.DeleteFileUpload,
             accessId,

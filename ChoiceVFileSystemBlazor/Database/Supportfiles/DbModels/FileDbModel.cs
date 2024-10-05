@@ -7,20 +7,21 @@ using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 
-public class SupportfileDbModel
+public class FileDbModel
 {
-    public SupportfileDbModel()
+    public FileDbModel()
     {
     }   
     
-    public SupportfileDbModel(Ulid createdByAccessId)
+    public FileDbModel(Ulid createdByAccessId, FileTypeEnum type)
     {
         CreatedByAccessId = createdByAccessId;
+        Type = type;
     }   
 
-    public SupportfileDbModel(
+    public FileDbModel(
         string title, string description, Ulid createdByAccessId, 
-        FileStatusEnum status, RankEnum minRank)
+        FileStatusEnum status, RankEnum minRank, FileTypeEnum type)
     {
         Id = Ulid.NewUlid();
         Title = title;
@@ -29,9 +30,11 @@ public class SupportfileDbModel
         CreatedByAccessId = createdByAccessId;
         Status = status;
         MinRank = minRank;
+        Type = type;
     }
     
     public Ulid Id { get; set; } = Ulid.NewUlid();
+    public FileTypeEnum Type { get; set; }
 
     [Required]
     [MinLength(3, ErrorMessage = "Title must be at least 3 characters long.")]
@@ -57,9 +60,9 @@ public class SupportfileDbModel
     
     // Navigation Properties
     public AccessDbModel CreatorAccessModel { get; set; }
-    public SupportfileCategoryDbModel? Category { get; set; }
+    public FileCategoryDbModel? Category { get; set; }
     
-    public List<SupportfileCharacterEntryDbModel> CharacterEntrys { get; set; }
-    public List<SupportfileEntryDbModel> Entrys { get; set; }
-    public List<SupportfileLogsDbModel> Logs { get; set; }
+    public List<FileCharacterEntryDbModel> CharacterEntrys { get; set; }
+    public List<FileEntryDbModel> Entrys { get; set; }
+    public List<FileLogsDbModel> Logs { get; set; }
 }

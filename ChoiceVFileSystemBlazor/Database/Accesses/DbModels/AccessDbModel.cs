@@ -26,9 +26,9 @@ public class AccessDbModel : PartialAccessModel
     
     // Navigation Properties
     public AccessSettingsDbModel Settings { get; set; }
-    public List<SupportfileDbModel> Supportfiles { get; set; } = [];
-    public List<SupportfileLogsDbModel> SupportfileLogs { get; set; } = [];
-    public List<SupportfileEntryDbModel> SupportfileEntrys { get; set; } = [];
+    public List<FileDbModel> Supportfiles { get; set; } = [];
+    public List<FileLogsDbModel> SupportfileLogs { get; set; } = [];
+    public List<FileEntryDbModel> SupportfileEntrys { get; set; } = [];
     public List<AccessLogsDbModel> CreatedAccessLogs { get; set; } = [];
     public List<AccessLogsDbModel> TargetedAccessLogs { get; set; } = [];
     public List<NewsDbModel> NewsDbModels { get; set; } = [];

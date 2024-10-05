@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies;
 
-public class SupportfileLogsProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext> dbContextFactory) : ISupportfileLogsProxy
+public class FileLogsProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext> dbContextFactory) : IFileLogsProxy
 {
-    public async Task<List<SupportfileLogsDbModel>> GetAllLogsForSupportfileIdAsync(Ulid id)
+    public async Task<List<FileLogsDbModel>> GetAllLogsForSupportfileIdAsync(Ulid id)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -21,19 +21,19 @@ public class SupportfileLogsProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatab
     }
 
     // Return null if adding failed
-    public async Task<SupportfileLogsDbModel?> AddLogAsync(SupportfileLogsDbModel supportfileLog)
+    public async Task<FileLogsDbModel?> AddLogAsync(FileLogsDbModel fileLog)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
-        await dbContext.SupportfileLogsDbModels.AddAsync(supportfileLog);
+        await dbContext.SupportfileLogsDbModels.AddAsync(fileLog);
         var changes = await dbContext.SaveChangesAsync();
         
-        return changes <= 0 ? null : supportfileLog;
+        return changes <= 0 ? null : fileLog;
     }
 
-    public async Task<bool> AddLogWithoutSaveAsync(ChoiceVFileSystemBlazorDatabaseContext dbContext, SupportfileLogsDbModel supportfileLog)
+    public async Task<bool> AddLogWithoutSaveAsync(ChoiceVFileSystemBlazorDatabaseContext dbContext, FileLogsDbModel fileLog)
     {
-        await dbContext.SupportfileLogsDbModels.AddAsync(supportfileLog);
+        await dbContext.SupportfileLogsDbModels.AddAsync(fileLog);
         return true;
     }
 }

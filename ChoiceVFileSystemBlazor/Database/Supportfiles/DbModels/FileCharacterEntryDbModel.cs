@@ -1,10 +1,10 @@
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 
-public class SupportfileCharacterEntryDbModel
+public class FileCharacterEntryDbModel
 {
-    public SupportfileCharacterEntryDbModel() { }
+    public FileCharacterEntryDbModel() { }
 
-    public SupportfileCharacterEntryDbModel(Ulid supportfileId, int accountId, int characterId, string discordId, string accountName, string characterFirstName, string characterLastName)
+    public FileCharacterEntryDbModel(Ulid supportfileId, int accountId, int characterId, string discordId, string accountName, string characterFirstName, string characterLastName)
     {
         SupportfileId = supportfileId;
         AccountId = accountId;
@@ -29,5 +29,5 @@ public class SupportfileCharacterEntryDbModel
     public string GetFullDisplayString() => $"[{AccountId}] {AccountName} | {DiscordId} | [{CharacterId}] {CharacterFirstName} {CharacterLastName}";
     
     // Navigation Properties
-    public SupportfileDbModel Supportfile { get; set; }
+    public FileDbModel File { get; set; }
 }

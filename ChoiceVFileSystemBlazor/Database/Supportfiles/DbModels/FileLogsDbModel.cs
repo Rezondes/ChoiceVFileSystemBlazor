@@ -5,11 +5,11 @@ using ChoiceVFileSystemBlazor.Extensions;
 
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 
-public class SupportfileLogsDbModel
+public class FileLogsDbModel
 {
-    public SupportfileLogsDbModel() {}
+    public FileLogsDbModel() {}
 
-    public SupportfileLogsDbModel(Ulid supportfileId, SupportfileLogTypeEnum type, Ulid accessId, string content)
+    public FileLogsDbModel(Ulid supportfileId, SupportfileLogTypeEnum type, Ulid accessId, string content)
     {
         SupportfileId = supportfileId;
         Type = type;
@@ -28,5 +28,5 @@ public class SupportfileLogsDbModel
         
     // Navigation Properties
     public AccessDbModel AccessModel { get; set; }
-    public SupportfileDbModel SupportfileDbModel { get; set; }
+    public FileDbModel FileDbModel { get; set; }
 }

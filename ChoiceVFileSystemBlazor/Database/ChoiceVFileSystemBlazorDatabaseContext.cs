@@ -30,12 +30,12 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
     #endregion
     
     #region Supportfiles 
-    public DbSet<SupportfileCharacterEntryDbModel> SupportfileCharacterEntryDbModels { get; set; }
-    public DbSet<SupportfileDbModel> SupportfileDbModels { get; set; }
-    public DbSet<SupportfileCategoryDbModel> SupportfileCategoryDbModels { get; set; }
-    public DbSet<SupportfileEntryDbModel> SupportfileEntryDbModels { get; set; }
-    public DbSet<SupportfileLogsDbModel> SupportfileLogsDbModels  { get; set; }
-    public DbSet<SupportfileFileUploadDbModel> SupportfileFileUploadDbModels  { get; set; }
+    public DbSet<FileCharacterEntryDbModel> SupportfileCharacterEntryDbModels { get; set; }
+    public DbSet<FileDbModel> SupportfileDbModels { get; set; }
+    public DbSet<FileCategoryDbModel> SupportfileCategoryDbModels { get; set; }
+    public DbSet<FileEntryDbModel> SupportfileEntryDbModels { get; set; }
+    public DbSet<FileLogsDbModel> SupportfileLogsDbModels  { get; set; }
+    public DbSet<FileUploadDbModel> SupportfileFileUploadDbModels  { get; set; }
     #endregion
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -151,7 +151,7 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
         
         #region Supportfiles
 
-        modelBuilder.Entity<SupportfileCharacterEntryDbModel>(entity => 
+        modelBuilder.Entity<FileCharacterEntryDbModel>(entity => 
         {
             entity.Property(e => e.Id)
                 .HasConversion(
@@ -163,12 +163,12 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
                     v => v.ToString(),
                     v => Ulid.Parse(v));
 
-            entity.HasOne(s => s.Supportfile)
+            entity.HasOne(s => s.File)
                 .WithMany(a => a.CharacterEntrys)
                 .HasForeignKey(s => s.SupportfileId);
         });
 
-        modelBuilder.Entity<SupportfileDbModel>(entity =>
+        modelBuilder.Entity<FileDbModel>(entity =>
         {
             entity.Property(e => e.Id)
                 .HasConversion(
@@ -195,7 +195,7 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
-        modelBuilder.Entity<SupportfileCategoryDbModel>(entity =>
+        modelBuilder.Entity<FileCategoryDbModel>(entity =>
         {
             entity.Property(e => e.Id)
                 .HasConversion(
@@ -208,7 +208,7 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
-        modelBuilder.Entity<SupportfileLogsDbModel>(entity =>
+        modelBuilder.Entity<FileLogsDbModel>(entity =>
         {
             entity.Property(e => e.Id)
                 .HasConversion(
@@ -229,12 +229,12 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
                 .WithMany(a => a.SupportfileLogs)
                 .HasForeignKey(s => s.AccessId);
             
-            entity.HasOne(s => s.SupportfileDbModel)
+            entity.HasOne(s => s.FileDbModel)
                 .WithMany(a => a.Logs)
                 .HasForeignKey(s => s.SupportfileId);
         });
 
-        modelBuilder.Entity<SupportfileEntryDbModel>(entity =>
+        modelBuilder.Entity<FileEntryDbModel>(entity =>
         {
             entity.Property(e => e.Id)
                 .HasConversion(
@@ -255,12 +255,12 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
                 .WithMany(a => a.SupportfileEntrys)
                 .HasForeignKey(s => s.CreatedByAccessId);
             
-            entity.HasOne(s => s.SupportfileDbModel)
+            entity.HasOne(s => s.FileDbModel)
                 .WithMany(a => a.Entrys)
                 .HasForeignKey(s => s.SupportfileId);
         });
 
-        modelBuilder.Entity<SupportfileFileUploadDbModel>(entity =>
+        modelBuilder.Entity<FileUploadDbModel>(entity =>
         {
             entity.Property(e => e.Id)
                 .HasConversion(

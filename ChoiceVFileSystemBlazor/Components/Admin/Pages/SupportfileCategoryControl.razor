@@ -7,7 +7,7 @@
     public static string GetRedirectUrl() => Url;
 }
 
-<PageTitle>Supportaktenkategorien</PageTitle>
+<PageTitle>Aktenkategorien</PageTitle>
 
 @if (_loading || !_isAuthorized || _shouldRedirect)
 {
@@ -16,12 +16,12 @@
 else
 {
     <MudDataGrid
-        T="SupportfileCategoryDbModel" MultiSelection="true"
+        T="FileCategoryDbModel" MultiSelection="true"
         Items="@_data" SortMode="SortMode.Multiple" Filterable="true"
         QuickFilter="@QuickFilter"
         Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="75vh">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">Supportakten Kategorien Übersicht</MudText>
+            <MudText Typo="Typo.h6">Aktenkategorien Übersicht</MudText>
             <MudSpacer />
 
             @if (UserAccessService.HasRight(RightEnum.SupportfileCategoryCreate))
@@ -40,7 +40,7 @@ else
         <Columns>
             <PropertyColumn Hideable="false" Property="x => x.Id" Title="#" Filterable="false"/>
             <PropertyColumn Hideable="false" Property="x => x.Name" Title="Name" />
-            <PropertyColumn Hideable="false" Property="x => x.Nummer" Title="Nummer" />
+            <PropertyColumn Hideable="false" Property="x => x.Number" Title="Nummer" />
             @if (UserAccessService.HasRight(RightEnum.SupportfileCategoryEdit) || UserAccessService.HasRight(RightEnum.SupportfileCategoryDelete))
             {
             <TemplateColumn CellClass="d-flex justify-end">
@@ -74,7 +74,7 @@ else
             }
         </Columns>
         <PagerContent>
-            <MudDataGridPager T="SupportfileCategoryDbModel" />
+            <MudDataGridPager T="FileCategoryDbModel" />
         </PagerContent>
     </MudDataGrid>
 }
@@ -86,7 +86,7 @@ else
     private bool _loading;
     private string? _searchString;
 
-    private List<SupportfileCategoryDbModel> _data = [];
+    private List<FileCategoryDbModel> _data = [];
     
     protected override async Task OnInitializedAsync()
     {
@@ -123,13 +123,13 @@ else
         _loading = true;
         StateHasChanged();
 
-        _data = await SupportfileCategoryProxy.GetAllAsync();
+        _data = await FileCategoryProxy.GetAllAsync();
         
         _loading = false;
         StateHasChanged();
     }
     
-    private Func<SupportfileCategoryDbModel, bool> QuickFilter => x =>
+    private Func<FileCategoryDbModel, bool> QuickFilter => x =>
     {
         if (_searchString == null) return true;
         
@@ -141,7 +141,7 @@ else
         if (x.Name.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
-        if (x.Nummer.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+        if (x.Number.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
         
         if ($"{x.Id}".ToLower().Contains(lowerSearchString))
@@ -193,9 +193,9 @@ else
             return;
         }
 
-        var category = new SupportfileCategoryDbModel(parsedName!, parsedNumber);
+        var category = new FileCategoryDbModel(parsedName!, parsedNumber);
 
-        var response = await SupportfileCategoryProxy.AddAsync(category);
+        var response = await FileCategoryProxy.AddAsync(category);
         if (response is null)
         {
             Snackbar.Add("Kategorie konnte nicht hinzugefügt werden!", Severity.Error);
@@ -206,7 +206,7 @@ else
         await Load();
     }
 
-    private async Task EditEntry(SupportfileCategoryDbModel category)
+    private async Task EditEntry(FileCategoryDbModel category)
     {
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
@@ -223,7 +223,7 @@ else
             new(
                 InputTypes.Number,
                 "Nummer",
-                category.Nummer.ToString(),
+                category.Number.ToString(),
                 "187"
             ),
         };
@@ -250,9 +250,9 @@ else
         }
 
         category.Name = parsedName!;
-        category.Nummer = parsedNumber;
+        category.Number = parsedNumber;
 
-        var response = await SupportfileCategoryProxy.UpdateAsync(category);
+        var response = await FileCategoryProxy.UpdateAsync(category);
         if (!response)
         {
             Snackbar.Add("Kategorie konnte nicht aktualisiert werden!", Severity.Error);
@@ -263,7 +263,7 @@ else
         await Load();
     }
 
-    private async Task DeleteEntry(SupportfileCategoryDbModel category)
+    private async Task DeleteEntry(FileCategoryDbModel category)
     {
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
@@ -277,7 +277,7 @@ else
 
         if (result is null or false) return;
 
-        var response = await SupportfileCategoryProxy.DeleteAsync(category.Id);
+        var response = await FileCategoryProxy.DeleteAsync(category.Id);
         if (!response)
         {
             Snackbar.Add("Diese Kategorie konnte nicht gelöscht werden!");

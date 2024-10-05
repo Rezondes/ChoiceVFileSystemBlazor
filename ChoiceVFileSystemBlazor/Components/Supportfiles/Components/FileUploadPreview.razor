@@ -81,7 +81,7 @@ else
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     [Parameter] public HubConnection? HubConnection { get; set; }
-    [Parameter] public SupportfileDbModel? Model { get; set; }
+    [Parameter] public FileDbModel? Model { get; set; }
     
     private bool _visible;
     private bool _newUpload;
@@ -89,7 +89,7 @@ else
     private string? _imagePreviewUrl;
     private string? _pdfPreviewUrl;
 
-    private SupportfileFileUploadDbModel? _file;
+    private FileUploadDbModel? _file;
     
     private void Close()
     {
@@ -107,7 +107,7 @@ else
         if (HubConnection is null) return;
         if (_file is null) return;
         
-        var uploaded = await SupportfileEntryProxy.AddFileAsync(_file, Model.Id, access.Id);
+        var uploaded = await FileEntryProxy.AddFileAsync(_file, Model.Id, access.Id);
         if (!uploaded)
         {
             Snackbar.Add("Ein Fehler beim Hochladen ist aufgetreten.", Severity.Error);
@@ -120,7 +120,7 @@ else
         await HubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), Model.Id);
     }
     
-    public void OpenFile(SupportfileFileUploadDbModel file, bool newUpload)
+    public void OpenFile(FileUploadDbModel file, bool newUpload)
     {
         var base64Data = Convert.ToBase64String(file.Data);
         
@@ -148,7 +148,7 @@ else
         StateHasChanged();
     }
     
-    public async Task DownloadFile(SupportfileFileUploadDbModel file)
+    public async Task DownloadFile(FileUploadDbModel file)
     {
         Close();
         
@@ -169,7 +169,7 @@ else
         await JS.InvokeVoidAsync("downloadFile", fileName, base64File, contentType);
     }
     
-    public async Task RenameFile(SupportfileFileUploadDbModel file)
+    public async Task RenameFile(FileUploadDbModel file)
     {
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
@@ -225,7 +225,7 @@ else
             return;
         }
 
-        var saved = await SupportfileEntryProxy.RenameFileAsync(file.Id, name, Model.Id, access.Id);
+        var saved = await FileEntryProxy.RenameFileAsync(file.Id, name, Model.Id, access.Id);
         if (!saved)
         {
             Snackbar.Add("Beim Überschreiben ist ein Fehler aufgetreten!", Severity.Error);
@@ -236,7 +236,7 @@ else
         await HubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), Model.Id);
     }
 
-    public async Task DeleteFile(SupportfileFileUploadDbModel file)
+    public async Task DeleteFile(FileUploadDbModel file)
     {
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
@@ -253,7 +253,7 @@ else
         );
         if (result is null or false) return;
         
-        var isDeleted = await SupportfileEntryProxy.DeleteFileAsync(file.Id, Model.Id, access.Id);
+        var isDeleted = await FileEntryProxy.DeleteFileAsync(file.Id, Model.Id, access.Id);
         if (!isDeleted)
         {
             Snackbar.Add("Datei konnte nicht gelöscht werden.", Severity.Error);

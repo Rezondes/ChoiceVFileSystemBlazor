@@ -219,10 +219,10 @@ builder.Services.AddDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>(opt
 
 builder.Services.AddScoped<IAccessProxy, AccessProxy>();
 builder.Services.AddScoped<IRankProxy, RankProxy>();
-builder.Services.AddScoped<ISupportfileProxy, SupportfileProxy>();
-builder.Services.AddScoped<ISupportfileCategoryProxy, SupportfileCategoryProxy>();
-builder.Services.AddScoped<ISupportfileLogsProxy, SupportfileLogsProxy>();
-builder.Services.AddScoped<ISupportfileEntryProxy, SupportfileEntryProxy>();
+builder.Services.AddScoped<IFileProxy, FileProxy>();
+builder.Services.AddScoped<IFileCategoryProxy, FileCategoryProxy>();
+builder.Services.AddScoped<IFileLogsProxy, FileLogsProxy>();
+builder.Services.AddScoped<IFileEntryProxy, FileEntryProxy>();
 builder.Services.AddScoped<IAccessLogsProxy, AccessLogsProxy>();
 builder.Services.AddScoped<IDiscordRolesProxy, DiscordRoleProxy>();
 builder.Services.AddScoped<IDiscordRoleLogsProxy, DiscordRoleLogsProxy>();

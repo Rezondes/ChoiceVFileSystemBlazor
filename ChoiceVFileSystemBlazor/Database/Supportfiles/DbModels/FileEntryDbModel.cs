@@ -4,11 +4,11 @@ using ChoiceVFileSystemBlazor.Extensions;
 
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 
-public class SupportfileEntryDbModel
+public class FileEntryDbModel
 {
-    public SupportfileEntryDbModel() {}
+    public FileEntryDbModel() {}
 
-    public SupportfileEntryDbModel(Ulid supportfileId, string content, Ulid accessId)
+    public FileEntryDbModel(Ulid supportfileId, string content, Ulid accessId)
     {
         SupportfileId = supportfileId;
         Content = content;
@@ -30,6 +30,6 @@ public class SupportfileEntryDbModel
     
     // Navigation Properties
     public AccessDbModel CreatorAccessModel { get; set; }
-    public SupportfileDbModel SupportfileDbModel { get; set; }
-    public List<SupportfileFileUploadDbModel> FileUploads { get; set; } = [];
+    public FileDbModel FileDbModel { get; set; }
+    public List<FileUploadDbModel> FileUploads { get; set; } = [];
 }
