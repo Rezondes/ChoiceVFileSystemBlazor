@@ -22,7 +22,7 @@
 }
 else
 {
-    <MudGrid Justify="Justify.Center" Style="height: 100%; align-items: center;"> 
+    <MudGrid Justify="Justify.Center" Style="height: 100%; align-items: center;">
         <MudItem xs="12" sm="7">
             <MudPaper Class="pa-4">
                 <MudForm @ref="_form" @bind-IsValid="@_success">
@@ -78,8 +78,8 @@ else
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     private bool _isAuthorized;
     private bool _shouldRedirect;
-    
-    private HubConnection?_hubConnection;
+
+    private HubConnection? _hubConnection;
 
     private FileDbModel? _model;
     private bool _success;
@@ -87,20 +87,20 @@ else
 
     private bool _loading = true;
     private List<FileCategoryDbModel> _categoryDbModels = [];
-    
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
         var access = await UserAccessService.GetUserAccess();
-        
+
         _model = new FileDbModel(access!.Id, FileTypeEnum.Supportfile);
-        
+
         _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
         StateHasChanged();
     }
-    
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -110,12 +110,12 @@ else
             Navigation.NavigateToNotAuthorized();
             return;
         }
-            
+
         await StartHubConnection();
         await Reload();
         ReloadService.OnCustomReload += Reload;
     }
-    
+
     public void Dispose()
     {
         ReloadService.OnCustomReload -= Reload;
@@ -127,7 +127,7 @@ else
         StateHasChanged();
 
         _categoryDbModels = await FileCategoryProxy.GetAllAsync();
-        
+
         _loading = false;
         StateHasChanged();
     }
@@ -135,39 +135,39 @@ else
     private async Task OnSubmit()
     {
         if (_model is null) return;
-        
+
         await _form.Validate();
         if (!_form.IsValid)
         {
             Snackbar.Add("Validation failed!", Severity.Error);
             return;
         }
-        
-       var response = await FileProxy.AddAsync(_model);
-       if (response is null)
-       {
-           Snackbar.Add("Ein Fehler beim hinzufügen ist aufgetreten.", Severity.Error);
-           return;
-       }
 
-       await SendEntryCreated();
-       
-       Navigation.NavigateTo(SupportfileView.GetRedirectUrl(response.Id.ToString()));
+        var response = await FileProxy.AddAsync(_model);
+        if (response is null)
+        {
+            Snackbar.Add("Ein Fehler beim hinzufügen ist aufgetreten.", Severity.Error);
+            return;
+        }
+
+        await SendEntryCreated();
+
+        Navigation.NavigateTo(SupportfileView.GetRedirectUrl(response.Id.ToString()));
     }
-    
+
     private async Task StartHubConnection()
     {
-        _hubConnection = HubHelper.GetHubConnection(Navigation, SupportfileHub.HubPattern);
-        
+        _hubConnection = HubHelper.GetHubConnection(Navigation, FileHub.HubPattern);
+
         await _hubConnection.StartAsync();
         StateHasChanged();
     }
 
     private async Task SendEntryCreated()
-    {;
+    {
         if (_hubConnection is null) return;
-        
-        await _hubConnection.SendAsync(SupportfileHubMethodEnum.EntryCreated.ToString());
+
+        await _hubConnection.SendAsync(FileHubMethodEnum.EntryCreated.ToString());
     }
 
 }

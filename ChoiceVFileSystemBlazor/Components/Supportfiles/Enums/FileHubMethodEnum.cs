@@ -1,6 +1,6 @@
 ﻿namespace ChoiceVFileSystemBlazor.Components.Supportfiles.Enums;
 
-public enum SupportfileHubMethodEnum
+public enum FileHubMethodEnum
 {
     UpdateFile,
     ToggleFileDeleted,

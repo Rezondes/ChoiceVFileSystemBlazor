@@ -9,7 +9,7 @@ public class FileLogsDbModel
 {
     public FileLogsDbModel() {}
 
-    public FileLogsDbModel(Ulid supportfileId, SupportfileLogTypeEnum type, Ulid accessId, string content)
+    public FileLogsDbModel(Ulid supportfileId, FileLogTypeEnum type, Ulid accessId, string content)
     {
         SupportfileId = supportfileId;
         Type = type;
@@ -19,7 +19,7 @@ public class FileLogsDbModel
     
     public Ulid Id { get; set; } = Ulid.NewUlid();
     public Ulid SupportfileId { get; set; }
-    public SupportfileLogTypeEnum Type { get; set; }
+    public FileLogTypeEnum Type { get; set; }
     public Ulid AccessId { get; set; }
     public string Content { get; set; }
     

@@ -1,8 +1,8 @@
-﻿@if (_loading)
+@if (_loading)
 {
     <LoadingComponent/>
 }
-else if (!_loading && _supportfiles is null)
+else if (!_loading && _files is null)
 {
     <ErrorComponent/>
 }
@@ -10,14 +10,14 @@ else
 {
     <MudDataGrid
         T="FileDbModel" MultiSelection="true"
-        Items="@_supportfiles" SortMode="SortMode.Multiple" Filterable="true"
-        QuickFilter="@QuickFilter" RowClick="@RowClicked" Style="width: 100%;" 
+        Items="@_files" SortMode="SortMode.Multiple" Filterable="true"
+        QuickFilter="@QuickFilter" RowClick="@RowClicked" Style="width: 100%;"
         Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="@(Height is null ? "75vh" : Height)">
         <ToolBarContent>
-            <MudText Typo="Typo.h6">@(Label ?? "Supportakten Übersicht")</MudText>
-            <MudSpacer />
+            <MudText Typo="Typo.h6">@(Label ?? "Gruppierungsakten Übersicht")</MudText>
+            <MudSpacer/>
 
-            @if (UserAccessService.HasRight(RightEnum.ViewDeletedSupportFiles))
+            @if (UserAccessService.HasRight(RightEnum.ViewDeletedGroupingFiles))
             {
                 if (_showDeletedFiles)
                 {
@@ -40,22 +40,22 @@ else
                 IconSize="Size.Medium" Class="mt-0"/>
         </ToolBarContent>
         <Columns>
-            <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
-            <PropertyColumn Property="x => x.Title" Title="Titel" />
+            <PropertyColumn Property="x => x.Id" Title="#" Filterable="false"/>
+            <PropertyColumn Property="x => x.Title" Title="Titel"/>
             <PropertyColumn Property="x => x.CreatorAccessModel.Name" Title="Ersteller"/>
             <PropertyColumn Property="x => x.CreatorAccessModel.Id" Title="ErstellerId"/>
-            <PropertyColumn Property="x => x.Status.GetDisplayText()" Title="Status" />
-            <PropertyColumn Property="x => x.MinRank.GetDisplayText()" Title="MinRank" />
+            <PropertyColumn Property="x => x.Status.GetDisplayText()" Title="Status"/>
+            <PropertyColumn Property="x => x.MinRank.GetDisplayText()" Title="MinRank"/>
             <TemplateColumn Hideable="false" Sortable="true" Filterable="true" Title="Kategorie">
                 <CellTemplate>
-                @if (context.Item.Category is null)
-                {
-                    <span>Keine Kategorie</span>
-                }
-                else
-                {
-                    <span>[@context.Item.Category.Number] @context.Item.Category.Name</span>
-                }
+                    @if (context.Item.Category is null)
+                    {
+                        <span>Keine Kategorie</span>
+                    }
+                    else
+                    {
+                        <span>[@context.Item.Category.Number] @context.Item.Category.Name</span>
+                    }
                 </CellTemplate>
             </TemplateColumn>
             <TemplateColumn Hideable="false" Sortable="true" Filterable="true" Title="Datum">
@@ -63,53 +63,47 @@ else
                     @context.Item.CreatedAtLocal(UserAccessService.GetUserAccess().Result.Settings.TimeZone)
                 </CellTemplate>
             </TemplateColumn>
-            @if (UserAccessService.HasRight(RightEnum.ViewDeletedSupportFiles))
+            @if (UserAccessService.HasRight(RightEnum.ViewDeletedGroupingFiles))
             {
-                <PropertyColumn Property="x => x.Deleted" Title="Gelöscht" />
+                <PropertyColumn Property="x => x.Deleted" Title="Gelöscht"/>
             }
         </Columns>
         <PagerContent>
-            <MudDataGridPager T="FileDbModel" />
+            <MudDataGridPager T="FileDbModel"/>
         </PagerContent>
     </MudDataGrid>
 }
 
-@code {  
+@code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     [Parameter] public Ulid? AccessId { get; set; }
     [Parameter] public int? AccountId { get; set; }
     [Parameter] public string? Label { get; set; }
     [Parameter] public string? Height { get; set; }
-    
+
     private bool _loading = true;
     private string? _searchString;
     private HubConnection? _hubConnection;
 
     private bool _showDeletedFiles = false;
-    
-    private List<FileDbModel>? _supportfiles = [];
-    
+
+    private List<FileDbModel>? _files = [];
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
-            
+
         await StartHubConnection();
     }
 
     private async Task StartHubConnection()
     {
         _hubConnection = HubHelper.GetHubConnection(Navigation, FileHub.HubPattern);
-        
-        _hubConnection.On(FileHubMethodEnum.EntryCreated.ToString(), async () =>
-        {
-            await InvokeAsync(Load);
-        });
 
-        _hubConnection.On<Ulid>(FileHubMethodEnum.ToggleFileDeleted.ToString(), async (id) =>
-        {
-            await InvokeAsync(Load);
-        });
-        
+        _hubConnection.On(FileHubMethodEnum.EntryCreated.ToString(), async () => { await InvokeAsync(Load); });
+
+        _hubConnection.On<Ulid>(FileHubMethodEnum.ToggleFileDeleted.ToString(), async (id) => { await InvokeAsync(Load); });
+
         await _hubConnection.StartAsync();
     }
 
@@ -117,43 +111,43 @@ else
     {
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
-        
+
         _loading = true;
         StateHasChanged();
-        
-        _supportfiles = null;
+
+        _files = null;
 
         List<FileDbModel> response;
 
         if (AccessId is not null)
         {
-            response = await FileProxy.GetAllSupportfilesAsync();
+            response = await FileProxy.GetAllGroupingfilesAsync();
             response = response.Where(x => x.CreatedByAccessId == AccessId).ToList();
         }
         else if (AccountId is not null)
         {
-            response = await FileProxy.GetAllFullSupportfilesAsync();
+            response = await FileProxy.GetAllFullGroupingfilesAsync();
             response = response.Where(x => x.CharacterEntrys.Any(y => y.AccountId == AccountId)).ToList();
         }
         else
         {
-            response = await FileProxy.GetAllSupportfilesAsync();
+            response = await FileProxy.GetAllGroupingfilesAsync();
         }
-        
+
         var filteredResponse = response.Where(x => x.MinRank <= access.Rank).ToList();
-        
-        _supportfiles = _showDeletedFiles ? filteredResponse : filteredResponse.Where(x => !x.Deleted).ToList();
-        
+
+        _files = _showDeletedFiles ? filteredResponse : filteredResponse.Where(x => !x.Deleted).ToList();
+
         _loading = false;
         StateHasChanged();
     }
-    
+
     private Func<FileDbModel, bool> QuickFilter => x =>
     {
         if (_searchString == null) return true;
-        
+
         var lowerSearchString = _searchString.ToLower();
-        
+
         if (string.IsNullOrWhiteSpace(lowerSearchString))
             return true;
 
@@ -162,16 +156,16 @@ else
 
         if (x.Status.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        
+
         if ($"{x.Id}".ToLower().Contains(lowerSearchString))
             return true;
 
         return false;
     };
-    
+
     void RowClicked(DataGridRowClickEventArgs<FileDbModel> args)
     {
-        Navigation.NavigateTo(SupportfileView.GetRedirectUrl(args.Item.Id.ToString()));
+        Navigation.NavigateTo(GroupingfileView.GetRedirectUrl(args.Item.Id.ToString()));
     }
 
     private async Task ToggleShowDeletedFiles()
@@ -179,4 +173,5 @@ else
         _showDeletedFiles = !_showDeletedFiles;
         await Load();
     }
+
 }

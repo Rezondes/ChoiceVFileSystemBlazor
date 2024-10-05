@@ -35,19 +35,19 @@ else
             <MudTooltip Text="Vorschau schließen" Duration="Constants.TOOLTIP_DURATION">
                 <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Info" OnClick="() => Close()"/>
             </MudTooltip>
-            @if (UserAccessService.HasRight(RightEnum.SupportfileDownloadFileForEntry))
+            @if (UserAccessService.HasRight(_canDownloadFilesForEntrys))
             {
                 <MudTooltip Text="Datei herunterladen" Duration="Constants.TOOLTIP_DURATION">
                     <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Tertiary" OnClick="() => DownloadFile(_file)"/>
                 </MudTooltip>
             }
-            @if (!Model.Deleted && UserAccessService.HasRight(RightEnum.SupportfileRenameFileForEntry))
+            @if (!Model.Deleted && UserAccessService.HasRight(_canRenameFilesForEntrys))
             {
                 <MudTooltip Text="Dateinamen ändern" Duration="Constants.TOOLTIP_DURATION">
                     <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => RenameFile(_file)"/>
                 </MudTooltip>
             }
-            @if (!Model.Deleted && UserAccessService.HasRight(RightEnum.SupportfileDeleteFileForEntry))
+            @if (!Model.Deleted && UserAccessService.HasRight(_canDeleteFilesForEntrys))
             {
                 <MudTooltip Text="Datei löschen" Duration="Constants.TOOLTIP_DURATION">
                     <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" OnClick="() => DeleteFile(_file)"/>
@@ -91,6 +91,10 @@ else
 
     private FileUploadDbModel? _file;
     
+    private RightEnum _canDownloadFilesForEntrys;
+    private RightEnum _canDeleteFilesForEntrys;
+    private RightEnum _canRenameFilesForEntrys;
+    
     private void Close()
     {
         _visible = false;
@@ -117,7 +121,7 @@ else
         Snackbar.Add("Datei erfolgreich hochgeladen!", Severity.Success);
         Close();
             
-        await HubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), Model.Id);
+        await HubConnection.SendAsync(FileHubMethodEnum.UpdateFile.ToString(), Model.Id);
     }
     
     public void OpenFile(FileUploadDbModel file, bool newUpload)
@@ -139,6 +143,22 @@ else
                 _visible = false;
                 StateHasChanged();
                 return;
+        }
+
+        if (Model is not null)
+        {
+            if (Model.Type == FileTypeEnum.Supportfile)
+            {
+                _canDownloadFilesForEntrys = RightEnum.SupportfileDownloadFileForEntry;
+                _canDeleteFilesForEntrys = RightEnum.SupportfileDeleteFileForEntry;
+                _canRenameFilesForEntrys = RightEnum.SupportfileRenameFileForEntry;
+            }
+            else if (Model.Type == FileTypeEnum.Groupingfile)
+            {
+                _canDownloadFilesForEntrys = RightEnum.GroupingfileDownloadFileForEntry;
+                _canDeleteFilesForEntrys = RightEnum.GroupingfileDeleteFileForEntry;
+                _canRenameFilesForEntrys = RightEnum.GroupingfileRenameFileForEntry;
+            }
         }
         
         _visible = true;
@@ -233,7 +253,7 @@ else
         }
 
         Snackbar.Add("Dateiname wurde überschrieben!", Severity.Success);
-        await HubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), Model.Id);
+        await HubConnection.SendAsync(FileHubMethodEnum.UpdateFile.ToString(), Model.Id);
     }
 
     public async Task DeleteFile(FileUploadDbModel file)
@@ -261,7 +281,7 @@ else
         }
 
         Snackbar.Add("Datei wurde gelöscht.", Severity.Success);
-        await HubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), Model.Id);
+        await HubConnection.SendAsync(FileHubMethodEnum.UpdateFile.ToString(), Model.Id);
     }
 
 }

@@ -1,5 +1,7 @@
 ﻿@page "/groupingfiles/create"
 
+@implements IDisposable
+
 @code {
     public const string Url = "/groupingfiles/create";
     public static string GetRedirectUrl() => Url;
@@ -7,8 +9,164 @@
 
 <PageTitle>Gruppierungsakte erstellen</PageTitle>
 
-<WorkInProgress/>
+<style>
+    .divider-class{
+        margin: 10px 0;
+        opacity: 0;
+    }
+</style>
+
+@if (_loading || _hubConnection is null || !_isAuthorized)
+{
+    <PageLoading/>
+}
+else
+{
+    <MudGrid Justify="Justify.Center" Style="height: 100%; align-items: center;">
+        <MudItem xs="12" sm="7">
+            <MudPaper Class="pa-4">
+                <MudForm @ref="_form" @bind-IsValid="@_success">
+                    <MudTextField Label="Id" Variant="Variant.Outlined" Disabled Value="@(_model.Id)"/>
+
+                    <MudDivider Class="divider-class"/>
+                    <MudTextField Label="Title" HelperText="Min. 3 characters" Variant="Variant.Outlined"
+                                  @bind-Value="_model.Title" For="@(() => _model.Title)"/>
+
+                    <MudDivider Class="divider-class"/>
+                    <MudTextField Label="Description" HelperText="Max. 150 characters" Lines="3" Variant="Variant.Outlined"
+                                  @bind-Value="_model.Description" For="@(() => _model.Description)"/>
+
+                    <MudDivider Class="divider-class"/>
+                    <MudSelect T="FileStatusEnum" Label="Status" Variant="Variant.Outlined"
+                               @bind-Value="_model.Status" For="@(() => _model.Status)">
+                        @foreach (FileStatusEnum status in Enum.GetValues(typeof(FileStatusEnum)))
+                        {
+                            <MudSelectItem Value="@(status)">@status.GetDisplayText()</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudDivider Class="divider-class"/>
+                    <MudSelect T="RankEnum" Label="MinRank" Variant="Variant.Outlined"
+                               @bind-Value="_model.MinRank" For="@(() => _model.MinRank)">
+                        @foreach (RankEnum rank in Enum.GetValues(typeof(RankEnum)))
+                        {
+                            <MudSelectItem Value="@(rank)">@rank.GetDisplayText()</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudDivider Class="divider-class"/>
+                    <MudSelect T="Ulid?" Label="Kategorie" Variant="Variant.Outlined"
+                               @bind-Value="_model.CategoryId" For="@(() => _model.CategoryId)">
+                        <MudSelectItem T="Ulid?" Value="@null">Keine Kategorie</MudSelectItem>
+                        @foreach (var category in _categoryDbModels)
+                        {
+                            <MudSelectItem T="Ulid?" Value="@(category.Id)">[@category.Number] @category.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudDivider Class="divider-class"/>
+                    <div class="d-flex align-center justify-space-between">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@(!_success)" Class="ml-auto" OnClick="() => OnSubmit()">Erstellen</MudButton>
+                    </div>
+                </MudForm>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
 
 @code {
-    
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+
+    private HubConnection? _hubConnection;
+
+    private FileDbModel? _model;
+    private bool _success;
+    private MudForm _form = null!;
+
+    private bool _loading = true;
+    private List<FileCategoryDbModel> _categoryDbModels = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        var access = await UserAccessService.GetUserAccess();
+
+        _model = new FileDbModel(access!.Id, FileTypeEnum.Groupingfile);
+
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
+        _shouldRedirect = !_isAuthorized;
+        StateHasChanged();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+
+        await StartHubConnection();
+        await Reload();
+        ReloadService.OnCustomReload += Reload;
+    }
+
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Reload;
+    }
+
+    private async Task Reload()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        _categoryDbModels = await FileCategoryProxy.GetAllAsync();
+
+        _loading = false;
+        StateHasChanged();
+    }
+
+    private async Task OnSubmit()
+    {
+        if (_model is null) return;
+
+        await _form.Validate();
+        if (!_form.IsValid)
+        {
+            Snackbar.Add("Validation failed!", Severity.Error);
+            return;
+        }
+
+        var response = await FileProxy.AddAsync(_model);
+        if (response is null)
+        {
+            Snackbar.Add("Ein Fehler beim hinzufügen ist aufgetreten.", Severity.Error);
+            return;
+        }
+
+        await SendEntryCreated();
+
+        Navigation.NavigateTo(SupportfileView.GetRedirectUrl(response.Id.ToString()));
+    }
+
+    private async Task StartHubConnection()
+    {
+        _hubConnection = HubHelper.GetHubConnection(Navigation, FileHub.HubPattern);
+
+        await _hubConnection.StartAsync();
+        StateHasChanged();
+    }
+
+    private async Task SendEntryCreated()
+    {
+        if (_hubConnection is null) return;
+
+        await _hubConnection.SendAsync(FileHubMethodEnum.EntryCreated.ToString());
+    }
 }

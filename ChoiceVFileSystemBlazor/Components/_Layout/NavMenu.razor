@@ -95,7 +95,7 @@
             {
                 <MudNavLink Href="@NewsControl.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Newspaper">News</MudNavLink>
             }
-            @if (UserAccessService.HasRight(RightEnum.ViewSupportfileCategoryControl))
+            @if (UserAccessService.HasRight(RightEnum.ViewFileCategoryControl))
             {
                 <MudNavLink Href="@SupportfileCategoryControl.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Category">Supportaktenkategorien</MudNavLink>
             }

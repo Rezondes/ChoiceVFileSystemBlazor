@@ -8,6 +8,38 @@ namespace ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies;
 
 public class FileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext> dbContextFactory, IFileLogsProxy fileLogsProxy, IFileCategoryProxy fileCategoryProxy) : IFileProxy
 {
+    
+    public async Task<List<FileDbModel>> GetAllGroupingfilesAsync()
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        return await dbContext.SupportfileDbModels
+            .Where(x => x.Type == FileTypeEnum.Groupingfile)
+            .Include(x => x.CreatorAccessModel)
+            .Include(x => x.Category)
+            .ToListAsync();
+    }
+    
+    public async Task<List<FileDbModel>> GetAllFullGroupingfilesAsync()
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        
+        // welcome in the including-hell
+        return await dbContext.SupportfileDbModels
+            .Where(x => x.Type == FileTypeEnum.Groupingfile)
+            .Include(x => x.CreatorAccessModel)
+            .Include(x => x.Category)
+            .Include(x => x.CharacterEntrys)
+            .Include(x => x.Entrys)
+            .ThenInclude(x => x.FileUploads)
+            .Include(x => x.Entrys)
+            .ThenInclude(x => x.CreatorAccessModel)
+            .Include(x => x.Logs)
+            .ThenInclude(x => x.AccessModel)
+            .AsSplitQuery()
+            .ToListAsync();
+    }
+    
     public async Task<List<FileDbModel>> GetAllSupportfilesAsync()
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -73,7 +105,7 @@ public class FileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>
         await dbContext.SupportfileDbModels.AddAsync(file);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             file.Id,
-            SupportfileLogTypeEnum.AddFile,
+            FileLogTypeEnum.AddFile,
             file.CreatedByAccessId,
             string.Empty
         ));
@@ -98,7 +130,7 @@ public class FileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>
         dbContext.SupportfileCharacterEntryDbModels.Add(characterEntry);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             characterEntry.SupportfileId,
-            SupportfileLogTypeEnum.AddCharEntry,
+            FileLogTypeEnum.AddCharEntry,
             accessId,
             $"Id: {characterEntry.Id} \n\n" +
             $"CharacterId: {characterEntry.CharacterId}"
@@ -124,7 +156,7 @@ public class FileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>
         dbContext.SupportfileCharacterEntryDbModels.Remove(charCheck);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             characterEntry.SupportfileId,
-            SupportfileLogTypeEnum.RemoveCharEntry,
+            FileLogTypeEnum.RemoveCharEntry,
             accessId,
             $"Id: {characterEntry.Id} \n\n" +
             $"CharacterId: {characterEntry.CharacterId}"
@@ -143,7 +175,7 @@ public class FileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>
 
         file.Deleted = !file.Deleted;
         
-        var logType = file.Deleted ? SupportfileLogTypeEnum.DeleteFile : SupportfileLogTypeEnum.RestoreFile;
+        var logType = file.Deleted ? FileLogTypeEnum.DeleteFile : FileLogTypeEnum.RestoreFile;
         
         dbContext.SupportfileDbModels.Update(file);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
@@ -171,7 +203,7 @@ public class FileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>
         dbContext.SupportfileDbModels.Update(file);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             file.Id,
-            SupportfileLogTypeEnum.ModifyTitle,
+            FileLogTypeEnum.ModifyTitle,
             accessId,
             $"OldTitle: {oldTitle} \n\n" +
             $"NewTitle: {file.Title}"
@@ -195,7 +227,7 @@ public class FileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>
         dbContext.SupportfileDbModels.Update(file);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             file.Id,
-            SupportfileLogTypeEnum.ModifyDescription,
+            FileLogTypeEnum.ModifyDescription,
             accessId,
             $"OldDescription: {oldDescription} \n\n" +
             $"NewDescription: {file.Description}"
@@ -219,7 +251,7 @@ public class FileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>
         dbContext.SupportfileDbModels.Update(file);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             file.Id,
-            SupportfileLogTypeEnum.ModifyStatus,
+            FileLogTypeEnum.ModifyStatus,
             accessId,
             $"OldStatus: {oldStatus} \n\n" +
             $"NewStatus: {file.Status}"
@@ -243,7 +275,7 @@ public class FileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>
         dbContext.SupportfileDbModels.Update(file);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             file.Id,
-            SupportfileLogTypeEnum.ModifyMinRank,
+            FileLogTypeEnum.ModifyMinRank,
             accessId,
             $"OldMinRank: {oldMinRank} \n\n" +
             $"NewMinRank: {file.MinRank}"
@@ -272,7 +304,7 @@ public class FileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>
         dbContext.SupportfileDbModels.Update(file);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             file.Id,
-            SupportfileLogTypeEnum.ModifyCategory,
+            FileLogTypeEnum.ModifyCategory,
             accessId,
             $"OldCategoryId: {oldCategoryId} \n\n" +
                 $"NewCategoryId: {file.CategoryId}"

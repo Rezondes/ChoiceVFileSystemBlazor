@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace ChoiceVFileSystemBlazor.Components.Supportfiles.Hubs;
 
-public class SupportfileHub : Hub
+public class FileHub : Hub
 {
     public const string HubPattern = "/supportfilehub";
     
@@ -13,7 +13,7 @@ public class SupportfileHub : Hub
     /// <param name="supportfileId"></param>
     public async Task UpdateEntrys(Ulid supportfileId)
     {
-        await Clients.All.SendAsync(SupportfileHubMethodEnum.UpdateEntrys.ToString(), supportfileId);
+        await Clients.All.SendAsync(FileHubMethodEnum.UpdateEntrys.ToString(), supportfileId);
     }
     
     /// <summary>
@@ -21,7 +21,7 @@ public class SupportfileHub : Hub
     /// </summary>
     public async Task EntryCreated()
     {
-        await Clients.All.SendAsync(SupportfileHubMethodEnum.EntryCreated.ToString());
+        await Clients.All.SendAsync(FileHubMethodEnum.EntryCreated.ToString());
     }
     
     /// <summary>
@@ -29,7 +29,7 @@ public class SupportfileHub : Hub
     /// </summary>
     public async Task UpdateFile(Ulid supportfileId)
     {
-        await Clients.All.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), supportfileId);
+        await Clients.All.SendAsync(FileHubMethodEnum.UpdateFile.ToString(), supportfileId);
     }
     
     /// <summary>
@@ -37,7 +37,7 @@ public class SupportfileHub : Hub
     /// </summary>
     public async Task ToggleFileDeleted(Ulid supportfileId)
     {
-        await Clients.All.SendAsync(SupportfileHubMethodEnum.ToggleFileDeleted.ToString(), supportfileId);
+        await Clients.All.SendAsync(FileHubMethodEnum.ToggleFileDeleted.ToString(), supportfileId);
     }
     
     private static readonly Dictionary<Ulid, Ulid> LockedFiles = new();
@@ -49,7 +49,7 @@ public class SupportfileHub : Hub
     {
         if (!LockedFiles.TryAdd(supportfileId, userId)) return;
         
-        await Clients.Others.SendAsync(SupportfileHubMethodEnum.FileLocked.ToString(), supportfileId, userId);
+        await Clients.Others.SendAsync(FileHubMethodEnum.FileLocked.ToString(), supportfileId, userId);
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public class SupportfileHub : Hub
         if (!LockedFiles.TryGetValue(supportfileId, out var value) || value != userId) return;
        
         LockedFiles.Remove(supportfileId);
-        await Clients.Others.SendAsync(SupportfileHubMethodEnum.FileUnlocked.ToString(), supportfileId, userId);
+        await Clients.Others.SendAsync(FileHubMethodEnum.FileUnlocked.ToString(), supportfileId, userId);
     }
 
     /// <summary>

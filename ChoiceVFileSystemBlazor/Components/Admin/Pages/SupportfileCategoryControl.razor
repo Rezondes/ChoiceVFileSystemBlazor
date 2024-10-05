@@ -24,7 +24,7 @@ else
             <MudText Typo="Typo.h6">Aktenkategorien Übersicht</MudText>
             <MudSpacer />
 
-            @if (UserAccessService.HasRight(RightEnum.SupportfileCategoryCreate))
+            @if (UserAccessService.HasRight(RightEnum.FileCategoryCreate))
             {
                 <MudTooltip Text="Kategorie hinzufügen" Duration="@Constants.TOOLTIP_DURATION">
                     <MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.Add" OnClick="() => CreateEntry()"/>
@@ -41,12 +41,12 @@ else
             <PropertyColumn Hideable="false" Property="x => x.Id" Title="#" Filterable="false"/>
             <PropertyColumn Hideable="false" Property="x => x.Name" Title="Name" />
             <PropertyColumn Hideable="false" Property="x => x.Number" Title="Nummer" />
-            @if (UserAccessService.HasRight(RightEnum.SupportfileCategoryEdit) || UserAccessService.HasRight(RightEnum.SupportfileCategoryDelete))
+            @if (UserAccessService.HasRight(RightEnum.FileCategoryEdit) || UserAccessService.HasRight(RightEnum.FileCategoryDelete))
             {
             <TemplateColumn CellClass="d-flex justify-end">
                 <CellTemplate>
                     <MudStack Row>
-                        @if (UserAccessService.HasRight(RightEnum.SupportfileCategoryEdit))
+                        @if (UserAccessService.HasRight(RightEnum.FileCategoryEdit))
                         {
                         <MudTooltip Text="Bearbeiten" Duration="@Constants.TOOLTIP_DURATION">
                             <MudIconButton
@@ -57,7 +57,7 @@ else
                                 OnClick="() => EditEntry(context.Item)"/>
                         </MudTooltip>
                         }
-                        @if (UserAccessService.HasRight(RightEnum.SupportfileCategoryDelete))
+                        @if (UserAccessService.HasRight(RightEnum.FileCategoryDelete))
                         {
                         <MudTooltip Text="Löschen" Duration="@Constants.TOOLTIP_DURATION">
                             <MudIconButton
@@ -154,7 +154,7 @@ else
     {
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
-        if (!UserAccessService.HasRight(RightEnum.SupportfileCategoryCreate)) return;
+        if (!UserAccessService.HasRight(RightEnum.FileCategoryCreate)) return;
         
         var inputs = new List<InputModel>
         {
@@ -210,7 +210,7 @@ else
     {
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
-        if (!UserAccessService.HasRight(RightEnum.SupportfileCategoryEdit)) return;
+        if (!UserAccessService.HasRight(RightEnum.FileCategoryEdit)) return;
         
         var inputs = new List<InputModel>
         {
@@ -267,7 +267,7 @@ else
     {
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
-        if (!UserAccessService.HasRight(RightEnum.SupportfileCategoryDelete)) return;
+        if (!UserAccessService.HasRight(RightEnum.FileCategoryDelete)) return;
         
         var result = await DialogService.ShowMessageBox(
             "Kategorie löschen", 

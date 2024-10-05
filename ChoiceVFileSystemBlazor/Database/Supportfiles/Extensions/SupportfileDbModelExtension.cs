@@ -12,6 +12,7 @@ public static class SupportfileDbModelExtension
             Description = source.Description,
             Status = source.Status,
             MinRank = source.MinRank,
+            Type = source.Type,
         };
     }
 }

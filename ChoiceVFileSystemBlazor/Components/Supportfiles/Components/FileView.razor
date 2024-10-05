@@ -3,7 +3,7 @@
 
 <PageTitle>@(GetFileTitle())</PageTitle>
 
-@if (_loading || _hubConnection is null || !_hasNeededRank || _model is null)
+@if (_loading || _hubConnection is null || !_hasNeededRank || _model is null || !_rightsSetted)
 {
     <PageLoading/>
 }
@@ -21,13 +21,13 @@ else if (_model is not null)
                         <MudTextField Label="Erstellt am" Variant="Variant.Outlined" ReadOnly Value="@_model.CreatedAtLocal()"/>
 
                         <MudDivider Style="@_dividerStyle"/>
-                        <MudTextField Label="Titel" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(RightEnum.SupportfileEditTitle))" @bind-Value="_model.Title"/>
+                        <MudTextField Label="Titel" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(_canEditTitle))" @bind-Value="_model.Title"/>
 
                         <MudDivider Style="@_dividerStyle"/>
-                        <MudTextField Label="Beschreibung" Lines="3" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(RightEnum.SupportfileEditDescription))" @bind-Value="_model.Description"/>
+                        <MudTextField Label="Beschreibung" Lines="3" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(_canEditDescription))" @bind-Value="_model.Description"/>
 
                         <MudDivider Style="@_dividerStyle"/>
-                        <MudSelect T="FileStatusEnum" Label="Status" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(RightEnum.SupportfileEditStatus))" @bind-Value="_model.Status">
+                        <MudSelect T="FileStatusEnum" Label="Status" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(_canEditStatus))" @bind-Value="_model.Status">
                             @foreach (FileStatusEnum status in Enum.GetValues(typeof(FileStatusEnum)))
                             {
                                 <MudSelectItem Value="@(status)">@status.GetDisplayText()</MudSelectItem>
@@ -35,7 +35,7 @@ else if (_model is not null)
                         </MudSelect>
 
                         <MudDivider Style="@_dividerStyle"/>
-                        <MudSelect T="RankEnum" Label="MinRank" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(RightEnum.SupportfileEditMinRank))" @bind-Value="_model.MinRank">
+                        <MudSelect T="RankEnum" Label="MinRank" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(_canEditMinRank))" @bind-Value="_model.MinRank">
                             @foreach (RankEnum minRank in Enum.GetValues(typeof(RankEnum)))
                             {
                                 <MudSelectItem Value="@(minRank)">@minRank.GetDisplayText()</MudSelectItem>
@@ -43,7 +43,7 @@ else if (_model is not null)
                         </MudSelect>
 
                         <MudDivider Style="@_dividerStyle"/>
-                        <MudSelect T="Ulid?" Label="Kategorie" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(RightEnum.SupportfileEditMinRank))" @bind-Value="_model.CategoryId">
+                        <MudSelect T="Ulid?" Label="Kategorie" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(_canEditCategory))" @bind-Value="_model.CategoryId">
                             <MudSelectItem T="Ulid?" Value="@null">Keine Kategorie</MudSelectItem>
                             @foreach (var category in _categoryDbModels)
                             {
@@ -53,12 +53,12 @@ else if (_model is not null)
                     </MudPaper>
                 </MudItem>
 
-                @if (UserAccessService.HasRight(RightEnum.SupportfileActions))
+                @if (UserAccessService.HasRight(_canViewFileActions))
                 {
                     <MudItem xs="4">
                         <MudPaper Class="pa-4">
                             <MudToolBar>
-                                @if (!_model.Deleted && UserAccessService.HasAnyRights([RightEnum.SupportfileEditTitle, RightEnum.SupportfileEditDescription, RightEnum.SupportfileEditStatus, RightEnum.SupportfileEditMinRank]))
+                                @if (!_model.Deleted && UserAccessService.HasAnyRights([_canEditTitle, _canEditDescription, _canEditStatus, _canEditMinRank, _canEditCategory]))
                                 {
                                     <MudTooltip Text="Änderungen speichern" Duration="@Constants.TOOLTIP_DURATION">
                                         <MudIconButton Variant="Variant.Text" Color="Color.Primary" Icon="@Icons.Material.Filled.Save" OnClick="() => SaveChanges()"/>
@@ -67,13 +67,13 @@ else if (_model is not null)
                             
                                 <MudSpacer />
 
-                                @if (_model.Deleted && UserAccessService.HasRight(RightEnum.SupportfileRestore))
+                                @if (_model.Deleted && UserAccessService.HasRight(_canRestoreFile))
                                 {
                                     <MudTooltip Text="Akte wiederherstellen" Duration="@Constants.TOOLTIP_DURATION">
                                         <MudIconButton Variant="Variant.Text" Color="Color.Success" Icon="@Icons.Material.Filled.RestoreFromTrash" OnClick="() => ToggleFileDeleted()"/>
                                     </MudTooltip>
                                 }
-                                else if (!_model.Deleted && UserAccessService.HasRight(RightEnum.SupportfileDelete))
+                                else if (!_model.Deleted && UserAccessService.HasRight(_canDeleteFile))
                                 {
                                     <MudTooltip Text="Akte löschen" Duration="@Constants.TOOLTIP_DURATION">
                                         <MudIconButton Variant="Variant.Text" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" OnClick="() => ToggleFileDeleted()"/>
@@ -138,14 +138,14 @@ else if (_model is not null)
             }
         </MudTabPanel>
         
-        @if (UserAccessService.HasRight(RightEnum.ViewSupportfileEntrys))
+        @if (UserAccessService.HasRight(_canViewFileEntrys))
         {
             <MudTabPanel Text="Einträge" Icon="@Icons.Custom.FileFormats.FileDocument" OnClick="() => UnlockCharTab()">
-                @if (!_model.Deleted && UserAccessService.HasRight(RightEnum.SupportfileCreateEntrys))
+                @if (!_model.Deleted && UserAccessService.HasRight(_canCreateEntrys))
                 {
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="() => OnClickCreate()">Eintrag hinzufügen</MudButton>
                 }
-                @if (UserAccessService.HasRight(RightEnum.ViewSupportfileDeletedEntrys))
+                @if (UserAccessService.HasRight(_canViewFileDeletedEntrys))
                 {
                     @if (_showDeletedEntrys)
                     {
@@ -179,7 +179,7 @@ else if (_model is not null)
                                 <MudCardContent>
                                     <MudTextField @bind-Value="entry.Content" ReadOnly Variant="Variant.Text" Lines="@_entryLines" AutoGrow MaxLines="10"/>
                                     
-                                    @if (UserAccessService.HasRight(RightEnum.ViewUploadedFilesForEntrys) && entry.FileUploads.Any())
+                                    @if (UserAccessService.HasRight(_canViewUploadedFilesForEntrys) && entry.FileUploads.Any())
                                     {
                                         <MudTable Items="entry.FileUploads">
                                             <HeaderContent>
@@ -194,25 +194,25 @@ else if (_model is not null)
                                                 <MudTd>@context.UploadDateLocal(UserAccessService.GetUserAccess().Result.Settings.TimeZone)</MudTd>
                                                 <MudTd>
                                                     <MudButtonGroup Color="Color.Primary" Variant="Variant.Text">
-                                                        @if (UserAccessService.HasRight(RightEnum.SupportfilePreviewFileForEntry))
+                                                        @if (UserAccessService.HasRight(_canPreviewFilesForEntrys))
                                                         {
                                                             <MudTooltip Text="Datei anschauen" Duration="Constants.TOOLTIP_DURATION">
                                                                 <MudIconButton Icon="@Icons.Material.Filled.Preview" Color="Color.Info" OnClick="() => PreviewFile(context)"/>
                                                             </MudTooltip>
                                                         }
-                                                        @if (UserAccessService.HasRight(RightEnum.SupportfileDownloadFileForEntry))
+                                                        @if (UserAccessService.HasRight(_canDownloadFilesForEntrys))
                                                         {
                                                             <MudTooltip Text="Datei herunterladen" Duration="Constants.TOOLTIP_DURATION">
                                                                 <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Tertiary" OnClick="() => DownloadFile(context)"/>
                                                             </MudTooltip>
                                                         }
-                                                        @if (!_model.Deleted && UserAccessService.HasRight(RightEnum.SupportfileRenameFileForEntry))
+                                                        @if (!_model.Deleted && UserAccessService.HasRight(_canRenameFilesForEntrys))
                                                         {
                                                             <MudTooltip Text="Dateinamen ändern" Duration="Constants.TOOLTIP_DURATION">
                                                                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => RenameFile(context)"/>
                                                             </MudTooltip>
                                                         }
-                                                        @if (!_model.Deleted && UserAccessService.HasRight(RightEnum.SupportfileDeleteFileForEntry))
+                                                        @if (!_model.Deleted && UserAccessService.HasRight(_canDeleteFilesForEntrys))
                                                         {
                                                             <MudTooltip Text="Datei löschen" Duration="Constants.TOOLTIP_DURATION">
                                                                 <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" OnClick="() => DeleteFile(context)"/>
@@ -228,7 +228,7 @@ else if (_model is not null)
                                     <div class="d-flex align-center justify-space-between" style="width: 100%;">
                                         <MudText Style="opacity: 0.2" Typo="Typo.body2">@GetSublineText(entry)</MudText>
                                         <MudButtonGroup Color="Color.Primary" Variant="Variant.Text">
-                                            @if (!_model.Deleted && UserAccessService.HasRight(RightEnum.SupportfileUploadFileForEntry))
+                                            @if (!_model.Deleted && UserAccessService.HasRight(_canUploadFilesForEntrys))
                                             {
                                                 <MudFileUpload T="IBrowserFile" FilesChanged="(file) => UploadFiles(file, entry)" Accept="application/pdf, image/png, image/jpg, image/jpeg">
                                                     <ActivatorContent>
@@ -238,19 +238,19 @@ else if (_model is not null)
                                                     </ActivatorContent>
                                                 </MudFileUpload>
                                             }
-                                            @if (!_model.Deleted && UserAccessService.HasRight(RightEnum.SupportfileEditEntrys))
+                                            @if (!_model.Deleted && UserAccessService.HasRight(_canEditEntrys))
                                             {
                                                 <MudTooltip Text="Eintrag bearbeiten" Duration="Constants.TOOLTIP_DURATION">
                                                     <MudIconButton Variant="Variant.Text" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" OnClick="() => EditEntry(entry)"/>
                                                 </MudTooltip>
                                             }
-                                            @if (!_model.Deleted && !entry.Deleted && UserAccessService.HasRight(RightEnum.SupportfileDeleteEntrys))
+                                            @if (!_model.Deleted && !entry.Deleted && UserAccessService.HasRight(_canDeleteEntrys))
                                             {
                                                 <MudTooltip Text="Eintrag löschen" Duration="Constants.TOOLTIP_DURATION">
                                                     <MudIconButton Variant="Variant.Text" Color="Color.Error" Icon="@Icons.Material.Filled.DeleteForever" OnClick="() => RemoveEntry(entry)"/>
                                                 </MudTooltip>
                                             }
-                                            else if (!_model.Deleted && entry.Deleted && UserAccessService.HasRight(RightEnum.SupportfileRestoreEntrys))
+                                            else if (!_model.Deleted && entry.Deleted && UserAccessService.HasRight(_canRestoreEntrys))
                                             {
                                                 <MudTooltip Text="Eintrag wiederherstellen" Duration="Constants.TOOLTIP_DURATION">
                                                     <MudIconButton Variant="Variant.Text" Color="Color.Success" Icon="@Icons.Material.Filled.RestoreFromTrash" OnClick="() => RestoreEntry(entry)"/>
@@ -266,7 +266,7 @@ else if (_model is not null)
             </MudTabPanel>
         }
         
-        @if (UserAccessService.HasRight(RightEnum.SupportfileViewLogs))
+        @if (UserAccessService.HasRight(_canViewLogs))
         {
             <MudTabPanel Text="Logs" Icon="@Icons.Material.Filled.ScreenSearchDesktop" OnClick="() => UnlockCharTab()">
                 <MudDataGrid
@@ -324,6 +324,29 @@ else
     private bool _loading = true;
 
     private bool _hasNeededRank;
+
+    private bool _rightsSetted;
+    private RightEnum _canViewFileActions;
+    private RightEnum _canEditTitle;
+    private RightEnum _canEditDescription;
+    private RightEnum _canEditStatus;
+    private RightEnum _canEditMinRank;
+    private RightEnum _canEditCategory;
+    private RightEnum _canDeleteFile;
+    private RightEnum _canRestoreFile;
+    private RightEnum _canViewLogs;
+    private RightEnum _canViewFileEntrys;
+    private RightEnum _canViewFileDeletedEntrys;
+    private RightEnum _canCreateEntrys;
+    private RightEnum _canEditEntrys;
+    private RightEnum _canDeleteEntrys;
+    private RightEnum _canRestoreEntrys;
+    private RightEnum _canViewUploadedFilesForEntrys;
+    private RightEnum _canUploadFilesForEntrys;
+    private RightEnum _canDownloadFilesForEntrys;
+    private RightEnum _canDeleteFilesForEntrys;
+    private RightEnum _canRenameFilesForEntrys;
+    private RightEnum _canPreviewFilesForEntrys;
     
     private FileDbModel? _model;
     private FileDbModel? _checkModel;
@@ -351,7 +374,21 @@ else
     }
     
     private static string _dividerStyle = "margin: 10px 0; opacity: 0;";
-    private string GetFileTitle() => _checkModel != null ? "Supportakte " + _checkModel.Title : "Loading...";
+
+    private string GetFileTitle()
+    {
+        if (_checkModel is null)
+        {
+            return "Loading...";
+        }
+
+        return _checkModel.Type switch
+        {
+            FileTypeEnum.Supportfile => "Supportakte " + _checkModel.Title,
+            FileTypeEnum.Groupingfile => "Gruppierungsakte " + _checkModel.Title,
+            _ => _checkModel.Title
+        };
+    }
 
     private const int _entryLines = 3;
     private bool _showDeletedEntrys = false;
@@ -397,7 +434,7 @@ else
             else
             {
                 Snackbar.Add($"{dropItem.Item.FileCharacterEntryDbModel.GetFullDisplayString()} zu Supportakte hinzugefügt.", Severity.Success);
-                await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), _model.Id);
+                await _hubConnection.SendAsync(FileHubMethodEnum.UpdateFile.ToString(), _model.Id);
             }
         }
         else
@@ -410,7 +447,7 @@ else
             else
             {
                 Snackbar.Add($"{dropItem.Item.FileCharacterEntryDbModel.GetFullDisplayString()} von Supportakte entfernt.", Severity.Success);
-                await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), _model.Id);
+                await _hubConnection.SendAsync(FileHubMethodEnum.UpdateFile.ToString(), _model.Id);
             }
         }
         
@@ -576,8 +613,10 @@ else
 
         _model = model;
         _checkModel = _model.CreateShallowCopy();
+
+        SetRights();
         
-        @if (UserAccessService.HasRight(RightEnum.ViewSupportfileEntrys))
+        @if (await UserAccessService.HasRightAsync(RightEnum.ViewSupportfileEntrys))
         {
             _entrys = _showDeletedEntrys ?
                 _model.Entrys
@@ -589,7 +628,7 @@ else
                     .ToList();
         }
         
-        @if (UserAccessService.HasRight(RightEnum.SupportfileViewLogs))
+        @if (await UserAccessService.HasRightAsync(RightEnum.SupportfileViewLogs))
         {
             _logs = _model.Logs
                 .OrderByDescending(x => x.Id)
@@ -600,6 +639,62 @@ else
         StateHasChanged();
     }
 
+    private void SetRights()
+    {
+        if (_model is null) return;
+        
+        if (_model.Type == FileTypeEnum.Supportfile)
+        {
+            _canViewFileActions = RightEnum.SupportfileActions;
+            _canEditTitle = RightEnum.SupportfileEditTitle;
+            _canEditDescription = RightEnum.SupportfileEditDescription;
+            _canEditStatus = RightEnum.SupportfileEditStatus;
+            _canEditMinRank = RightEnum.SupportfileEditMinRank;
+            _canEditCategory = RightEnum.SupportfileEditCategory;
+            _canDeleteFile = RightEnum.SupportfileDelete;
+            _canRestoreFile = RightEnum.SupportfileRestore;
+            _canViewLogs = RightEnum.SupportfileViewLogs;
+            _canViewFileEntrys = RightEnum.ViewSupportfileEntrys;
+            _canViewFileDeletedEntrys = RightEnum.ViewSupportfileDeletedEntrys;
+            _canCreateEntrys = RightEnum.SupportfileCreateEntrys;
+            _canEditEntrys = RightEnum.SupportfileEditEntrys;
+            _canDeleteEntrys = RightEnum.SupportfileDeleteEntrys;
+            _canRestoreEntrys = RightEnum.SupportfileRestoreEntrys;
+            _canViewUploadedFilesForEntrys = RightEnum.ViewSupportUploadedFilesForEntrys;
+            _canUploadFilesForEntrys = RightEnum.SupportfileUploadFileForEntry;
+            _canDownloadFilesForEntrys = RightEnum.SupportfileDownloadFileForEntry;
+            _canDeleteFilesForEntrys = RightEnum.SupportfileDeleteFileForEntry;
+            _canRenameFilesForEntrys = RightEnum.SupportfileRenameFileForEntry;
+            _canPreviewFilesForEntrys = RightEnum.SupportfilePreviewFileForEntry;
+        }
+        else if (_model.Type == FileTypeEnum.Groupingfile)
+        {
+            _canViewFileActions = RightEnum.GroupingfileActions;
+            _canEditTitle = RightEnum.GroupingfileEditTitle;
+            _canEditDescription = RightEnum.GroupingfileEditDescription;
+            _canEditStatus = RightEnum.GroupingfileEditStatus;
+            _canEditMinRank = RightEnum.GroupingfileEditMinRank;
+            _canEditCategory = RightEnum.GroupingfileEditCategory;
+            _canDeleteFile = RightEnum.GroupingfileDelete;
+            _canRestoreFile = RightEnum.GroupingfileRestore;
+            _canViewLogs = RightEnum.GroupingfileViewLogs;
+            _canViewFileEntrys = RightEnum.ViewGroupingfileEntrys;
+            _canViewFileDeletedEntrys = RightEnum.ViewGroupingfileDeletedEntrys;
+            _canCreateEntrys = RightEnum.GroupingfileCreateEntrys;
+            _canEditEntrys = RightEnum.GroupingfileEditEntrys;
+            _canDeleteEntrys = RightEnum.GroupingfileDeleteEntrys;
+            _canRestoreEntrys = RightEnum.GroupingfileRestoreEntrys;
+            _canViewUploadedFilesForEntrys = RightEnum.ViewGroupingUploadedFilesForEntrys;
+            _canUploadFilesForEntrys = RightEnum.GroupingfileUploadFileForEntry;
+            _canDownloadFilesForEntrys = RightEnum.GroupingfileDownloadFileForEntry;
+            _canDeleteFilesForEntrys = RightEnum.GroupingfileDeleteFileForEntry;
+            _canRenameFilesForEntrys = RightEnum.GroupingfileRenameFileForEntry;
+            _canPreviewFilesForEntrys = RightEnum.GroupingfilePreviewFileForEntry;
+        }
+
+        _rightsSetted = true;
+    }
+    
     private async Task LoadCharEntrys()
     {
         if (_model is null) return;
@@ -663,7 +758,7 @@ else
         if (access is null) return;
         if (_model is null) return;
         if (_model.Deleted) return;
-        if (!UserAccessService.HasRight(RightEnum.SupportfileCreateEntrys)) return;
+        if (!await UserAccessService.HasRightAsync(_canCreateEntrys)) return;
         
         var inputs = new List<InputModel>
         {
@@ -702,9 +797,9 @@ else
 
     private async Task StartHubConnection()
     {
-        _hubConnection = HubHelper.GetHubConnection(Navigation, SupportfileHub.HubPattern);
+        _hubConnection = HubHelper.GetHubConnection(Navigation, FileHub.HubPattern);
         
-        _hubConnection.On<Ulid>(SupportfileHubMethodEnum.UpdateFile.ToString(), async (id) =>
+        _hubConnection.On<Ulid>(FileHubMethodEnum.UpdateFile.ToString(), async (id) =>
         {
             if (_model is null) return;
             if (id != _model.Id) return;
@@ -713,7 +808,7 @@ else
             await InvokeAsync(StateHasChanged);
         });
         
-        _hubConnection.On<Ulid>(SupportfileHubMethodEnum.UpdateEntrys.ToString(), async (id) =>
+        _hubConnection.On<Ulid>(FileHubMethodEnum.UpdateEntrys.ToString(), async (id) =>
         {
             if (_model is null) return;
             if (id != _model.Id) return;
@@ -722,7 +817,7 @@ else
             await InvokeAsync(StateHasChanged);
         });
         
-        _hubConnection.On<Ulid>(SupportfileHubMethodEnum.ToggleFileDeleted.ToString(), async (id) =>
+        _hubConnection.On<Ulid>(FileHubMethodEnum.ToggleFileDeleted.ToString(), async (id) =>
         {
             if (_model is null) return;
             if (id != _model.Id) return;
@@ -737,7 +832,7 @@ else
             await InvokeAsync(StateHasChanged);
         });
         
-        _hubConnection.On<Ulid, Ulid>(SupportfileHubMethodEnum.FileLocked.ToString(), async (fileId, userId) =>
+        _hubConnection.On<Ulid, Ulid>(FileHubMethodEnum.FileLocked.ToString(), async (fileId, userId) =>
         {
             if (_model is null) return;
             if (fileId != _model.Id) return;
@@ -757,7 +852,7 @@ else
             await InvokeAsync(StateHasChanged);
         });
 
-        _hubConnection.On<Ulid, Ulid>(SupportfileHubMethodEnum.FileUnlocked.ToString(), async (fileId, userId) =>
+        _hubConnection.On<Ulid, Ulid>(FileHubMethodEnum.FileUnlocked.ToString(), async (fileId, userId) =>
         {
             if (_model is null) return;
             if (fileId != _model.Id) return;
@@ -778,7 +873,7 @@ else
         _isLocked = await GetLockCharTabAsync();
         if (_isLocked)
         {
-            var lockedByUserId = await _hubConnection.InvokeAsync<Ulid>(SupportfileHubMethodEnum.GetLockedByUser.ToString(), _model.Id);
+            var lockedByUserId = await _hubConnection.InvokeAsync<Ulid>(FileHubMethodEnum.GetLockedByUser.ToString(), _model.Id);
             _lockedByUser = await AccessProxy.GetAsync(lockedByUserId);
         }
     }
@@ -793,7 +888,7 @@ else
         _isLocked = await GetLockCharTabAsync();
         if (_isLocked)
         {
-            var lockedByUserId = await _hubConnection.InvokeAsync<Ulid>(SupportfileHubMethodEnum.GetLockedByUser.ToString(), _model.Id);
+            var lockedByUserId = await _hubConnection.InvokeAsync<Ulid>(FileHubMethodEnum.GetLockedByUser.ToString(), _model.Id);
             _lockedByUser = await AccessProxy.GetAsync(lockedByUserId);
             return;
         }
@@ -806,7 +901,7 @@ else
         if (_model is null) return false;
         if (_hubConnection is null) return false;
         
-        return await _hubConnection.InvokeAsync<bool>(SupportfileHubMethodEnum.IsFileLocked.ToString(), _model.Id);
+        return await _hubConnection.InvokeAsync<bool>(FileHubMethodEnum.IsFileLocked.ToString(), _model.Id);
     }
     
     private async Task LockCharTabAsync()
@@ -818,7 +913,7 @@ else
         {
             var access = await UserAccessService.GetUserAccess();
 
-            await _hubConnection.InvokeAsync(SupportfileHubMethodEnum.LockFile.ToString(), _model.Id, access.Id);
+            await _hubConnection.InvokeAsync(FileHubMethodEnum.LockFile.ToString(), _model.Id, access.Id);
             _lockedByUser = access;
         }
         catch (HubException ex)
@@ -843,7 +938,7 @@ else
 
         if (_lockedByUser?.Id != access.Id) return;
         
-        await _hubConnection.InvokeAsync(SupportfileHubMethodEnum.UnlockFile.ToString(), _model.Id, access.Id);
+        await _hubConnection.InvokeAsync(FileHubMethodEnum.UnlockFile.ToString(), _model.Id, access.Id);
         _lockedByUser = null;
     }
     
@@ -852,7 +947,7 @@ else
         if (_model is null) return;
         if (_hubConnection is null) return;
         
-        await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateEntrys.ToString(), _model.Id);
+        await _hubConnection.SendAsync(FileHubMethodEnum.UpdateEntrys.ToString(), _model.Id);
     }
     
     private async Task EditEntry(FileEntryDbModel entry)
@@ -861,7 +956,7 @@ else
         if (access is null) return;
         if (_model is null) return;
         if (_model.Deleted) return;
-        if (!UserAccessService.HasRight(RightEnum.SupportfileEditEntrys)) return;
+        if (!await UserAccessService.HasRightAsync(_canEditEntrys)) return;
         
         const string title = "Eintrag bearbeiten";
         var description = "Wie möchtest du den Eintrag bearbeiten?";
@@ -917,7 +1012,7 @@ else
         if (access is null) return;
         if (_model is null) return;
         if (_model.Deleted) return;
-        if (!UserAccessService.HasRight(RightEnum.SupportfileDeleteEntrys)) return;
+        if (!await UserAccessService.HasRightAsync(_canDeleteEntrys)) return;
         
         var result = await DialogService.ShowMessageBox(
             "Eintrag löschen", 
@@ -943,7 +1038,7 @@ else
         if (access is null) return;
         if (_model is null) return;
         if (_model.Deleted) return;
-        if (!UserAccessService.HasRight(RightEnum.SupportfileDeleteEntrys)) return;
+        if (!await UserAccessService.HasRightAsync(_canDeleteEntrys)) return;
         
         var result = await DialogService.ShowMessageBox(
             "Eintrag wiederherstellen", 
@@ -1000,8 +1095,8 @@ else
         if (_model is null) return;
         if (_hubConnection is null) return;
 
-        if (_model.Deleted && !UserAccessService.HasRight(RightEnum.SupportfileRestore)) return;
-        if (!_model.Deleted && !UserAccessService.HasRight(RightEnum.SupportfileDelete)) return;
+        if (_model.Deleted && !await UserAccessService.HasRightAsync(_canRestoreFile)) return;
+        if (!_model.Deleted && !await UserAccessService.HasRightAsync(_canDeleteFile)) return;
 
         var title = _model.Deleted ? "Supportakte wiederherstellen" : "Supportakte löschen";
         var message = _model.Deleted ? 
@@ -1024,7 +1119,7 @@ else
             return;
         }
         
-        await _hubConnection.SendAsync(SupportfileHubMethodEnum.ToggleFileDeleted.ToString(), _model.Id);
+        await _hubConnection.SendAsync(FileHubMethodEnum.ToggleFileDeleted.ToString(), _model.Id);
     }
 
     private async Task SaveChanges()
@@ -1043,7 +1138,7 @@ else
 
         var shouldReload = false;
         
-        if (_checkModel.Title != _model.Title && await UserAccessService.HasRightAsync(RightEnum.SupportfileEditTitle))
+        if (_checkModel.Title != _model.Title && await UserAccessService.HasRightAsync(_canEditTitle))
         {
             var updateResponse = await FileProxy.UpdateTitleAsync(_model.Id, _model.Title, access.Id);
             if (!updateResponse)
@@ -1057,7 +1152,7 @@ else
             }
         }
         
-        if (_checkModel.Description != _model.Description && await UserAccessService.HasRightAsync(RightEnum.SupportfileEditDescription))
+        if (_checkModel.Description != _model.Description && await UserAccessService.HasRightAsync(_canEditDescription))
         {
             var updateResponse = await FileProxy.UpdateDescriptionAsync(_model.Id, _model.Description, access.Id);
             if (!updateResponse)
@@ -1071,7 +1166,7 @@ else
             }
         }
         
-        if (_checkModel.Status != _model.Status && await UserAccessService.HasRightAsync(RightEnum.SupportfileEditStatus))
+        if (_checkModel.Status != _model.Status && await UserAccessService.HasRightAsync(_canEditStatus))
         {
             var updateResponse = await FileProxy.UpdateStatusAsync(_model.Id, _model.Status, access.Id);
             if (!updateResponse)
@@ -1085,7 +1180,7 @@ else
             }
         }
         
-        if (_checkModel.MinRank != _model.MinRank && await UserAccessService.HasRightAsync(RightEnum.SupportfileEditMinRank))
+        if (_checkModel.MinRank != _model.MinRank && await UserAccessService.HasRightAsync(_canEditMinRank))
         {
             var updateResponse = await FileProxy.UpdateMinRankAsync(_model.Id, _model.MinRank, access.Id);
             if (!updateResponse)
@@ -1099,7 +1194,7 @@ else
             }
         }
         
-        if (_checkModel.CategoryId != _model.CategoryId && await UserAccessService.HasRightAsync(RightEnum.SupportfileEditCategory))
+        if (_checkModel.CategoryId != _model.CategoryId && await UserAccessService.HasRightAsync(_canEditCategory))
         {
             var updateResponse = await FileProxy.ChangeCategoryAsync(_model.Id, _model.CategoryId, access.Id);
             if (!updateResponse)
@@ -1115,7 +1210,7 @@ else
 
         if (!shouldReload) return;
         
-        await _hubConnection.SendAsync(SupportfileHubMethodEnum.UpdateFile.ToString(), _model.Id);
+        await _hubConnection.SendAsync(FileHubMethodEnum.UpdateFile.ToString(), _model.Id);
     }
 
     private async Task ToggleShowDeletedEntrys()

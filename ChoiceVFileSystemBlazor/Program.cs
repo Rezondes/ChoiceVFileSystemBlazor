@@ -258,7 +258,7 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.MapHub<BaseHub>(BaseHub.HubPattern);
-app.MapHub<SupportfileHub>(SupportfileHub.HubPattern);
+app.MapHub<FileHub>(FileHub.HubPattern);
 
 app.UseStatusCodePages(context =>
 {

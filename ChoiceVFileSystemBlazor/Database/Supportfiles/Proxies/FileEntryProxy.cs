@@ -40,7 +40,7 @@ public class FileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseCon
         await dbContext.SupportfileEntryDbModels.AddAsync(fileEntry);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             fileEntry.SupportfileId,
-            SupportfileLogTypeEnum.AddEntry,
+            FileLogTypeEnum.AddEntry,
             fileEntry.CreatedByAccessId,
             $"Id: {fileEntry.Id}"
         ));
@@ -65,7 +65,7 @@ public class FileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseCon
         dbContext.SupportfileEntryDbModels.Update(entry);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             entry.SupportfileId,
-            SupportfileLogTypeEnum.ModifyEntry,
+            FileLogTypeEnum.ModifyEntry,
             accessId,
             $"Id: {entry.Id} \n\n" +
             $"OldContent: {oldContent} \n\n" +
@@ -89,7 +89,7 @@ public class FileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseCon
         dbContext.Update(entry);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             entry.SupportfileId,
-            SupportfileLogTypeEnum.RemoveEntry,
+            FileLogTypeEnum.RemoveEntry,
             accessId,
             $"Id: {entry.Id} \n\n" +
             $"Content: {entry.Content} \n\n" +
@@ -113,7 +113,7 @@ public class FileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseCon
         dbContext.Update(entry);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             entry.SupportfileId,
-            SupportfileLogTypeEnum.RestoreEntry,
+            FileLogTypeEnum.RestoreEntry,
             accessId,
             $"Id: {entry.Id} \n\n" +
             $"Content: {entry.Content} \n\n" +
@@ -158,7 +158,7 @@ public class FileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseCon
         await dbContext.SupportfileFileUploadDbModels.AddAsync(file);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             supportfileId,
-            SupportfileLogTypeEnum.AddFileUpload,
+            FileLogTypeEnum.AddFileUpload,
             accessId,
             $"FileId: {file.Id} \n\n" +
             $"FileName: {file.FileName} \n\n" +
@@ -183,7 +183,7 @@ public class FileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseCon
         dbContext.SupportfileFileUploadDbModels.Update(file);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             supportfileId,
-            SupportfileLogTypeEnum.DeleteFileUpload,
+            FileLogTypeEnum.DeleteFileUpload,
             accessId,
             $"FileId: {file.Id} \n\n" +
             $"OldName: {oldName} \n\n" +
@@ -204,7 +204,7 @@ public class FileEntryProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseCon
         dbContext.SupportfileFileUploadDbModels.Remove(file);
         await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
             supportfileId,
-            SupportfileLogTypeEnum.DeleteFileUpload,
+            FileLogTypeEnum.DeleteFileUpload,
             accessId,
             $"FileId: {file.Id} \n\n" +
             $"FileName: {file.FileName} \n\n" +

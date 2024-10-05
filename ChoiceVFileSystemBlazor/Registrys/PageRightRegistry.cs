@@ -31,7 +31,7 @@ public static class PageRightRegistry
         { AccessLogs.Url, RightEnum.ViewAdminAccessLogs },
         { DiscordRolesControl.Url, RightEnum.ViewDiscordRolesControl },
         { NewsControl.Url, RightEnum.ViewNewsControl },
-        { SupportfileCategoryControl.Url, RightEnum.ViewSupportfileCategoryControl },
+        { SupportfileCategoryControl.Url, RightEnum.ViewFileCategoryControl },
         
         { BankAccountOverview.Url, RightEnum.ViewBankAccounts },
         
@@ -42,8 +42,9 @@ public static class PageRightRegistry
         { CompanyOverview.Url, RightEnum.ViewCompanies },
         { CompanyView.Url, RightEnum.ViewCompanies },
         
-        { GroupingfileCreate.Url, RightEnum.ViewGroupingfiles },
+        { GroupingfileCreate.Url, RightEnum.GroupingfileCreate },
         { GroupingfileOverview.Url, RightEnum.ViewGroupingfiles },
+        { GroupingfileView.Url, RightEnum.ViewGroupingfiles },
         
         { SupportfileCreate.Url, RightEnum.SupportfileCreate },
         { SupportfileOverview.Url, RightEnum.ViewSupportfiles },

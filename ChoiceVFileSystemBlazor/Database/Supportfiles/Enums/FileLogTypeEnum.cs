@@ -1,6 +1,6 @@
 ﻿namespace ChoiceVFileSystemBlazor.Database.Supportfiles.Enums;
 
-public enum SupportfileLogTypeEnum
+public enum FileLogTypeEnum
 {
     AddFile = 1000,
     DeleteFile = 1001,

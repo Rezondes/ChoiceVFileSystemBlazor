@@ -5,6 +5,9 @@ namespace ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces;
 
 public interface IFileProxy
 {
+    public Task<List<FileDbModel>> GetAllGroupingfilesAsync();
+
+    public Task<List<FileDbModel>> GetAllFullGroupingfilesAsync();
     public Task<List<FileDbModel>> GetAllSupportfilesAsync();
 
     public Task<List<FileDbModel>> GetAllFullSupportfilesAsync();
