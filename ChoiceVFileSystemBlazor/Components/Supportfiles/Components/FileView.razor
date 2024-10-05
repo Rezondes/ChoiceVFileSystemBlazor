@@ -824,7 +824,15 @@ else
 
             if (!_model.Deleted)
             {
-                Navigation.NavigateTo(SupportfileOverview.GetRedirectUrl());
+                switch (_model.Type)
+                {
+                    case FileTypeEnum.Supportfile:
+                        Navigation.NavigateTo(SupportfileOverview.GetRedirectUrl());
+                        break;
+                    case FileTypeEnum.Groupingfile:
+                        Navigation.NavigateTo(GroupingfileOverview.GetRedirectUrl());
+                        break;
+                }
                 return;
             }
 
