@@ -36,11 +36,11 @@
         <MudNavGroup Icon="@Icons.Material.Filled.Groups" Title="Gruppierungsakten">
             @if (UserAccessService.HasRight(RightEnum.GroupingfileCreate))
             {
-                <MudNavLink Icon="@Icons.Material.Filled.Create" Href="@GroupingfilesCreate.GetRedirectUrl()">Erstellen</MudNavLink>
+                <MudNavLink Icon="@Icons.Material.Filled.Create" Href="@GroupingfileCreate.GetRedirectUrl()">Erstellen</MudNavLink>
             }
             @if (UserAccessService.HasRight(RightEnum.ViewGroupingfiles))
             {
-                <MudNavLink Icon="@Icons.Material.Filled.TableView" Href="@GroupingfilesOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix">Übersicht</MudNavLink>
+                <MudNavLink Icon="@Icons.Material.Filled.TableView" Href="@GroupingfileOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix">Übersicht</MudNavLink>
             }
         </MudNavGroup>
     }

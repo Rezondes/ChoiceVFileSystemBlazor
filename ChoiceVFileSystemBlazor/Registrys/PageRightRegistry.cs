@@ -42,8 +42,8 @@ public static class PageRightRegistry
         { CompanyOverview.Url, RightEnum.ViewCompanies },
         { CompanyView.Url, RightEnum.ViewCompanies },
         
-        { GroupingfilesCreate.Url, RightEnum.ViewGroupingfiles },
-        { GroupingfilesOverview.Url, RightEnum.ViewGroupingfiles },
+        { GroupingfileCreate.Url, RightEnum.ViewGroupingfiles },
+        { GroupingfileOverview.Url, RightEnum.ViewGroupingfiles },
         
         { SupportfileCreate.Url, RightEnum.SupportfileCreate },
         { SupportfileOverview.Url, RightEnum.ViewSupportfiles },
