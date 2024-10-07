@@ -6,37 +6,32 @@
 <MudSnackbarProvider/>
 
 <MudLayout Style="height: 100vh; overflow: hidden;">
-    <MudAppBar> 
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
+    <MudAppBar>
+        
+        <MudImage Src="cnc_logo_wide.png"
+                  Alt="Cops and Crimes Logo"
+                  Style="
+                        width: 400px; 
+                        margin-bottom: 3px;
+                        margin-left: -5px;
+                        "/>
+        <MudSpacer/>
         <MudButtonGroup Color="Color.Inherit">
             <ThemeModeToggle IsDarkMode="_isDarkMode" OnDarkModeChanged="ToggleDarkMode"/>
         </MudButtonGroup>
     </MudAppBar>
 
-    <MudDrawer @bind-Open="_open" ClipMode="_clipMode" Breakpoint="_breakpoint" Variant="DrawerVariant.Mini">
-        <CopsAndCrimesNavMenu @ref="_navMenu"/>
-    </MudDrawer>
-
     <MudMainContent Style="height: 100%; overflow: hidden;">
-        <MudContainer Class="px-8" MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: auto; padding: 16px 0;">
+        <MudContainer Class="px-8 d-flex align-items-center justify-content-start flex-column" MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: auto; padding: 16px 0;">
             @Body
         </MudContainer>
     </MudMainContent>
 </MudLayout>
 
 @code {
-    private CopsAndCrimesNavMenu? _navMenu;
-    private bool _open = true;
-    private Breakpoint _breakpoint = Breakpoint.Lg;
-    private DrawerClipMode _clipMode = DrawerClipMode.Always;
     private bool _isDarkMode = true;
 
-    private async Task ToggleDrawer()
-    {
-        _open = !_open;
-        StateHasChanged();
-    }
-    private async Task ToggleDarkMode(bool newValue)
+    private void ToggleDarkMode(bool newValue)
     {
         _isDarkMode = newValue;
         StateHasChanged();
