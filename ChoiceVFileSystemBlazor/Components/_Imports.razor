@@ -84,8 +84,6 @@
 
 @using Microsoft.AspNetCore.SignalR.Client
 
-@attribute [Microsoft.AspNetCore.Authorization.Authorize(AuthenticationSchemes = "Discord")]
-
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
@@ -94,6 +92,7 @@
 @inject ReloadService ReloadService
 @inject ServerInformationCachedService ServerInformationCachedService
 
+@inject IHttpContextAccessor HttpContextAccessor
 @inject IJSRuntime JS
 
 // ChoiceV Gameserver Api

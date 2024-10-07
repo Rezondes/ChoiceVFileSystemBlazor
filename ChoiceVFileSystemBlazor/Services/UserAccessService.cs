@@ -15,6 +15,14 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
     private AccessDbModel? _userAccess;
     private List<RightEnum> _userRights = [];
 
+    public bool HasClaims(ClaimsPrincipal user)
+    {
+        var discordId = user.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+        var discordName = user.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
+        
+        return discordId is not null && discordName is not null;
+    }
+    
     public async Task InitializeUserAsync(ClaimsPrincipal user)
     {
         var discordId = user.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;

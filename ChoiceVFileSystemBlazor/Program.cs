@@ -42,7 +42,7 @@ builder.Services.AddLogging(config =>
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-
+builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor()
     .AddCircuitOptions(options => { options.DetailedErrors = true; });
 
@@ -90,18 +90,6 @@ builder.Services.AddAuthentication(options =>
 .AddCookie(options =>
 {
     options.ExpireTimeSpan = TimeSpan.FromHours(6);
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = false,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwlIssuer,
-        ValidAudience = jwlAudience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtEncryptionKey!))
-    };
 })
 .AddOAuth("Discord", options =>
 {
@@ -167,6 +155,15 @@ builder.Services.AddAuthentication(options =>
             context.RunClaimActions(member);
         }
     };
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("DiscordPolicy", policy =>
+    {
+        policy.RequireAuthenticatedUser();
+        policy.AddAuthenticationSchemes("Discord");
+    });
 });
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
@@ -252,6 +249,7 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+app.UseAuthentication();
 app.UseAuthorization();
 app.UseCookiePolicy();
 app.MapRazorComponents<App>()

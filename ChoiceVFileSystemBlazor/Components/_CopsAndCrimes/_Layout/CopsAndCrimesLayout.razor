@@ -1,0 +1,44 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider IsDarkMode="_isDarkMode"/>
+<MudPopoverProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<MudLayout Style="height: 100vh; overflow: hidden;">
+    <MudAppBar> 
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer" />
+        <MudButtonGroup Color="Color.Inherit">
+            <ThemeModeToggle IsDarkMode="_isDarkMode" OnDarkModeChanged="ToggleDarkMode"/>
+        </MudButtonGroup>
+    </MudAppBar>
+
+    <MudDrawer @bind-Open="_open" ClipMode="_clipMode" Breakpoint="_breakpoint" Variant="DrawerVariant.Mini">
+        <CopsAndCrimesNavMenu @ref="_navMenu"/>
+    </MudDrawer>
+
+    <MudMainContent Style="height: 100%; overflow: hidden;">
+        <MudContainer Class="px-8" MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: auto; padding: 16px 0;">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private CopsAndCrimesNavMenu? _navMenu;
+    private bool _open = true;
+    private Breakpoint _breakpoint = Breakpoint.Lg;
+    private DrawerClipMode _clipMode = DrawerClipMode.Always;
+    private bool _isDarkMode = true;
+
+    private async Task ToggleDrawer()
+    {
+        _open = !_open;
+        StateHasChanged();
+    }
+    private async Task ToggleDarkMode(bool newValue)
+    {
+        _isDarkMode = newValue;
+        StateHasChanged();
+    }
+}

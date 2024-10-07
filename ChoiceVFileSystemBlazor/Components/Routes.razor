@@ -1,33 +1,77 @@
 ﻿@inject UserAccessService UserAccessService
 
+@using Microsoft.AspNetCore.Authentication
+@using ChoiceVFileSystemBlazor.Components._CopsAndCrimes._Layout
 @implements IDisposable
 
 <CascadingAuthenticationState>
-    <CascadingValue Value="@UserAccessService">
+    @if (_isCopsAndCrimes)
+    {
         <Router AppAssembly="@typeof(Program).Assembly">
             <Found Context="routeData">
-                <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                <RouteView RouteData="@(new RouteData(typeof(CopsAndCrimesHome), routeData.RouteValues))" DefaultLayout="@typeof(CopsAndCrimesLayout)"/>
             </Found>
             <NotFound>
-                <LayoutView Layout="@typeof(MainLayout)">
+                <LayoutView Layout="@typeof(CopsAndCrimesLayout)">
                     <p>Sorry, there's nothing at this address.</p>
                 </LayoutView>
             </NotFound>
         </Router>
-    </CascadingValue>
+    }
+    else
+    {
+        <AuthorizeView Policy="DiscordPolicy">
+            <Authorized>
+                <CascadingValue Value="@UserAccessService">
+                    <Router AppAssembly="@typeof(Program).Assembly">
+                        <Found Context="routeData">
+                            <RouteView RouteData="routeData" DefaultLayout="@typeof(MainLayout)" />
+                        </Found>
+                        <NotFound>
+                            <LayoutView Layout="@typeof(MainLayout)">
+                                <p>Sorry, there's nothing at this address.</p>
+                            </LayoutView>
+                        </NotFound>
+                    </Router>
+                </CascadingValue>
+            </Authorized>
+            <NotAuthorized>
+                <p>You are not authorized to view this page.</p>
+            </NotAuthorized>
+        </AuthorizeView>
+    }
 </CascadingAuthenticationState>
 
+
 @code {
+    private static bool _isCopsAndCrimes;
     private static Routes? _instance;
+    
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        await UserAccessService.InitializeUserAsync(authState.User);
+        var currentUri = Navigation.Uri;
+        var currentHost = new Uri(currentUri).Host;
+
+        _isCopsAndCrimes = currentHost.Contains("copsandcrimes.de");
+
+        if (!_isCopsAndCrimes)
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+            if (!UserAccessService.HasClaims(authState.User))
+            {
+                var context = HttpContextAccessor.HttpContext;
+                await context.ChallengeAsync("Discord");
+                return;
+            }
+            
+            await UserAccessService.InitializeUserAsync(authState.User);
+        }
     }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender) return;
+        if (!firstRender || _isCopsAndCrimes) return;
         _instance = this;
         await JS.InvokeVoidAsync("initializeCustomReload");
     }
@@ -35,15 +79,13 @@
     [JSInvokable]
     public static async Task CustomReload()
     {
-        if (_instance != null)
-        {
-            await _instance.Reload();
-        }
+        if (_instance == null || _isCopsAndCrimes) return;
+        await _instance.Reload();
     }
     
     private async Task Reload()
     {
-        if (ReloadService is null) return;
+        if (ReloadService is null || _isCopsAndCrimes) return;
         await ReloadService.TriggerCustomReload();
     }
     

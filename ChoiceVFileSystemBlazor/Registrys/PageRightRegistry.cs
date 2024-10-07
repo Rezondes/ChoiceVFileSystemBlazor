@@ -17,7 +17,7 @@ public static class PageRightRegistry
     private static readonly Dictionary<string, RightEnum> PageRights = new()
     {
         { "", RightEnum.None },
-        { Home.Url, RightEnum.None },
+        { MainHome.Url, RightEnum.None },
         { NotAuthorized.Url, RightEnum.None },
         { Error.Url, RightEnum.None },
         { NotFound.Url, RightEnum.None },
