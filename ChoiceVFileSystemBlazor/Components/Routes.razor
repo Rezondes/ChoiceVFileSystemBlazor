@@ -9,7 +9,7 @@
     {
         <Router AppAssembly="@typeof(Program).Assembly">
             <Found Context="routeData">
-                <RouteView RouteData="@(new RouteData(typeof(CopsAndCrimesHome), routeData.RouteValues))" DefaultLayout="@typeof(CopsAndCrimesLayout)"/>
+                <RouteView RouteData="routeData" DefaultLayout="@typeof(CopsAndCrimesLayout)"/>
             </Found>
             <NotFound>
                 <LayoutView Layout="@typeof(CopsAndCrimesLayout)">
@@ -50,23 +50,34 @@
     protected override async Task OnInitializedAsync()
     {
         var currentUri = Navigation.Uri;
-        var currentHost = new Uri(currentUri).Host;
+        var newUri = new Uri(currentUri);
+        var currentHost = newUri.Host;
 
         _isCopsAndCrimes = currentHost.Contains("copsandcrimes.de");
-
-        if (!_isCopsAndCrimes)
+        
+        // _isCopsAndCrimes = currentHost.Contains("localhost");
+        
+        if (_isCopsAndCrimes)
         {
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-
-            if (!UserAccessService.HasClaims(authState.User))
-            {
-                var context = HttpContextAccessor.HttpContext;
-                await context.ChallengeAsync("Discord");
-                return;
-            }
+            if (newUri.AbsolutePath != "/") return;
             
-            await UserAccessService.InitializeUserAsync(authState.User);
+            Navigation.NavigateTo("/landingpage");
+            return;
         }
+        
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        if (!UserAccessService.HasClaims(authState.User))
+        {
+            var context = HttpContextAccessor.HttpContext;
+            await context.ChallengeAsync("Discord");
+            return;
+        }
+            
+        await UserAccessService.InitializeUserAsync(authState.User);
+        
+        if (newUri.AbsolutePath != "/landingpage") return;
+        Navigation.NavigateTo("/");
     }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -91,6 +102,6 @@
     
     public void Dispose()
     {
-        Console.WriteLine("Disposed");
+        // Console.WriteLine("Disposed");
     }
 }
