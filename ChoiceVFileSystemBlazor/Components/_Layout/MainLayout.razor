@@ -61,19 +61,24 @@ else
 
         <MudNavLink Href="https://github.com/Rezondes"
                     Icon="@Icons.Custom.Brands.GitHub"
-                    Style=" position: absolute;
-                            bottom: 0;
-                            height: 5%;
-                            margin-left: 0;
-                            width: var(--mud-drawer-width-left);
-                            background-color: var(--mud-palette-drawer-background);">
-            Created by Rezondes
+                    Style="@GetStyle()">
+            @if (_open)
+            {
+                <span>Created by Rezondes</span>
+            }
         </MudNavLink>
     </MudLayout>
 }
 
 @code
 {
+    private string GetStyle()
+    {
+        const string mainStyle = "position: absolute; bottom: 0; height: 5%; margin-left: 0; background-color: var(--mud-palette-drawer-background);";
+
+        return _open ? mainStyle + " width: var(--mud-drawer-width-left)" : mainStyle + " width: var(--mud-drawer-width-mini-left)";
+    }
+    
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     private bool _loading = true;
     private bool _shouldRedirect;
