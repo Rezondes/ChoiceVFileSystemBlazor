@@ -49,7 +49,7 @@ else
             </MudButtonGroup>
         </MudAppBar>
 
-        <MudDrawer @bind-Open="_open" ClipMode="_clipMode" Breakpoint="_breakpoint" Variant="DrawerVariant.Mini">
+        <MudDrawer @bind-Open="_open" ClipMode="_clipMode" Breakpoint="_breakpoint" Variant="DrawerVariant.Mini" Style="height: calc(95% - var(--mud-appbar-height));">
             <NavMenu @ref="_navMenu"/>
         </MudDrawer>
 
@@ -58,6 +58,17 @@ else
                 @Body
             </MudContainer>
         </MudMainContent>
+
+        <MudNavLink Href="https://github.com/Rezondes"
+                    Icon="@Icons.Custom.Brands.GitHub"
+                    Style=" position: absolute;
+                            bottom: 0;
+                            height: 5%;
+                            margin-left: 0;
+                            width: var(--mud-drawer-width-left);
+                            background-color: var(--mud-palette-drawer-background);">
+            Created by Rezondes
+        </MudNavLink>
     </MudLayout>
 }
 
