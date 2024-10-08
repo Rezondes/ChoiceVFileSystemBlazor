@@ -53,8 +53,7 @@
         var newUri = new Uri(currentUri);
         var currentHost = newUri.Host;
 
-        _isCopsAndCrimes = currentHost.Contains("copsandcrimes.de");
-        _isCopsAndCrimes = currentHost.Contains("localhost");
+        _isCopsAndCrimes = currentHost.Contains("copsandcrimes.de") || currentHost.Contains("localhost");
         
         if (_isCopsAndCrimes)
         {
@@ -81,7 +80,14 @@
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender || _isCopsAndCrimes) return;
+        if (!firstRender) return;
+
+        if (_isCopsAndCrimes)
+        {
+            await JS.InvokeVoidAsync("setFavicon", "/img/logo.png");
+            return;
+        }
+        
         _instance = this;
         await JS.InvokeVoidAsync("initializeCustomReload");
     }
