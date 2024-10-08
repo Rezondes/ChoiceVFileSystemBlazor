@@ -1,39 +1,7 @@
 @inherits LayoutComponentBase
 
-<MudThemeProvider IsDarkMode="_isDarkMode"/>
-<MudPopoverProvider/>
-<MudDialogProvider/>
-<MudSnackbarProvider/>
-
-<MudLayout Style="height: 100vh; overflow: hidden;">
-    <MudAppBar>
-        
-        <MudImage Src="cnc_logo_wide.png"
-                  Alt="Cops and Crimes Logo"
-                  Style="
-                        width: 400px; 
-                        margin-bottom: 3px;
-                        margin-left: -5px;
-                        "/>
-        <MudSpacer/>
-        <MudButtonGroup Color="Color.Inherit">
-            <ThemeModeToggle IsDarkMode="_isDarkMode" OnDarkModeChanged="ToggleDarkMode"/>
-        </MudButtonGroup>
-    </MudAppBar>
-
-    <MudMainContent Style="height: 100%; overflow: hidden;">
-        <MudContainer Class="px-8 d-flex align-items-center justify-content-start flex-column" MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: auto; padding: 16px 0;">
-            @Body
-        </MudContainer>
+<MudLayout>
+    <MudMainContent>
+        @Body
     </MudMainContent>
 </MudLayout>
-
-@code {
-    private bool _isDarkMode = true;
-
-    private void ToggleDarkMode(bool newValue)
-    {
-        _isDarkMode = newValue;
-        StateHasChanged();
-    }
-}

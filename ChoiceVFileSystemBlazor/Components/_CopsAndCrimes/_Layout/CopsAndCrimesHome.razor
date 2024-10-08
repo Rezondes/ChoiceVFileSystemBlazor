@@ -1,7 +1,659 @@
 @page "/landingpage"
 
-<MudText Typo="Typo.h4">
-    Derzeit in Bearbeitung!
-</MudText>
- 
-<MudButton Href="https://altv.run/RjaChaW" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Style="margin-top: 15px">Server beitreten</MudButton>
+<!-- Google Font -->
+<link type="text/css" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,400i,500,500i,700,700i,900,900i" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat Alternates" />
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+<!-- Stylesheet -->
+<link type="text/css" rel="stylesheet" href="css/style.css" />
+
+<style>
+    .main-container{
+        padding: 0;
+    }
+</style>
+
+<header class="main_bg" id="Home"> 
+    <div style="
+                    color: white;
+                    padding: 48px;
+                    position: absolute;
+                    top: 45%;
+                    left: 0%;
+                    transform: translate(0%, -50%);
+                    -ms-transform: translate(-0%, -50%);
+                ">
+        <span style="font-size: 64px">
+            <img class="slowfloat2s bigLogo"
+                 src="/img/landingpage/cnc_logo_l.png"
+                 alt=""/>
+        </span>
+        <br />
+        <span style="
+                        font-size: 25px;
+                        margin-left: 20px;
+                        font-family: 'Montserrat Alternates';
+                    ">
+            alt:V Funserver - Verfolgungsjagden & mehr!
+        </span>
+    </div>
+    <div style="
+                    font-size: 18px;
+                    padding: 10px 10px;
+                    position: absolute;
+                    left: 0;
+                    bottom: 0;
+                ">
+        <ul class="footer-socials">
+            <li style="margin-right: 50px">
+                <a target="_blank"
+                   href="http://discord.copsandcrimes.de/"
+                   class="socials">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         height="23px"
+                         viewBox="0 0 640 512">
+                        <style>
+                            svg {
+                                fill: #ffffff;
+                            }
+                        </style>
+                        <path d="M524.531,69.836a1.5,1.5,0,0,0-.764-.7A485.065,485.065,0,0,0,404.081,32.03a1.816,1.816,0,0,0-1.923.91,337.461,337.461,0,0,0-14.9,30.6,447.848,447.848,0,0,0-134.426,0,309.541,309.541,0,0,0-15.135-30.6,1.89,1.89,0,0,0-1.924-.91A483.689,483.689,0,0,0,116.085,69.137a1.712,1.712,0,0,0-.788.676C39.068,183.651,18.186,294.69,28.43,404.354a2.016,2.016,0,0,0,.765,1.375A487.666,487.666,0,0,0,176.02,479.918a1.9,1.9,0,0,0,2.063-.676A348.2,348.2,0,0,0,208.12,430.4a1.86,1.86,0,0,0-1.019-2.588,321.173,321.173,0,0,1-45.868-21.853,1.885,1.885,0,0,1-.185-3.126c3.082-2.309,6.166-4.711,9.109-7.137a1.819,1.819,0,0,1,1.9-.256c96.229,43.917,200.41,43.917,295.5,0a1.812,1.812,0,0,1,1.924.233c2.944,2.426,6.027,4.851,9.132,7.16a1.884,1.884,0,0,1-.162,3.126,301.407,301.407,0,0,1-45.89,21.83,1.875,1.875,0,0,0-1,2.611,391.055,391.055,0,0,0,30.014,48.815,1.864,1.864,0,0,0,2.063.7A486.048,486.048,0,0,0,610.7,405.729a1.882,1.882,0,0,0,.765-1.352C623.729,277.594,590.933,167.465,524.531,69.836ZM222.491,337.58c-28.972,0-52.844-26.587-52.844-59.239S193.056,219.1,222.491,219.1c29.665,0,53.306,26.82,52.843,59.239C275.334,310.993,251.924,337.58,222.491,337.58Zm195.38,0c-28.971,0-52.843-26.587-52.843-59.239S388.437,219.1,417.871,219.1c29.667,0,53.307,26.82,52.844,59.239C470.715,310.993,447.538,337.58,417.871,337.58Z" />
+                    </svg>
+                </a>
+            </li>
+
+            <li style="margin-right: 50px">
+                <a href="ts3server://ts.copsandcrimes.de?port=9987"
+                   class="socials">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         height="23px"
+                         viewBox="0 0 576 512">
+                        <style>
+                            svg {
+                                fill: #ffffff;
+                            }
+                        </style>
+                        <path d="M152.8 37.2c-32.2 38.1-56.1 82.6-69.9 130.5c0 .2-.1 .3-.1 .5C43.5 184.4 16 223 16 268c0 59.6 48.4 108 108 108s108-48.4 108-108c0-53.5-38.9-97.9-90-106.5c15.7-41.8 40.4-79.6 72.3-110.7c1.8-1.6 4-2.6 6.3-3.1c37.2-11.5 76.7-13.3 114.8-5.2C454.7 67.6 534 180.7 517.1 301.3c-8.4 62.6-38.6 112.7-87.7 151.4c-50.1 39.7-107.5 54.3-170.2 52.2l-24-1c12.4 2.8 25 4.9 37.6 6.3c40.7 4.2 81.4 2.1 120.1-12.5c94-35.5 149.3-102.3 162.9-202.5c4.8-52.6-5.8-105.4-30.8-152C454.6 11.3 290.8-38.4 159 32c-2.4 1.4-4.5 3.1-6.3 5.2zM309.4 433.9c-2.1 11.5-4.2 21.9-14.6 31.3c53.2-1 123.2-29.2 161.8-97.1c39.7-69.9 37.6-139.9-6.3-207.8C413.8 105 360.5 77.9 293.7 73.7c1.5 2.3 3.2 4.4 5.2 6.3l5.2 6.3c25.1 31.3 37.6 67.9 42.8 107.5c2.1 15.7-1 30.3-13.6 41.8c-4.2 3.1-5.2 6.3-4.2 10.4l7.3 17.7L365.7 318c5.2 11.5 4.2 19.8-6.3 28.2c-3.2 2.5-6.7 4.6-10.4 6.3l-18.8 8.4 3.1 13.6c3.1 6.3 1 12.5-3.1 17.7c-2.5 2.4-3.8 5.9-3.1 9.4c2.1 11.5-2.1 19.8-12.5 25.1c-2.1 1-4.2 5.2-5.2 7.3zm-133.6-3.1c16.7 11.5 34.5 20.9 53.2 26.1c24 5.2 41.8-6.3 44.9-30.3c1-8.4 5.2-14.6 12.5-17.7c7.3-4.2 8.4-7.3 2.1-13.6l-9.4-8.4 13.6-4.2c6.3-2.1 7.3-5.2 5.2-11.5c-1.4-3-2.4-6.2-3.1-9.4c-3.1-14.6-2.1-15.7 11.5-18.8c8.4-3.1 15.7-6.3 21.9-12.5c3.1-2.1 3.1-4.2 1-8.4l-16.7-30.3c-1-1.9-2.1-3.8-3.1-5.7c-6.4-11.7-13-23.6-15.7-37.1c-2.1-9.4-1-17.7 8.4-24c5.2-4.2 8.4-9.4 8.4-16.7c-.4-10.1-1.5-20.3-3.1-30.3c-6.3-37.6-23-68.9-51.2-95c-5.2-4.2-9.4-6.3-16.7-4.2L203.9 91.5c2 1.2 4 2.4 6 3.6l0 0c6.3 3.7 12.2 7.3 17 12.1c30.3 26.1 41.8 61.6 45.9 100.2c1 8.4 0 16.7-7.3 21.9c-8.4 5.2-10.4 12.5-7.3 20.9c4.9 13.2 10.4 26 16.7 38.6L291.6 318c-6.3 8.4-13.6 11.5-21.9 14.6c-12.5 3.1-14.6 7.3-10.4 20.9c.6 1.5 1.4 2.8 2.1 4.2c2.1 5.2 1 8.4-4.2 10.4l-12.5 3.1 5.2 4.2 4.2 4.2c4.2 5.2 4.2 8.4-2.1 10.4c-7.3 4.2-11.5 9.4-11.5 17.7c0 12.5-7.3 19.8-18.8 24c-3.8 1-7.6 1.5-11.5 1l-34.5-2.1z" />
+                    </svg>
+                </a>
+            </li>
+
+            <li style="margin-right: 50px">
+                <a target="_blank"
+                   href="https://www.patreon.com/copsandcrimes"
+                   class="socials">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         height="23px"
+                         viewBox="0 0 512 512">
+                        <style>
+                            svg {
+                                fill: #ffffff;
+                            }
+                        </style>
+                        <path d="M512 194.8c0 101.3-82.4 183.8-183.8 183.8-101.7 0-184.4-82.4-184.4-183.8 0-101.6 82.7-184.3 184.4-184.3C429.6 10.5 512 93.2 512 194.8zM0 501.5h90v-491H0v491z" />
+                    </svg>
+                </a>
+            </li>
+
+            <li style="margin-right: 50px">
+                <a target="_blank"
+                   href="https://deinserverhost.de/store/?m=cashbox&user=47068&hash=2b202c741b"
+                   class="socials">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         height="23px"
+                         viewBox="0 0 576 512">
+                        <style>
+                            svg {
+                                fill: #ffffff;
+                            }
+                        </style>
+                        <path d="M400 96l0 .7c-5.3-.4-10.6-.7-16-.7H256c-16.5 0-32.5 2.1-47.8 6c-.1-2-.2-4-.2-6c0-53 43-96 96-96s96 43 96 96zm-16 32c3.5 0 7 .1 10.4 .3c4.2 .3 8.4 .7 12.6 1.3C424.6 109.1 450.8 96 480 96h11.5c10.4 0 18 9.8 15.5 19.9l-13.8 55.2c15.8 14.8 28.7 32.8 37.5 52.9H544c17.7 0 32 14.3 32 32v96c0 17.7-14.3 32-32 32H512c-9.1 12.1-19.9 22.9-32 32v64c0 17.7-14.3 32-32 32H416c-17.7 0-32-14.3-32-32V448H256v32c0 17.7-14.3 32-32 32H192c-17.7 0-32-14.3-32-32V416c-34.9-26.2-58.7-66.3-63.2-112H68c-37.6 0-68-30.4-68-68s30.4-68 68-68h4c13.3 0 24 10.7 24 24s-10.7 24-24 24H68c-11 0-20 9-20 20s9 20 20 20H99.2c12.1-59.8 57.7-107.5 116.3-122.8c12.9-3.4 26.5-5.2 40.5-5.2H384zm64 136a24 24 0 1 0 -48 0 24 24 0 1 0 48 0z" />
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    </div>
+</header>
+
+<hr class="line" />
+
+<!---------------*/
+/*  VORSTELLUNG  */
+/*---------------->
+
+<div class="container blue_bg" style="padding: 140px" id="Vorstellung">
+    <div class="main_title slowfloat2s">
+        <h2>SERVERVORSTELLUNG</h2>
+        <h1>SERVERVORSTELLUNG</h1>
+    </div>
+
+    <div class="container" style="color: white; text-align: center">
+        <div class="box-item" style="width: 100%">
+            <div class="flip-box-front">
+                <div class="inner">
+                    <div class="box"
+                         style="
+                                    box-shadow: none;
+                                    height: auto;
+                                    padding: 20px;
+                                ">
+                        <div class="wrapper" style="text-align: left">
+                            <h3 style="
+                                            font-size: 20px;
+                                            font-family: 'Montserrat Alternates';
+                                        ">
+                                Bist du bereit für ein atemberaubendes
+                                Abenteuer, das Verbrechen &
+                                Strafverfolgungen in der riesigen Welt
+                                von Los Santos vereint?
+                                <br />
+                                Dann ist "Cops and Crimes" der perfekte
+                                Ort für dich!
+                            </h3>
+                            <hr class="line" />
+                            <p style="font-size: 15px">
+                                <span style="
+                                                font-size: 20px;
+                                                font-family: 'Montserrat Alternates';
+                                            ">
+                                    Unser einzigartiger Hauptspielmodus:
+                                    Cops and Crimes
+                                </span>
+                                <br />
+                                <br />
+                                Tauche ein in das Herzstück unseres
+                                Servers, den Cops and Crimes-Spielmodus.
+                                Hier wirst du in zwei Teams aufgeteilt -
+                                die Polizei & die Kriminellen.
+                                <br />
+                                Deine Aufgabe hängt von deiner
+                                Teamzugehörigkeit ab.
+                                <br />
+                                <br />
+                                Unser Ziel ist es, dass alle Spieler,
+                                egal ob sie die Rolle der Polizei oder
+                                der Kriminellen übernehmen, ein
+                                aufregendes & faires Spielerlebnis
+                                haben.
+                                <br />
+                                Die sorgfältige Einteilung der Fahrzeuge
+                                in drei Kategorien hilft dabei, die
+                                Spannung auf unserem Server auf höchstem
+                                Niveau zu halten.
+                                <br />
+                                Jede Kategorie hat eine eigene maximale
+                                Geschwindigkeit, die das Gameplay
+                                ausbalanciert.
+                                <br />
+                                <br />
+                                Trete einer öffentlichen Lobby bei &
+                                spiele zusammen mit neuen Mitspielern
+                                nach unseren Standardregeln oder
+                                erstelle ganz einfach deine eigene Lobby
+                                & gestalte sie nach deinen
+                                Vorstellungen.
+                                <br />
+                                Du kannst sie mit einem Passwort
+                                schützen, um nur Freunde & Vertraute
+                                einzuladen, oder lass sie öffentlich für
+                                alle Spieler zugänglich.
+                                <br />
+                                <br />
+                                Lege deine eigenen Regeln fest &
+                                bestimme das Spielgeschehen. Erlebe
+                                dynamische Teamkämpfe & aufregende
+                                Verfolgungsjagden.
+                                <br />
+                                <br />
+                                <span style="
+                                                font-size: 20px;
+                                                font-family: 'Montserrat Alternates';
+                                                float: right;
+                                                color: rgba(
+                                                    255,
+                                                    255,
+                                                    255,
+                                                    0.212
+                                                );
+                                            ">
+                                    Das CnC-Team wünscht dir viel Spaß!
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="line" />
+
+<!---------------*/
+/*    SERVER     */
+/*---------------->
+
+<div class="dark-grey center"
+     id="Server"
+     style="padding: 90px;">
+    <div class="main_title slowfloat2s">
+        <h2 style="color: #4b161c">SERVER</h2>
+        <h1 style="color: #681720">SERVER</h1>
+    </div>
+    <iframe src="https://altv.run/RjaChaW"
+            title="alt:V Quicklink"
+            style="
+                    height: 650px;
+                    width: 100%;
+                    border-radius: 15px;
+                    border: 1px solid #681720;
+                ">
+    </iframe>
+</div>
+
+<hr class="line" />
+
+<!---------------*/
+/*    LOBBYS     */
+/*---------------->
+
+<div class="container blue_bg"
+     style="padding: 90px"
+     id="Lobbys">
+    <div class="main_title slowfloat2s">
+        <h2>LOBBY's</h2>
+        <h1>LOBBY's</h1>
+    </div>
+    <p class="center"
+       style="
+                    font-size: 18px;
+                    font-family: 'Montserrat Alternates';
+                    color: white;
+                    font-size: 25px !important;
+                ">
+        Hier werden sie dir kurz vorgestellt:
+    </p>
+
+    <!----------------------------------------------- FREEROAM ----------------------------------------------->
+    <div class="box-container" style="color: white; text-align: center">
+        <div class="box-item">
+            <div class="flip-box">
+                <div class="flip-box-front"
+                     style="background-image: url('/img/landingpage/lobby_bg.jpg')">
+                    <div class="inner">
+                        <div class="box"
+                             style="box-shadow: none; height: 450px">
+                            <div class="wrapper">
+                                <img class="grayscale"
+                                     src="/img/landingpage/freeroam.jpg"
+                                     style="
+                                                height: auto;
+                                                width: 100%;
+                                                border-radius: 12px;
+                                            " />
+                                <h3 style="
+                                                text-transform: uppercase;
+                                                font-family: 'Montserrat Alternates';
+                                                margin-top: 40px;
+                                            ">
+                                    Freeroam
+                                </h3>
+                                <hr class="line"
+                                    style="border: 1px solid #3762d3" />
+                                <p style="
+                                                text-transform: uppercase;
+                                                font-size: 15px;
+                                            ">
+                                    Bis zu 128 Spieler
+                                </p>
+                                <p style="
+                                                font-size: 13px;
+                                                margin-top: 47px;
+                                                margin-right: -15px;
+                                                text-align: right;
+                                                color: rgba(
+                                                    255,
+                                                    255,
+                                                    255,
+                                                    0.548
+                                                );
+                                            ">
+                                    Siehe mehr ...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flip-box-back"
+                     style="background-image: url('img/lobby_bg.jpg')">
+                    <div class="box"
+                         style="
+                                    box-shadow: none;
+                                    height: 475px;
+                                    border-radius: 8px;
+                                ">
+                        <div class="inner">
+                            <p style="
+                                            font-size: 15px;
+                                            text-align: left;
+                                        ">
+                                <span style="font-size: 24px">
+                                    Tuning & mehr!
+                                </span>
+                                <br />
+                                <br />
+                                Dieser Modus bietet dir die Freiheit,
+                                Los Santos nach Herzenslust zu erkunden.
+                                <br />
+                                <br />
+                                Spawne deine Fahrzeuge, bewaffne dich,
+                                tune deine Fahrzeuge und mache einfach
+                                das, was dir gefällt.
+                                <br />
+                                <br />
+                                Es gibt keine Regeln, nur grenzenlose
+                                Möglichkeiten.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!----------------------------------------- PUBLIC COPS & CRIMES ----------------------------------------->
+        <div class="box-item">
+            <div class="flip-box">
+                <div class="flip-box-front"
+                     style="background-image: url('/img/landingpage/lobby_bg.jpg')">
+                    <div class="inner">
+                        <div class="box"
+                             style="box-shadow: none; height: 450px">
+                            <div class="wrapper">
+                                <img class="grayscale"
+                                     src="/img/landingpage/publiccnc.jpg"
+                                     style="
+                                                height: auto;
+                                                width: 100%;
+                                                border-radius: 12px;
+                                            " />
+                                <h3 style="
+                                                text-transform: uppercase;
+                                                font-family: 'Montserrat Alternates';
+                                                margin-top: 40px;
+                                            ">
+                                    Public Cops and Crimes
+                                </h3>
+                                <hr class="line"
+                                    style="border: 1px solid #3762d3" />
+                                <p style="
+                                                text-transform: uppercase;
+                                                font-size: 15px;
+                                            ">
+                                    Bis zu 31 Spieler
+                                </p>
+                                <p style="
+                                                font-size: 13px;
+                                                margin-top: 47px;
+                                                margin-right: -15px;
+                                                text-align: right;
+                                                color: rgba(
+                                                    255,
+                                                    255,
+                                                    255,
+                                                    0.548
+                                                );
+                                            ">
+                                    Siehe mehr ...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flip-box-back"
+                     style="background-image: url('img/lobby_bg.jpg')">
+                    <div class="box"
+                         style="
+                                    box-shadow: none;
+                                    height: 475px;
+                                    border-radius: 8px;
+                                ">
+                        <div class="inner">
+                            <p style="
+                                            font-size: 15px;
+                                            text-align: left;
+                                        ">
+                                <span style="font-size: 24px">
+                                    Polizei:
+                                </span>
+                                <br />
+                                Als Gesetzeshüter ist es deine Pflicht,
+                                innerhalb einer bestimmten Zeit die
+                                Kriminellen festzunehmen.
+                                <br />
+                                Sei wachsam, kooperiere mit deinen
+                                Kollegen & setze alles daran, die
+                                Verbrecher hinter Gitter zu bringen.
+                                <br />
+                                <br />
+                                <br />
+                                <span style="font-size: 24px">
+                                    Kriminelle:
+                                </span>
+                                <br />
+                                Du bist ein Meister des Chaos & der
+                                Verwüstung.
+                                <br />
+                                Deine Mission ist es, innerhalb der
+                                vorgegebenen Zeit nicht
+                                gefasst zu werden.
+                                <br />
+                                <br />
+                                Setze all deine Fähigkeiten ein, um der
+                                Polizei zu entkommen, aber sei gewarnt -
+                                wenn du deine Waffe ziehst, beginnt ein
+                                gnadenloser Schusswechsel.
+                                <br />
+                                <br />
+                                Überleben ist der Schlüssel
+                                zum Sieg.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!------------------------------------------ PUBLIC DEATHMATCH ------------------------------------------>
+        <div class="box-item">
+            <div class="flip-box">
+                <div class="flip-box-front"
+                     style="background-image: url('/img/landingpage/lobby_bg.jpg')">
+                    <div class="inner">
+                        <div class="box"
+                             style="box-shadow: none; height: 450px">
+                            <div class="wrapper">
+                                <img class="grayscale"
+                                     src="/img/landingpage/deathmatch.jpg"
+                                     style="
+                                                height: auto;
+                                                width: 100%;
+                                                border-radius: 12px;
+                                            " />
+                                <h3 style="
+                                                text-transform: uppercase;
+                                                font-family: 'Montserrat Alternates';
+                                                margin-top: 40px;
+                                            ">
+                                    Public Deathmatch
+                                </h3>
+                                <hr class="line"
+                                    style="border: 1px solid #3762d3" />
+                                <p style="
+                                                text-transform: uppercase;
+                                                font-size: 15px;
+                                            ">
+                                    Bis zu 31 Spieler
+                                </p>
+                                <p style="
+                                                font-size: 13px;
+                                                margin-top: 47px;
+                                                margin-right: -15px;
+                                                text-align: right;
+                                                color: rgba(
+                                                    255,
+                                                    255,
+                                                    255,
+                                                    0.548
+                                                );
+                                            ">
+                                    Siehe mehr ...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flip-box-back"
+                     style="background-image: url('img/lobby_bg.jpg')">
+                    <div class="box"
+                         style="
+                                    box-shadow: none;
+                                    height: 475px;
+                                    border-radius: 8px;
+                                ">
+                        <div class="inner">
+                            <p style="
+                                            font-size: 15px;
+                                            text-align: left;
+                                        ">
+                                <span style="font-size: 24px">
+                                    Spieler gegen Spieler:
+                                </span>
+                                <br />
+                                <br />
+                                Im klassischen Deathmatch-Modus trittst
+                                du einfach einer Lobby bei und nimmst an
+                                gnadenlosen Schießereien teil.
+                                <br />
+                                <br />
+                                Hier zählt nur, wer am Ende noch steht.
+                                <br />
+                                <br />
+                                Schnapp dir deine Waffen und zeige, dass
+                                du der beste Schütze in Los Santos bist.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="line" />
+
+<!---------------*/
+/*     RULES     */
+/*---------------->
+
+<div class="dark-grey" style="padding: 90px" id="Rules">
+    <div class="main_title slowfloat2s">
+        <h2 style="color: #4b161c">REGELWERK</h2>
+        <h1 style="color: #681720">REGELWERK</h1>
+    </div>
+
+    <div style="
+                    text-align: center;
+                    color: White;
+                    height: auto;
+                    width: auto;
+                    box-shadow: none;
+                    overflow: hidden;
+                    margin-top: 15px;
+                    font-size: 18px;
+                    font-family: 'Montserrat Alternates';
+                ">
+        §1 Sei kein Idiot
+    </div>
+</div>
+
+<hr class="line" />
+
+<!---------------*/
+/*    FOOTER     */
+/*---------------->
+
+<footer class="footer center">
+    <img class="footer-logo" src="/img/landingpage/cnc_logo_s.png" alt="" />
+    <br />
+    <ul class="footer-socials">
+        <li style="margin-right: 50px">
+            <a target="_blank"
+               href="http://discord.copsandcrimes.de/"
+               class="socials">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     height="23px"
+                     viewBox="0 0 640 512">
+                    <style>
+                        svg {
+                            fill: #ffffff;
+                        }
+                    </style>
+                    <path d="M524.531,69.836a1.5,1.5,0,0,0-.764-.7A485.065,485.065,0,0,0,404.081,32.03a1.816,1.816,0,0,0-1.923.91,337.461,337.461,0,0,0-14.9,30.6,447.848,447.848,0,0,0-134.426,0,309.541,309.541,0,0,0-15.135-30.6,1.89,1.89,0,0,0-1.924-.91A483.689,483.689,0,0,0,116.085,69.137a1.712,1.712,0,0,0-.788.676C39.068,183.651,18.186,294.69,28.43,404.354a2.016,2.016,0,0,0,.765,1.375A487.666,487.666,0,0,0,176.02,479.918a1.9,1.9,0,0,0,2.063-.676A348.2,348.2,0,0,0,208.12,430.4a1.86,1.86,0,0,0-1.019-2.588,321.173,321.173,0,0,1-45.868-21.853,1.885,1.885,0,0,1-.185-3.126c3.082-2.309,6.166-4.711,9.109-7.137a1.819,1.819,0,0,1,1.9-.256c96.229,43.917,200.41,43.917,295.5,0a1.812,1.812,0,0,1,1.924.233c2.944,2.426,6.027,4.851,9.132,7.16a1.884,1.884,0,0,1-.162,3.126,301.407,301.407,0,0,1-45.89,21.83,1.875,1.875,0,0,0-1,2.611,391.055,391.055,0,0,0,30.014,48.815,1.864,1.864,0,0,0,2.063.7A486.048,486.048,0,0,0,610.7,405.729a1.882,1.882,0,0,0,.765-1.352C623.729,277.594,590.933,167.465,524.531,69.836ZM222.491,337.58c-28.972,0-52.844-26.587-52.844-59.239S193.056,219.1,222.491,219.1c29.665,0,53.306,26.82,52.843,59.239C275.334,310.993,251.924,337.58,222.491,337.58Zm195.38,0c-28.971,0-52.843-26.587-52.843-59.239S388.437,219.1,417.871,219.1c29.667,0,53.307,26.82,52.844,59.239C470.715,310.993,447.538,337.58,417.871,337.58Z" />
+                </svg>
+            </a>
+        </li>
+
+        <li style="margin-right: 50px">
+            <a href="ts3server://ts.copsandcrimes.de?port=9987"
+               class="socials">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     height="23px"
+                     viewBox="0 0 576 512">
+                    <style>
+                        svg {
+                            fill: #ffffff;
+                        }
+                    </style>
+                    <path d="M152.8 37.2c-32.2 38.1-56.1 82.6-69.9 130.5c0 .2-.1 .3-.1 .5C43.5 184.4 16 223 16 268c0 59.6 48.4 108 108 108s108-48.4 108-108c0-53.5-38.9-97.9-90-106.5c15.7-41.8 40.4-79.6 72.3-110.7c1.8-1.6 4-2.6 6.3-3.1c37.2-11.5 76.7-13.3 114.8-5.2C454.7 67.6 534 180.7 517.1 301.3c-8.4 62.6-38.6 112.7-87.7 151.4c-50.1 39.7-107.5 54.3-170.2 52.2l-24-1c12.4 2.8 25 4.9 37.6 6.3c40.7 4.2 81.4 2.1 120.1-12.5c94-35.5 149.3-102.3 162.9-202.5c4.8-52.6-5.8-105.4-30.8-152C454.6 11.3 290.8-38.4 159 32c-2.4 1.4-4.5 3.1-6.3 5.2zM309.4 433.9c-2.1 11.5-4.2 21.9-14.6 31.3c53.2-1 123.2-29.2 161.8-97.1c39.7-69.9 37.6-139.9-6.3-207.8C413.8 105 360.5 77.9 293.7 73.7c1.5 2.3 3.2 4.4 5.2 6.3l5.2 6.3c25.1 31.3 37.6 67.9 42.8 107.5c2.1 15.7-1 30.3-13.6 41.8c-4.2 3.1-5.2 6.3-4.2 10.4l7.3 17.7L365.7 318c5.2 11.5 4.2 19.8-6.3 28.2c-3.2 2.5-6.7 4.6-10.4 6.3l-18.8 8.4 3.1 13.6c3.1 6.3 1 12.5-3.1 17.7c-2.5 2.4-3.8 5.9-3.1 9.4c2.1 11.5-2.1 19.8-12.5 25.1c-2.1 1-4.2 5.2-5.2 7.3zm-133.6-3.1c16.7 11.5 34.5 20.9 53.2 26.1c24 5.2 41.8-6.3 44.9-30.3c1-8.4 5.2-14.6 12.5-17.7c7.3-4.2 8.4-7.3 2.1-13.6l-9.4-8.4 13.6-4.2c6.3-2.1 7.3-5.2 5.2-11.5c-1.4-3-2.4-6.2-3.1-9.4c-3.1-14.6-2.1-15.7 11.5-18.8c8.4-3.1 15.7-6.3 21.9-12.5c3.1-2.1 3.1-4.2 1-8.4l-16.7-30.3c-1-1.9-2.1-3.8-3.1-5.7c-6.4-11.7-13-23.6-15.7-37.1c-2.1-9.4-1-17.7 8.4-24c5.2-4.2 8.4-9.4 8.4-16.7c-.4-10.1-1.5-20.3-3.1-30.3c-6.3-37.6-23-68.9-51.2-95c-5.2-4.2-9.4-6.3-16.7-4.2L203.9 91.5c2 1.2 4 2.4 6 3.6l0 0c6.3 3.7 12.2 7.3 17 12.1c30.3 26.1 41.8 61.6 45.9 100.2c1 8.4 0 16.7-7.3 21.9c-8.4 5.2-10.4 12.5-7.3 20.9c4.9 13.2 10.4 26 16.7 38.6L291.6 318c-6.3 8.4-13.6 11.5-21.9 14.6c-12.5 3.1-14.6 7.3-10.4 20.9c.6 1.5 1.4 2.8 2.1 4.2c2.1 5.2 1 8.4-4.2 10.4l-12.5 3.1 5.2 4.2 4.2 4.2c4.2 5.2 4.2 8.4-2.1 10.4c-7.3 4.2-11.5 9.4-11.5 17.7c0 12.5-7.3 19.8-18.8 24c-3.8 1-7.6 1.5-11.5 1l-34.5-2.1z" />
+                </svg>
+            </a>
+        </li>
+
+        <li style="margin-right: 50px">
+            <a target="_blank"
+               href="https://www.patreon.com/copsandcrimes"
+               class="socials">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     height="23px"
+                     viewBox="0 0 512 512">
+                    <style>
+                        svg {
+                            fill: #ffffff;
+                        }
+                    </style>
+                    <path d="M512 194.8c0 101.3-82.4 183.8-183.8 183.8-101.7 0-184.4-82.4-184.4-183.8 0-101.6 82.7-184.3 184.4-184.3C429.6 10.5 512 93.2 512 194.8zM0 501.5h90v-491H0v491z" />
+                </svg>
+            </a>
+        </li>
+
+        <li style="margin-right: 50px">
+            <a target="_blank"
+               href="https://deinserverhost.de/store/?m=cashbox&user=47068&hash=2b202c741b"
+               class="socials">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     height="23px"
+                     viewBox="0 0 576 512">
+                    <style>
+                        svg {
+                            fill: #ffffff;
+                        }
+                    </style>
+                    <path d="M400 96l0 .7c-5.3-.4-10.6-.7-16-.7H256c-16.5 0-32.5 2.1-47.8 6c-.1-2-.2-4-.2-6c0-53 43-96 96-96s96 43 96 96zm-16 32c3.5 0 7 .1 10.4 .3c4.2 .3 8.4 .7 12.6 1.3C424.6 109.1 450.8 96 480 96h11.5c10.4 0 18 9.8 15.5 19.9l-13.8 55.2c15.8 14.8 28.7 32.8 37.5 52.9H544c17.7 0 32 14.3 32 32v96c0 17.7-14.3 32-32 32H512c-9.1 12.1-19.9 22.9-32 32v64c0 17.7-14.3 32-32 32H416c-17.7 0-32-14.3-32-32V448H256v32c0 17.7-14.3 32-32 32H192c-17.7 0-32-14.3-32-32V416c-34.9-26.2-58.7-66.3-63.2-112H68c-37.6 0-68-30.4-68-68s30.4-68 68-68h4c13.3 0 24 10.7 24 24s-10.7 24-24 24H68c-11 0-20 9-20 20s9 20 20 20H99.2c12.1-59.8 57.7-107.5 116.3-122.8c12.9-3.4 26.5-5.2 40.5-5.2H384zm64 136a24 24 0 1 0 -48 0 24 24 0 1 0 48 0z" />
+                </svg>
+            </a>
+        </li>
+    </ul>
+</footer>
