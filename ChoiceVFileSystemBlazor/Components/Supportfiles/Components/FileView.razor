@@ -26,30 +26,33 @@ else if (_model is not null)
                         <MudDivider Style="@_dividerStyle"/>
                         <MudTextField Label="Beschreibung" Lines="3" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(_canEditDescription))" @bind-Value="_model.Description"/>
 
-                        <MudDivider Style="@_dividerStyle"/>
-                        <MudSelect T="FileStatusEnum" Label="Status" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(_canEditStatus))" @bind-Value="_model.Status">
-                            @foreach (FileStatusEnum status in Enum.GetValues(typeof(FileStatusEnum)))
-                            {
-                                <MudSelectItem Value="@(status)">@status.GetDisplayText()</MudSelectItem>
-                            }
-                        </MudSelect>
+                        @if (_model.Type == FileTypeEnum.Supportfile)
+                        {
+                            <MudDivider Style="@_dividerStyle"/>
+                            <MudSelect T="FileStatusEnum" Label="Status" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(_canEditStatus))" @bind-Value="_model.Status">
+                                @foreach (FileStatusEnum status in Enum.GetValues(typeof(FileStatusEnum)))
+                                {
+                                    <MudSelectItem Value="@(status)">@status.GetDisplayText()</MudSelectItem>
+                                }
+                            </MudSelect>
 
-                        <MudDivider Style="@_dividerStyle"/>
-                        <MudSelect T="RankEnum" Label="MinRank" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(_canEditMinRank))" @bind-Value="_model.MinRank">
-                            @foreach (RankEnum minRank in Enum.GetValues(typeof(RankEnum)))
-                            {
-                                <MudSelectItem Value="@(minRank)">@minRank.GetDisplayText()</MudSelectItem>
-                            }
-                        </MudSelect>
+                            <MudDivider Style="@_dividerStyle"/>
+                            <MudSelect T="RankEnum" Label="MinRank" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(_canEditMinRank))" @bind-Value="_model.MinRank">
+                                @foreach (RankEnum minRank in Enum.GetValues(typeof(RankEnum)))
+                                {
+                                    <MudSelectItem Value="@(minRank)">@minRank.GetDisplayText()</MudSelectItem>
+                                }
+                            </MudSelect>
 
-                        <MudDivider Style="@_dividerStyle"/>
-                        <MudSelect T="Ulid?" Label="Kategorie" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(_canEditCategory))" @bind-Value="_model.CategoryId">
-                            <MudSelectItem T="Ulid?" Value="@null">Keine Kategorie</MudSelectItem>
-                            @foreach (var category in _categoryDbModels)
-                            {
-                                <MudSelectItem T="Ulid?" Value="@(category.Id)">[@category.Number] @category.Name</MudSelectItem>
-                            }
-                        </MudSelect>
+                            <MudDivider Style="@_dividerStyle"/>
+                            <MudSelect T="Ulid?" Label="Kategorie" Variant="Variant.Outlined" ReadOnly="@(_model.Deleted || !UserAccessService.HasRight(_canEditCategory))" @bind-Value="_model.CategoryId">
+                                <MudSelectItem T="Ulid?" Value="@null">Keine Kategorie</MudSelectItem>
+                                @foreach (var category in _categoryDbModels)
+                                {
+                                    <MudSelectItem T="Ulid?" Value="@(category.Id)">[@category.Number] @category.Name</MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
                     </MudPaper>
                 </MudItem>
 

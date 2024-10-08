@@ -44,20 +44,6 @@ else
             <PropertyColumn Property="x => x.Title" Title="Titel"/>
             <PropertyColumn Property="x => x.CreatorAccessModel.Name" Title="Ersteller"/>
             <PropertyColumn Property="x => x.CreatorAccessModel.Id" Title="ErstellerId"/>
-            <PropertyColumn Property="x => x.Status.GetDisplayText()" Title="Status"/>
-            <PropertyColumn Property="x => x.MinRank.GetDisplayText()" Title="MinRank"/>
-            <TemplateColumn Hideable="false" Sortable="true" Filterable="true" Title="Kategorie">
-                <CellTemplate>
-                    @if (context.Item.Category is null)
-                    {
-                        <span>Keine Kategorie</span>
-                    }
-                    else
-                    {
-                        <span>[@context.Item.Category.Number] @context.Item.Category.Name</span>
-                    }
-                </CellTemplate>
-            </TemplateColumn>
             <TemplateColumn Hideable="false" Sortable="true" Filterable="true" Title="Datum">
                 <CellTemplate>
                     @context.Item.CreatedAtLocal(UserAccessService.GetUserAccess().Result.Settings.TimeZone)

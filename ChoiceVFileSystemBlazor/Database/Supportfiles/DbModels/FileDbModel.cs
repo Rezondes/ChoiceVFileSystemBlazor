@@ -47,12 +47,12 @@ public class FileDbModel
     public string CreatedAtLocal(string timeZoneId = "Europe/Berlin") => CreatedAt.ConvertTimeFromUtcWithTimeZone(timeZoneId);
     
     public Ulid CreatedByAccessId { get; set; }
-    [Required]
-    public FileStatusEnum Status { get; set; }
+    
+    [Required] 
+    public FileStatusEnum Status { get; set; } = FileStatusEnum.Created;
 
     [Required] 
     public RankEnum MinRank { get; set; } = RankEnum.Rank1;
-
     
     public Ulid? CategoryId { get; set; }
     
