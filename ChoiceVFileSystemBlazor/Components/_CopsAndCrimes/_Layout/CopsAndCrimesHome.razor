@@ -659,12 +659,3 @@
         </li>
     </ul>
 </footer>
-
-@code {
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!firstRender) return;
-
-        await JS.InvokeVoidAsync("setFavicon", "/img/landingpage/logo.png");
-    }
-}

@@ -81,10 +81,10 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
-
+        
         if (_isCopsAndCrimes)
         {
-            await JS.InvokeVoidAsync("setFavicon", "/img/landingpage/logo.png");
+            await JS.InvokeVoidAsync("setFavicon", "cnc_logo.png");
             return;
         }
         
