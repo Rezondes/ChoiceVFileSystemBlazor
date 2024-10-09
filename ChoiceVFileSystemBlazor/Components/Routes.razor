@@ -82,14 +82,7 @@
     {
         if (!firstRender) return;
         
-        if (_isCopsAndCrimes)
-        {
-            await JS.InvokeVoidAsync("setFavicon", "cnc_logo.png");
-            return;
-        }
-        
         _instance = this;
-        await JS.InvokeVoidAsync("setFavicon", "choicev_logo_partial.png");
         await JS.InvokeVoidAsync("initializeCustomReload");
     }
     

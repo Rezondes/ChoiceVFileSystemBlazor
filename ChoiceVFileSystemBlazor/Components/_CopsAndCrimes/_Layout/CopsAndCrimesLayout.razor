@@ -5,3 +5,12 @@
         @Body
     </MudMainContent>
 </MudLayout>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        
+        await JS.InvokeVoidAsync("setFavicon", "cnc_logo.png");
+    }
+}
