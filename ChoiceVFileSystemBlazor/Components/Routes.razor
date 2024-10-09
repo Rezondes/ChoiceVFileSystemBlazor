@@ -89,6 +89,7 @@
         }
         
         _instance = this;
+        await JS.InvokeVoidAsync("setFavicon", "choicev_logo_partial.png");
         await JS.InvokeVoidAsync("initializeCustomReload");
     }
     
