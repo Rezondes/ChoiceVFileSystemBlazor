@@ -64,6 +64,17 @@
             }
         </MudNavGroup>
     }
+
+
+    @if (UserAccessService.HasRight(RightEnum.ViewWhitelistArea))
+    {
+        <MudNavGroup Icon="@Icons.Material.Filled.Checklist" Title="Whitelist">
+            @if (UserAccessService.HasRight(RightEnum.ViewWhitelistQuestions))
+            {
+                <MudNavLink Href="@WhitelistQuestionsOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.QuestionAnswer">Whitelistfragenübersicht</MudNavLink>
+            }
+        </MudNavGroup>
+    }
     
     @if (UserAccessService.HasRight(RightEnum.ViewAdminPanelArea))
     {
