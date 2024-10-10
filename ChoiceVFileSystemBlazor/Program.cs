@@ -207,12 +207,12 @@ builder.Services.ConfigureHttpClient<IVehicleApi>(choiceVApiBaseAddress, choiceV
 #endregion
 
 #region ChoiceV Whitelist Api
-var choiceVWhitelistApiBaseAddress = builder.Configuration.GetValue<string>("ChoiceVWhitelistAApi:BaseAddress")!;
-Assert(string.IsNullOrEmpty(choiceVWhitelistApiBaseAddress), "ChoiceVWhitelistAApi Address is missing");
-var choiceVWhitelistApiUsername = builder.Configuration.GetValue<string>("ChoiceVWhitelistAApi:BasicAuthUsername")!;
-Assert(string.IsNullOrEmpty(choiceVWhitelistApiUsername), "ChoiceVWhitelistAApi BasicAuthUsername is missing");
-var choiceVWhitelistApiPassword = builder.Configuration.GetValue<string>("ChoiceVWhitelistAApi:BasicAuthPassword")!;
-Assert(string.IsNullOrEmpty(choiceVWhitelistApiPassword), "ChoiceVWhitelistAApi BasicAuthPassword is missing");
+var choiceVWhitelistApiBaseAddress = builder.Configuration.GetValue<string>("ChoiceVWhitelistApi:BaseAddress")!;
+Assert(string.IsNullOrEmpty(choiceVWhitelistApiBaseAddress), "ChoiceVWhitelistApi Address is missing");
+var choiceVWhitelistApiUsername = builder.Configuration.GetValue<string>("ChoiceVWhitelistApi:BasicAuthUsername")!;
+Assert(string.IsNullOrEmpty(choiceVWhitelistApiUsername), "ChoiceVWhitelistApi BasicAuthUsername is missing");
+var choiceVWhitelistApiPassword = builder.Configuration.GetValue<string>("ChoiceVWhitelistApi:BasicAuthPassword")!;
+Assert(string.IsNullOrEmpty(choiceVWhitelistApiPassword), "ChoiceVWhitelistApi BasicAuthPassword is missing");
 
 builder.Services.ConfigureHttpClient<IWhitelistQuestionApi>(choiceVWhitelistApiBaseAddress, choiceVWhitelistApiUsername, choiceVWhitelistApiPassword);
 #endregion
