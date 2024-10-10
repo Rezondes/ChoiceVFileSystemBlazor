@@ -8,6 +8,7 @@ using ChoiceVFileSystemBlazor.Components.Companies.Pages;
 using ChoiceVFileSystemBlazor.Components.Groupingfiles.Pages;
 using ChoiceVFileSystemBlazor.Components.Supportfiles.Pages;
 using ChoiceVFileSystemBlazor.Components.Supportkeylogs.Pages;
+using ChoiceVFileSystemBlazor.Components.WhitelistQuestions.Pages;
 using ChoiceVFileSystemBlazor.Database._Shared;
 
 namespace ChoiceVFileSystemBlazor.Registrys;
@@ -51,6 +52,9 @@ public static class PageRightRegistry
         { SupportfileView.Url, RightEnum.ViewSupportfiles },
         
         { SupportkeylogsOverview.Url, RightEnum.ViewSupportKeyLogsArea },
+        
+        { WhitelistQuestionsOverview.Url, RightEnum.ViewWhitelistQuestions },
+        { WhitelistQuestionsView.Url, RightEnum.ViewWhitelistQuestions },
     };
 
     public static RightEnum GetNeededRankForPage(string relativePath)

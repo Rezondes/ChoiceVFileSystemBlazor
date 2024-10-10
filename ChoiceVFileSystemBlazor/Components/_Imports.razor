@@ -68,6 +68,9 @@
 @using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces
 @using ChoiceVFileSystemBlazor.Database.Supportfiles.Extensions
 @using ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels
+@using ChoiceVFileSystemBlazor.Components.WhitelistQuestions.Pages
+@using ChoiceVSharedApiModels.Whitelist
+@using ChoiceVFileSystemBlazor.Components.WhitelistQuestions.Components
 
 @using ChoiceVRefitClient
 @using ChoiceVSharedApiModels.Accounts
@@ -103,6 +106,9 @@
 @inject IInventoryApi InventoryApi
 @inject IServerApi ServerApi
 @inject IVehicleApi VehicleApi
+
+// ChoiceV Whitelist Api
+@inject IWhitelistQuestionApi WhitelistQuestionApi
 
 // SCP Database Proxies
 @inject IAccessProxy AccessProxy

@@ -1,0 +1,97 @@
+@if (_loading)
+{
+    <LoadingComponent/>
+}
+else
+{
+    <MudDataGrid
+        T="WhitelistQuestionApiModel" MultiSelection="true"
+        Items="@_data" SortMode="SortMode.Multiple" Filterable="true"
+        QuickFilter="@QuickFilter" RowClick="@RowClicked" Style="width: 100%;"
+        Hideable="true" Hover="true" Striped="true" FixedHeader="true"  Height="@(Height ?? "75vh")">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">@(Label ?? "Whitelistfragen Übersicht")</MudText>
+            <MudSpacer />
+            <MudTextField
+                T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+                Adornment="Adornment.Start" Immediate="true"
+                AdornmentIcon="@Icons.Material.Filled.Search"
+                IconSize="Size.Medium" Class="mt-0"/>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
+            <PropertyColumn Property="x => x.Question" Title="Question" />
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="WhitelistQuestionApiModel" />
+        </PagerContent>
+    </MudDataGrid>
+}
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Height { get; set; }
+
+    private bool _loading = true;
+    private string? _searchString;
+
+    private List<WhitelistQuestionApiModel> _data = [];
+
+    public async Task Load()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        try
+        {
+            var response = await WhitelistQuestionApi.GetAllAsync();
+            
+            if (response.IsSuccessStatusCode)
+            {
+                _data = response.Content;
+            }
+            else
+            {
+                Snackbar.Add(response.Error.Message, Severity.Error);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+
+        StateHasChanged();
+    }
+
+    private Func<WhitelistQuestionApiModel, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+
+        var lowerSearchString = _searchString.ToLower();
+
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.Question.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if ($"{x.Id}".ToLower().Contains(lowerSearchString))
+            return true;
+
+        return false;
+    };
+
+    void RowClicked(DataGridRowClickEventArgs<WhitelistQuestionApiModel> args)
+    {
+        Navigation.NavigateTo(WhitelistQuestionsView.GetRedirectUrl(args.Item.Id.ToString()));
+    }
+}
