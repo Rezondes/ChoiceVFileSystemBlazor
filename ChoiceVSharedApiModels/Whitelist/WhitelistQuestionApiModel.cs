@@ -9,16 +9,11 @@ public class WhitelistQuestionApiModel
     public WhitelistQuestionApiModel(
         uint id,
         string question,
-        string answer1,
-        string answer2,
-        string answer3,
-        string answer4,
-        string answer5,
-        bool answer1Right,
-        bool answer2Right,
-        bool answer3Right,
-        bool answer4Right,
-        bool answer5Right,
+        WhitelistQuestionAnswerApiModel answer1,
+        WhitelistQuestionAnswerApiModel answer2,
+        WhitelistQuestionAnswerApiModel answer3,
+        WhitelistQuestionAnswerApiModel answer4,
+        WhitelistQuestionAnswerApiModel answer5,
         int wronglyAnsweredCounter,
         string explanation)
     {
@@ -29,11 +24,6 @@ public class WhitelistQuestionApiModel
         Answer3 = answer3;
         Answer4 = answer4;
         Answer5 = answer5;
-        Answer1Right = answer1Right;
-        Answer2Right = answer2Right;
-        Answer3Right = answer3Right;
-        Answer4Right = answer4Right;
-        Answer5Right = answer5Right;
         WronglyAnsweredCounter = wronglyAnsweredCounter;
         Explanation = explanation;
     }
@@ -45,34 +35,19 @@ public class WhitelistQuestionApiModel
     public string Question { get; set; }
 
     [JsonPropertyName("answer1")]
-    public string Answer1 { get; set; }
+    public WhitelistQuestionAnswerApiModel? Answer1 { get; set; }
 
     [JsonPropertyName("answer2")]
-    public string Answer2 { get; set; }
+    public WhitelistQuestionAnswerApiModel? Answer2 { get; set; }
 
     [JsonPropertyName("answer3")]
-    public string Answer3 { get; set; }
+    public WhitelistQuestionAnswerApiModel? Answer3 { get; set; }
 
     [JsonPropertyName("answer4")]
-    public string Answer4 { get; set; }
+    public WhitelistQuestionAnswerApiModel? Answer4 { get; set; }
 
     [JsonPropertyName("answer5")]
-    public string Answer5 { get; set; }
-
-    [JsonPropertyName("answer1Right")]
-    public bool Answer1Right { get; set; }
-
-    [JsonPropertyName("answer2Right")]
-    public bool Answer2Right { get; set; }
-
-    [JsonPropertyName("answer3Right")]
-    public bool Answer3Right { get; set; }
-
-    [JsonPropertyName("answer4Right")]
-    public bool Answer4Right { get; set; }
-
-    [JsonPropertyName("answer5Right")]
-    public bool Answer5Right { get; set; }
+    public WhitelistQuestionAnswerApiModel? Answer5 { get; set; }
 
     [JsonPropertyName("wronglyAnsweredCounter")]
     public int WronglyAnsweredCounter { get; set; }
@@ -80,3 +55,5 @@ public class WhitelistQuestionApiModel
     [JsonPropertyName("explanation")]
     public string Explanation { get; set; }
 }
+
+public record WhitelistQuestionAnswerApiModel(string Text, bool IsCorrect);
