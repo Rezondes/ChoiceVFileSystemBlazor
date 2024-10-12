@@ -18,6 +18,7 @@ using ChoiceVFileSystemBlazor.Database.Ranks.Proxies.Intefaces;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces;
 using ChoiceVFileSystemBlazor.Extensions;
+using ChoiceVFileSystemBlazor.Models;
 using ChoiceVFileSystemBlazor.Services;
 using ChoiceVRefitClient;
 using Microsoft.AspNetCore.Authentication;
@@ -80,6 +81,8 @@ var jwlIssuer = builder.Configuration.GetValue<string>("Jwt:Issuer");
 Assert(string.IsNullOrEmpty(jwlIssuer), $"JWT Issuer is missing");
 var jwlAudience = builder.Configuration.GetValue<string>("Jwt:Audience");
 Assert(string.IsNullOrEmpty(jwlAudience), $"JWT Audience is missing");
+
+builder.Services.Configure<DiscordBotSettingsModel>(builder.Configuration.GetSection("Discord"));
 
 builder.Services.AddAuthentication(options =>
 {
@@ -185,6 +188,7 @@ builder.Services.AddHostedService<StartupService>();
 builder.Services.AddScoped<ReloadService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserAccessService>();
+builder.Services.AddScoped<DiscordService>();
 
 builder.Services.AddSingleton<ServerInformationCachedService>();
 builder.Services.AddHostedService<ServerInformationBackgroundService>();

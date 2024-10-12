@@ -26,4 +26,8 @@ public interface IAccountApi
     [Put("/api/v1/account/kick?accountId={accountId}&message={message}")]
     [Headers("Authorization: Bearer")]
     Task<ApiResponse<AccountKickResultApiModel>> KickAccountByAccountIdAsync(int accountId, string message);
+    
+    [Post("/api/v1/account/add?socialClubName={socialClubName}&discordId={discordId}")]
+    [Headers("Authorization: Bearer")]
+    Task<ApiResponse<AccountApiModel>> AddAccountAsync(string socialClubName, string discordId);
 }

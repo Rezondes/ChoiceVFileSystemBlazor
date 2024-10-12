@@ -23,6 +23,9 @@ else
         <ToolBarContent>
             <MudText Typo="Typo.h6">Account Übersicht</MudText>
             <MudSpacer />
+            <MudTooltip Text="Spieler whitelisten" Duration="@Constants.TOOLTIP_DURATION">
+                <MudIconButton Color="Color.Success" Icon="@Icons.Material.Outlined.Add" OnClick="() => AddNewAccount()"/>
+            </MudTooltip>
             <MudTextField 
                 T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER" 
                 Adornment="Adornment.Start" Immediate="true"
@@ -144,4 +147,64 @@ else
     {
         Navigation.NavigateTo(AccountView.GetRedirectUrl(args.Item.Id.ToString()));
     }
+
+    private async Task AddNewAccount()
+    {
+        // var discordGuildMember = await DiscordService.GetGuildMembersAsync();
+        
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                "SocialClubName",
+                string.Empty,
+                "SuperKuhlerSocialClubName"
+            ),
+            new(
+                InputTypes.Text,
+                "DiscordId",
+                string.Empty,
+                "SuperKuhlerDiscordId"
+            ),
+        };
+
+        var dialogData = await DialogService.OpenDialog(
+            "Spieler whitelisten", 
+            "Bist du dir sicher, dass du diesen Spieler whitelisten willst?", 
+            "Spieler whitelisten",
+            inputs);
+        if (dialogData is null) return;
+
+        var (validatedSocialClubName, parsedSocialClubName) = dialogData[0].ValidateInput<string>();
+        if (!validatedSocialClubName)
+        {
+            Snackbar.Add("Hurensohn", Severity.Error);
+            return;
+        }
+        
+        var (validatedDiscordId, parsedDiscordId) = dialogData[1].ValidateInput<string>();
+        if (!validatedDiscordId)
+        {
+            Snackbar.Add("Hurensohn 2", Severity.Error);
+            return;
+        }
+
+        var response = await AccountApi.AddAccountAsync(parsedSocialClubName!, parsedDiscordId!);
+        if (!response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Hurensohn 3", Severity.Error);
+            return;
+        }
+
+        var newAccount = response.Content;
+        
+        Snackbar.Add($"Spieler gewhitelisted! " +
+                     $"Id: {newAccount.Id}, " +
+                     $"DiscordId: {newAccount.DiscordId}, " +
+                     $"SocialClubName: {newAccount.SocialClubName}, " +
+                     $"Status: {newAccount.State}");
+        
+        await Load();
+    }
+
 }

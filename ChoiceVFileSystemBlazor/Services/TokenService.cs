@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 
 namespace ChoiceVFileSystemBlazor.Services;
 
-public class TokenService(IHttpContextAccessor httpContextAccessor, IAuthenticationService authenticationService)
+public class TokenService(IHttpContextAccessor httpContextAccessor)
 {
     public async Task<string?> GetAccessTokenAsync()
     {
