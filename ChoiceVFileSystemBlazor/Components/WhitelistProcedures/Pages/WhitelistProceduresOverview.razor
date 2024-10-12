@@ -1,0 +1,53 @@
+@page "/whitelist/questions"
+
+@implements IDisposable
+
+@code {
+    public const string Url = "/whitelist/questions";
+    public static string GetRedirectUrl() => Url;
+}
+
+<PageTitle>Whitelistprozesse Übersicht</PageTitle>
+
+<WhitelistProceduresOverviewDataGrid @ref="_dataGrid"/>
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+
+    private WhitelistProceduresOverviewDataGrid _dataGrid;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
+        _shouldRedirect = !_isAuthorized;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+
+        await Reload();
+    
+        ReloadService.OnCustomReload += Reload;
+    }
+    
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Reload;
+    }
+
+    private async Task Reload()
+    {
+        await _dataGrid.Load();
+    }
+}

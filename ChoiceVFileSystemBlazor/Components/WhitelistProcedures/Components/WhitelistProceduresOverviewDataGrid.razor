@@ -1,0 +1,121 @@
+@if (_loading)
+{
+    <LoadingComponent/>
+}
+else
+{
+    <MudDataGrid
+        T="WhitelistProcedureApiModel" MultiSelection="true"
+        Items="@_data" SortMode="SortMode.Multiple" Filterable="true"
+        QuickFilter="@QuickFilter" RowClick="@RowClicked" Style="width: 100%;"
+        Hideable="true" Hover="true" Striped="true" FixedHeader="true"  Height="@(Height ?? "75vh")">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">@(Label ?? "Whitelistprozess Übersicht")</MudText>
+            <MudSpacer />
+            <MudTextField
+                T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+                Adornment="Adornment.Start" Immediate="true"
+                AdornmentIcon="@Icons.Material.Filled.Search"
+                IconSize="Size.Medium" Class="mt-0"/>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
+            <PropertyColumn Property="x => x.UserId" Title="UserId" />
+            <PropertyColumn Property="x => x.ChannelId" Title="ChannelId" />
+            <PropertyColumn Property="x => x.CurrentStep" Title="CurrentStep" />
+            <PropertyColumn Property="x => x.Blocked" Title="Blocked" />
+            <PropertyColumn Property="x => x.NotCanceable" Title="NotCancelable" />
+            <PropertyColumn Property="x => x.StartTime" Title="StartTime" />
+            <PropertyColumn Property="x => x.CancelStartTime" Title="CancelStartTime" />
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="WhitelistProcedureApiModel" />
+        </PagerContent>
+    </MudDataGrid>
+}
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Height { get; set; }
+
+    private bool _loading = true;
+    private string? _searchString;
+
+    private List<WhitelistProcedureApiModel> _data = [];
+
+    public async Task Load()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        try
+        {
+            var response = await WhitelistProcedureApi.GetAllAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                _data = response.Content;
+            }
+            else
+            {
+                Snackbar.Add(response.Error.Message, Severity.Error);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+
+        StateHasChanged();
+    }
+
+    private Func<WhitelistProcedureApiModel, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+
+        var lowerSearchString = _searchString.ToLower();
+
+        if (string.IsNullOrWhiteSpace(lowerSearchString)) 
+            return true;
+
+        if (x.UserId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.ChannelId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.CurrentStep.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.Blocked.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.NotCanceable.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.StartTime.ToString(CultureInfo.CurrentCulture).ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.CancelStartTime.ToString(CultureInfo.CurrentCulture).ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if ($"{x.Id}".ToLower().Contains(lowerSearchString))
+            return true;
+
+        return false;
+    };
+
+    void RowClicked(DataGridRowClickEventArgs<WhitelistProcedureApiModel> args)
+    {
+        Navigation.NavigateTo(WhitelistQuestionsView.GetRedirectUrl(args.Item.Id.ToString()));
+    }
+}

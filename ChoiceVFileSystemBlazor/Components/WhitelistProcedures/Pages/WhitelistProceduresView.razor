@@ -1,0 +1,118 @@
+@page "/whitelist/procedures/view/{id}"
+
+@implements IDisposable
+
+@code {
+    public const string Url = "/whitelist/procedures/view/";
+    public static string GetRedirectUrl(string id) => Url + id;
+}
+
+@if (_loading)
+{
+    <PageLoading/>
+}
+else if (!_loading && _model is null)
+{
+    <ErrorComponent/>
+}
+else if (_model is null)
+{
+    <ErrorComponent/>
+}
+else
+{
+    
+}
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+    private bool _loading = true;
+    
+    [Parameter] public string Id { get; set; }
+    private uint _id;
+    
+    private WhitelistProcedureApiModel? _model;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
+        _shouldRedirect = !_isAuthorized;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+        
+        var parsingSuccess = ParseId();
+        if (!parsingSuccess)
+        {
+            Navigation.NavigateToError();
+            return;
+        }
+
+        await Load();
+    
+        ReloadService.OnCustomReload += Load;
+    }
+    
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Load;
+    }
+
+    private bool ParseId()
+    {
+        if (!uint.TryParse(Id, out var id))
+        {
+            Snackbar.Add("Parsing failed", Severity.Error);
+            _loading = false;
+            return false;
+        }
+
+        _id = id;
+        return true;
+    }
+    
+    private async Task Load()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        try
+        {
+            var response = await WhitelistProcedureApi.GetByProcedureIdAsync(_id);
+            if (response.IsSuccessStatusCode)
+            {
+                _model = response.Content;
+            }
+            else
+            {
+                Snackbar.Add(response.Error.Message, Severity.Error);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+        
+        StateHasChanged();
+    }
+}
