@@ -1,0 +1,140 @@
+<style>
+    .divider-class{
+        margin: 10px 0;
+        opacity: 0;
+    }
+</style>
+
+<MudDialog Style="width: 80%; max-width: 80%">
+    <TitleContent>
+        TestId: @Model.Id | DiscordId: @Model.UserId | ChannelId: @Model.ChannelId | Right: @Model.RightQuestions | Wrong: @Model.WrongQuestions | Finished: @Model.Finished
+    </TitleContent>
+    <DialogContent>
+        <MudGrid Justify="Justify.Center">
+            @for (var index = 0; index < Model.QuestionAnswers.Count; index++)
+            {
+                var questionAnswer = Model.QuestionAnswers[index];
+                var question = questionAnswer.Question;
+                var questionNumber = index + 1;
+                var text = $"Frage {questionNumber}:";
+
+                <MudItem xs="12">
+                    <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full" Style="@GetQuestionStyle(questionAnswer)">
+                        <MudExpansionPanels MultiExpansion="true" Style="width: 100%">
+                            <MudExpansionPanel Text="@text">
+                                <MudText Style="max-width: 80%">
+                                    @question.Question
+                                </MudText>
+                                <MudDivider Class="divider-class"/>
+
+                                @if (question.Answer1 is not null)
+                                {
+                                    <MudText Typo="Typo.h5">Anwortmöglichkeit 1 (@(question.Answer1.IsCorrect ? "richtig" : "falsch")):</MudText>
+                                    <MudText Style="max-width: 80%" Color="@GetTextColor(question.Answer1.IsCorrect, questionAnswer.SelectedAnswer1)">
+                                        @question.Answer1.Text
+                                    </MudText>
+                                    <MudDivider Class="divider-class"/>
+                                }
+                                @if (question.Answer2 is not null)
+                                {
+                                    <MudText Typo="Typo.h5">Anwortmöglichkeit 2 (@(question.Answer2.IsCorrect ? "richtig" : "falsch")):</MudText>
+                                    <MudText Style="max-width: 80%" Color="@GetTextColor(question.Answer2.IsCorrect, questionAnswer.SelectedAnswer2)">
+                                        @question.Answer2.Text
+                                    </MudText>
+                                    <MudDivider Class="divider-class"/>
+                                }
+                                @if (question.Answer3 is not null)
+                                {
+                                    <MudText Typo="Typo.h5">Anwortmöglichkeit 3 (@(question.Answer3.IsCorrect ? "richtig" : "falsch")):</MudText>
+                                    <MudText Style="max-width: 80%" Color="@GetTextColor(question.Answer3.IsCorrect, questionAnswer.SelectedAnswer3)">
+                                        @question.Answer3.Text
+                                    </MudText>
+                                    <MudDivider Class="divider-class"/>
+                                }
+                                @if (question.Answer4 is not null)
+                                {
+                                    <MudText Typo="Typo.h5">Anwortmöglichkeit 4 (@(question.Answer4.IsCorrect ? "richtig" : "falsch")):</MudText>
+                                    <MudText Style="max-width: 80%" Color="@GetTextColor(question.Answer4.IsCorrect, questionAnswer.SelectedAnswer4)">
+                                        @question.Answer4.Text
+                                    </MudText>
+                                    <MudDivider Class="divider-class"/>
+                                }
+                                @if (question.Answer5 is not null)
+                                {
+                                    <MudText Typo="Typo.h5">Anwortmöglichkeit 5 (@(question.Answer5.IsCorrect ? "richtig" : "falsch")):</MudText>
+                                    <MudText Style="max-width: 80%" Color="@GetTextColor(question.Answer5.IsCorrect, questionAnswer.SelectedAnswer5)">
+                                        @question.Answer5.Text
+                                    </MudText>
+                                    <MudDivider Class="divider-class"/>
+                                }
+
+                                <MudText Typo="Typo.h5">Erklärung:</MudText>
+                                <MudText Style="max-width: 80%">
+                                    @question.Explanation
+                                </MudText>
+                                <MudDivider Class="divider-class"/>
+                            </MudExpansionPanel>
+                        </MudExpansionPanels>
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = null!;
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+
+    [Parameter] public WhitelistQuestionsTestApiModel Model { get; set; }
+
+    private static Color GetTextColor(bool questionIsCorrect, bool? questionAnswerIsSelected)
+    {
+        return questionAnswerIsSelected.GetValueOrDefault() == questionIsCorrect ? Color.Success : Color.Error;
+    }
+
+    private string? GetQuestionStyle(WhitelistQuestionTestAnswerApiModel questionAnswer)
+    {
+        var isCorrect = true;
+        
+        var question = questionAnswer.Question;
+        
+        if (question.Answer1 is not null)
+        {
+            if (question.Answer1.IsCorrect != questionAnswer.SelectedAnswer1)
+            {
+                isCorrect = false;
+            }
+        }
+        if (question.Answer2 is not null)
+        {
+            if (question.Answer2.IsCorrect != questionAnswer.SelectedAnswer2)
+            {
+                isCorrect = false;
+            }
+        }
+        if (question.Answer3 is not null)
+        {
+            if (question.Answer3.IsCorrect != questionAnswer.SelectedAnswer3)
+            {
+                isCorrect = false;
+            }
+        }
+        if (question.Answer4 is not null)
+        {
+            if (question.Answer4.IsCorrect != questionAnswer.SelectedAnswer4)
+            {
+                isCorrect = false;
+            }
+        }
+        if (question.Answer5 is not null)
+        {
+            if (question.Answer5.IsCorrect != questionAnswer.SelectedAnswer5)
+            {
+                isCorrect = false;
+            }
+        }
+
+        return isCorrect ? "border: 1px solid var(--mud-palette-success);" : "border: 1px solid var(--mud-palette-error);";
+    }
+}

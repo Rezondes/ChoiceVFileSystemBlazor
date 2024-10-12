@@ -1,3 +1,4 @@
+@using ChoiceVFileSystemBlazor.Components.WhitelistProcedures.Pages
 @if (_loading)
 {
     <LoadingComponent/>
@@ -116,6 +117,6 @@ else
 
     void RowClicked(DataGridRowClickEventArgs<WhitelistProcedureApiModel> args)
     {
-        Navigation.NavigateTo(WhitelistQuestionsView.GetRedirectUrl(args.Item.Id.ToString()));
+        Navigation.NavigateTo(WhitelistProceduresView.GetRedirectUrl(args.Item.Id.ToString()));
     }
 }

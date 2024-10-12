@@ -21,7 +21,125 @@ else if (_model is null)
 }
 else
 {
-    
+    <MudItem Style="height: 75px;">
+        <MudText Typo="Typo.h3">[@_model.Id] @_model.UserId | @_model.ChannelId</MudText>
+    </MudItem>
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="5" >
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudPaper Height="495px">
+                        <div class="d-flex flex-row align-items-center px-5 mud-width-full">
+                            <MudIcon Icon="@Icons.Material.Filled.Info"/>
+                            <MudText Class="px-5" Typo="Typo.h5">Informationen</MudText>
+                        </div>
+                        <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
+                            <MudText>UserId: @_model.UserId</MudText>
+                            <MudText>ChannelId: @_model.ChannelId</MudText>
+                            <MudText>CurrentStep: @_model.CurrentStep</MudText>
+                            <MudText>Blocked: @_model.Blocked</MudText>
+                            <MudText>NotCancelable: @_model.NotCanceable</MudText>
+                            <MudText>StartTime: @_model.StartTime</MudText>
+                            <MudText>CancelStartTime: @_model.CancelStartTime</MudText>
+                        </MudContainer>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+        <MudItem xs="7">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudPaper Height="140px">
+                        <div class="d-flex flex-row align-items-center px-5 mud-width-full">
+                            <MudIcon Icon="@Icons.Material.Filled.AdsClick"/>
+                            <MudText Class="px-5" Typo="Typo.h5">Funktionen</MudText>
+                        </div>
+                        <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
+                            <WorkInProgressComponent/>
+                        </div>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudPaper Height="495px">
+                <div class="d-flex flex-row align-items-center px-5 mud-width-full">
+                    <MudIcon Icon="@Icons.Material.Filled.Info"/>
+                    <MudText Class="px-5" Typo="Typo.h5">Weitere Informationen</MudText>
+                </div>
+                <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
+                    <MudText>CHAR_NAME: @(_model.DataList.FirstOrDefault(x => x.Name == "CHAR_NAME")?.Data ?? "Keine Daten")</MudText>
+                    <MudText>CHAR_AGE: @(_model.DataList.FirstOrDefault(x => x.Name == "CHAR_AGE")?.Data ?? "Keine Daten")</MudText>
+                    <MudText>CHAR_PROFESSION: @(_model.DataList.FirstOrDefault(x => x.Name == "CHAR_PROFESSION")?.Data ?? "Keine Daten")</MudText>
+                    <MudText>SOCIALCLUB: @(_model.DataList.FirstOrDefault(x => x.Name == "SOCIALCLUB")?.Data ?? "Keine Daten")</MudText>
+                    <MudText>TEAMSPEAK_ID: @(_model.DataList.FirstOrDefault(x => x.Name == "TEAMSPEAK_ID")?.Data ?? "Keine Daten")</MudText>
+                    <MudText>CHAR_HISTORY: @(_model.DataList.FirstOrDefault(x => x.Name == "CHAR_HISTORY")?.Data ?? "Keine Daten")</MudText>
+                </MudContainer>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12">
+            <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
+                <MudDataGrid
+                    T="WhitelistQuestionsTestApiModel" MultiSelection="true"
+                    Items="@_model.TestList" SortMode="SortMode.Multiple" Filterable="true"
+                    QuickFilter="@TestQuickFilter" RowClick="@TestRowClicked" Style="width: 100%;"
+                    Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="400px">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Tests</MudText>
+                        <MudSpacer />
+                        <MudTextField
+                            T="string" @bind-Value="_testSearchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+                            Adornment="Adornment.Start" Immediate="true"
+                            AdornmentIcon="@Icons.Material.Filled.Search"
+                            IconSize="Size.Medium" Class="mt-0"/>
+                    </ToolBarContent>
+                    <Columns>
+                        <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
+                        <PropertyColumn Property="x => x.WrongQuestions" Title="WrongQuestions" />
+                        <PropertyColumn Property="x => x.RightQuestions" Title="RightQuestions" />
+                        <PropertyColumn Property="x => x.Finished" Title="Finished" />
+                        <PropertyColumn Property="x => x.QuestionAnswers.Count" Title="QuestionAnswers Count" />
+                    </Columns>
+                    <PagerContent>
+                        <MudDataGridPager T="WhitelistQuestionsTestApiModel" />
+                    </PagerContent>
+                </MudDataGrid>
+            </MudPaper>
+        </MudItem>
+        
+        <MudItem xs="12">
+            <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
+                <MudDataGrid
+                    T="WhitelistProceduresLogApiModel" MultiSelection="true"
+                    Items="@_model.LogList" SortMode="SortMode.Multiple" Filterable="true"
+                    QuickFilter="@LogsQuickFilter" Style="width: 100%;"
+                    Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="400px">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Logs</MudText>
+                        <MudSpacer />
+                        <MudTextField
+                            T="string" @bind-Value="_logsSearchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+                            Adornment="Adornment.Start" Immediate="true"
+                            AdornmentIcon="@Icons.Material.Filled.Search"
+                            IconSize="Size.Medium" Class="mt-0"/>
+                    </ToolBarContent>
+                    <Columns>
+                        <PropertyColumn Property="x => x.Id" Title="#" Filterable="false" />
+                        <PropertyColumn Property="x => x.Step" Title="Step" />
+                        <PropertyColumn Property="x => x.Title" Title="Title" />
+                        <PropertyColumn Property="x => x.Message" Title="Message" />
+                        <PropertyColumn Property="x => x.Date" Title="Date" />
+                        <PropertyColumn Property="x => x.Level" Title="Level" />
+                    </Columns>
+                    <PagerContent>
+                        <MudDataGridPager T="WhitelistProceduresLogApiModel" />
+                    </PagerContent>
+                </MudDataGrid>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
 }
 
 @code {
@@ -31,9 +149,12 @@ else
     private bool _loading = true;
     
     [Parameter] public string Id { get; set; }
-    private uint _id;
+    private int _id;
     
     private WhitelistProcedureApiModel? _model;
+
+    private string? _logsSearchString;
+    private string? _testSearchString;
     
     protected override async Task OnInitializedAsync()
     {
@@ -72,7 +193,7 @@ else
 
     private bool ParseId()
     {
-        if (!uint.TryParse(Id, out var id))
+        if (!int.TryParse(Id, out var id))
         {
             Snackbar.Add("Parsing failed", Severity.Error);
             _loading = false;
@@ -114,5 +235,71 @@ else
         }
         
         StateHasChanged();
+    }
+    
+    private Func<WhitelistProceduresLogApiModel, bool> LogsQuickFilter => x =>
+    {
+        if (_logsSearchString == null) return true;
+        
+        var lowerSearchString = _logsSearchString.ToLower();
+
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.Step.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.Title.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.Message.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.Date.ToString(CultureInfo.CurrentCulture).ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if ($"{x.Id}".ToLower().Contains(_logsSearchString))
+            return true;
+
+        return false;
+    };
+    
+    private Func<WhitelistQuestionsTestApiModel, bool> TestQuickFilter => x =>
+    {
+        if (_testSearchString == null) return true;
+        
+        var lowerSearchString = _testSearchString.ToLower();
+
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.WrongQuestions.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.RightQuestions.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.Finished.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.QuestionAnswers.Count.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if ($"{x.Id}".ToLower().Contains(_testSearchString))
+            return true;
+
+        return false;
+    };
+    
+    private async Task TestRowClicked(DataGridRowClickEventArgs<WhitelistQuestionsTestApiModel> args)
+    {
+        var item = args.Item;
+
+        var parameter = new DialogParameters<WhitelistQuestionTestDialog>
+        {
+            { x => x.Model, item },
+        };
+
+        await DialogService.ShowAsync<WhitelistQuestionTestDialog>(string.Empty, parameter, new DialogOptions { FullWidth = true });
     }
 }

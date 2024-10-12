@@ -1,4 +1,5 @@
 ﻿@using ChoiceVFileSystemBlazor.Components.Admin.Pages
+@using ChoiceVFileSystemBlazor.Components.WhitelistProcedures.Pages
 @using ChoiceVFileSystemBlazor.Components.Supportkeylogs.Pages
 @namespace ChoiceVFileSystemBlazor.Components._Layout
 
@@ -71,7 +72,11 @@
         <MudNavGroup Icon="@Icons.Material.Filled.Checklist" Title="Whitelist">
             @if (UserAccessService.HasRight(RightEnum.ViewWhitelistQuestions))
             {
-                <MudNavLink Href="@WhitelistQuestionsOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.QuestionAnswer">Whitelistfragenübersicht</MudNavLink>
+                <MudNavLink Href="@WhitelistProceduresOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.QuestionAnswer">Whitelistprozesse</MudNavLink>
+            }
+            @if (UserAccessService.HasRight(RightEnum.ViewWhitelistQuestions))
+            {
+                <MudNavLink Href="@WhitelistQuestionsOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.QuestionMark">Whitelistfragenübersicht</MudNavLink>
             }
         </MudNavGroup>
     }

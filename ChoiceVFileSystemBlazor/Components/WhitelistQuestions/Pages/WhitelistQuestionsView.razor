@@ -21,22 +21,72 @@ else if (_model is null)
 }
 else
 {
-    <MudItem Style="height: 75px;">
-        <MudText Typo="Typo.h3">[@_model.Id]</MudText>
-    </MudItem>
+    <style>
+        .divider-class{
+            margin: 10px 0; 
+            opacity: 0;
+        }
+    </style>
     
-    <MudItem>
-        <MudText Typo="Typo.h3">@_model.Question</MudText>
-    </MudItem>
-    
-    <MudItem>
-        <MudCheckBox Value="_model.Answer1.IsCorrect"></MudCheckBox>
-        <MudText Typo="Typo.h3">@_model.Answer1.Text</MudText>
-    </MudItem>
-    
-    <MudItem>
-        <MudText Typo="Typo.h3">@_model.Explanation</MudText>
-    </MudItem>
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="12">
+            <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full">
+                <MudDivider Class="divider-class"/>
+                <MudText Typo="Typo.h5">Frage:</MudText>
+                <MudText>
+                    @_model.Question
+                </MudText>
+                <MudDivider Class="divider-class"/>
+
+                @if (_model.Answer1 is not null)
+                {
+                    <MudText Typo="Typo.h5">Anwortmöglichkeit 1 (@(_model.Answer1.IsCorrect ? "richtig" : "falsch")):</MudText>
+                    <MudText>
+                        @_model.Answer1.Text
+                    </MudText>
+                    <MudDivider Class="divider-class"/>
+                }
+                @if (_model.Answer2 is not null)
+                {
+                    <MudText Typo="Typo.h5">Anwortmöglichkeit 2 (@(_model.Answer2.IsCorrect ? "richtig" : "falsch")):</MudText>
+                    <MudText>
+                        @_model.Answer2.Text
+                    </MudText>
+                    <MudDivider Class="divider-class"/>
+                }
+                @if (_model.Answer3 is not null)
+                {
+                    <MudText Typo="Typo.h5">Anwortmöglichkeit 3 (@(_model.Answer3.IsCorrect ? "richtig" : "falsch")):</MudText>
+                    <MudText>
+                        @_model.Answer3.Text
+                    </MudText>
+                    <MudDivider Class="divider-class"/>
+                }
+                @if (_model.Answer4 is not null)
+                {
+                    <MudText Typo="Typo.h5">Anwortmöglichkeit 4 (@(_model.Answer4.IsCorrect ? "richtig" : "falsch")):</MudText>
+                    <MudText>
+                        @_model.Answer4.Text
+                    </MudText>
+                    <MudDivider Class="divider-class"/>
+                }
+                @if (_model.Answer5 is not null)
+                {
+                    <MudText Typo="Typo.h5">Anwortmöglichkeit 5 (@(_model.Answer5.IsCorrect ? "richtig" : "falsch")):</MudText>
+                    <MudText>
+                        @_model.Answer5.Text
+                    </MudText>
+                    <MudDivider Class="divider-class"/>
+                }
+                
+                <MudText Typo="Typo.h5">Erklärung:</MudText>
+                <MudText>
+                    @_model.Explanation
+                </MudText>
+                <MudDivider Class="divider-class"/>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
 }
 
 @code {

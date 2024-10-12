@@ -9,5 +9,5 @@ public interface IWhitelistProcedureApi
     Task<ApiResponse<List<WhitelistProcedureApiModel>>> GetAllAsync(); 
     
     [Get("/api/v1/procedure?procedureId={procedureId}")]
-    Task<ApiResponse<WhitelistProcedureApiModel?>> GetByProcedureIdAsync(uint procedureId); 
+    Task<ApiResponse<WhitelistProcedureApiModel?>> GetByProcedureIdAsync(int procedureId); 
 }
