@@ -215,6 +215,7 @@ var choiceVWhitelistApiPassword = builder.Configuration.GetValue<string>("Choice
 Assert(string.IsNullOrEmpty(choiceVWhitelistApiPassword), "ChoiceVWhitelistApi BasicAuthPassword is missing");
 
 builder.Services.ConfigureHttpClient<IWhitelistQuestionApi>(choiceVWhitelistApiBaseAddress, choiceVWhitelistApiUsername, choiceVWhitelistApiPassword);
+builder.Services.ConfigureHttpClient<IWhitelistProcedureApi>(choiceVWhitelistApiBaseAddress, choiceVWhitelistApiUsername, choiceVWhitelistApiPassword);
 #endregion
 
 #region Database
