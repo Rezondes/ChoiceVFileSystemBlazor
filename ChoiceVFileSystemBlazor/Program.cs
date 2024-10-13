@@ -208,6 +208,7 @@ builder.Services.ConfigureHttpClient<ICompanyApi>(choiceVApiBaseAddress, choiceV
 builder.Services.ConfigureHttpClient<IInventoryApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
 builder.Services.ConfigureHttpClient<IServerApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
 builder.Services.ConfigureHttpClient<IVehicleApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
+builder.Services.ConfigureHttpClient<IDiscordApi>(choiceVApiBaseAddress, choiceVApiUsername, choiceVApiPassword);
 #endregion
 
 #region ChoiceV Whitelist Api
