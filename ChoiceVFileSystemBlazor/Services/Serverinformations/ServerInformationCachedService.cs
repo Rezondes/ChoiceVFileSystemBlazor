@@ -1,7 +1,7 @@
 using ChoiceVRefitClient;
 using ChoiceVSharedApiModels.Server;
 
-namespace ChoiceVFileSystemBlazor.Services;
+namespace ChoiceVFileSystemBlazor.Services.Serverinformations;
 
 public class ServerInformationCachedService(IServerApi serverApi, ILogger<ServerInformationCachedService> logger)
 {

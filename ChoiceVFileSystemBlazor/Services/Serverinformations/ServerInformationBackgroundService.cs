@@ -1,4 +1,4 @@
-namespace ChoiceVFileSystemBlazor.Services;
+namespace ChoiceVFileSystemBlazor.Services.Serverinformations;
 
 public class ServerInformationBackgroundService(ServerInformationCachedService cachedService, ILogger<ServerInformationBackgroundService> logger) : BackgroundService
 {
