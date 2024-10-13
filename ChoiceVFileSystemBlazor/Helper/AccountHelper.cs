@@ -1,4 +1,5 @@
 using ChoiceVFileSystemBlazor.Models;
+using ChoiceVFileSystemBlazor.Services;
 using ChoiceVRefitClient;
 using MudBlazor;
 
@@ -6,7 +7,14 @@ namespace ChoiceVFileSystemBlazor.Helper;
 
 public static class AccountHelper
 {
-    public static async Task<bool> OpenAddAccountDialog(IDialogService dialogService, ISnackbar snackbar, IAccountApi accountApi, string socialClubName = "", string discordId = "")
+    public static async Task<bool> OpenAddAccountDialog(
+        DiscordService discordService,
+        IDialogService dialogService, 
+        ISnackbar snackbar, 
+        IAccountApi accountApi,
+        string socialClubName = "", 
+        string discordId = ""
+    )
     {
         var inputs = new List<InputModel>
         {
@@ -44,7 +52,14 @@ public static class AccountHelper
             snackbar.Add("Du hast keine valide DiscordId eingegeben!", Severity.Error);
             return false;
         }
-
+        
+        var discordIdValidated = await discordService.ValidateDiscordId(parsedDiscordId!);
+        if (!discordIdValidated)
+        {
+            snackbar.Add("Du hast keine valide DiscordId!", Severity.Error);
+            return false;
+        }
+        
         var response = await accountApi.AddAccountAsync(parsedSocialClubName!, parsedDiscordId!);
         if (!response.IsSuccessStatusCode)
         {

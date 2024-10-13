@@ -150,7 +150,12 @@ else
 
     private async Task AddNewAccount()
     {
-        var added = await AccountHelper.OpenAddAccountDialog(DialogService, Snackbar, AccountApi);
+        var added = await AccountHelper.OpenAddAccountDialog(
+            DiscordService,
+            DialogService, 
+            Snackbar, 
+            AccountApi
+        );
         if (!added) return;
         await Load();
     }
