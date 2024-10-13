@@ -20,6 +20,7 @@ using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces;
 using ChoiceVFileSystemBlazor.Extensions;
 using ChoiceVFileSystemBlazor.Models;
 using ChoiceVFileSystemBlazor.Services;
+using ChoiceVFileSystemBlazor.Services.DiscordGuildMembers;
 using ChoiceVFileSystemBlazor.Services.Serverinformations;
 using ChoiceVRefitClient;
 using Microsoft.AspNetCore.Authentication;
@@ -193,6 +194,9 @@ builder.Services.AddScoped<DiscordService>();
 
 builder.Services.AddSingleton<ServerInformationCachedService>();
 builder.Services.AddHostedService<ServerInformationBackgroundService>();
+
+builder.Services.AddSingleton<DiscordGuildMembersCachedService>();
+builder.Services.AddHostedService<DiscordGuildMembersBackgroundService>();
 
 #region ChoiceV Api
 var choiceVApiBaseAddress = builder.Configuration.GetValue<string>("ChoiceVApi:BaseAddress")!;

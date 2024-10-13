@@ -72,6 +72,7 @@
 @using ChoiceVSharedApiModels.Whitelist
 @using ChoiceVFileSystemBlazor.Components.WhitelistQuestions.Components
 @using ChoiceVFileSystemBlazor.Components.WhitelistProcedures.Components
+@using ChoiceVFileSystemBlazor.Services.DiscordGuildMembers
 @using ChoiceVFileSystemBlazor.Services.Serverinformations
 
 @using ChoiceVRefitClient
@@ -96,6 +97,7 @@
 
 @inject ReloadService ReloadService
 @inject ServerInformationCachedService ServerInformationCachedService
+@inject DiscordGuildMembersCachedService DiscordGuildMembersCachedService
 @inject DiscordService DiscordService
 
 @inject IHttpContextAccessor HttpContextAccessor

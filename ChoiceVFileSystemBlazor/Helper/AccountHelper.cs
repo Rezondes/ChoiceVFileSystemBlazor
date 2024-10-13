@@ -1,5 +1,6 @@
 using ChoiceVFileSystemBlazor.Models;
 using ChoiceVFileSystemBlazor.Services;
+using ChoiceVFileSystemBlazor.Services.DiscordGuildMembers;
 using ChoiceVRefitClient;
 using MudBlazor;
 
@@ -8,7 +9,7 @@ namespace ChoiceVFileSystemBlazor.Helper;
 public static class AccountHelper
 {
     public static async Task<bool> OpenAddAccountDialog(
-        IDiscordApi discordApi,
+        DiscordGuildMembersCachedService discordGuildMembersCachedService,
         DiscordService discordService,
         IDialogService dialogService, 
         ISnackbar snackbar, 
@@ -17,6 +18,33 @@ public static class AccountHelper
         string discordId = ""
     )
     {
+        const string discordInputLabel = "DiscordId";
+        const string discordInputPlaceholder = "SuperKuhlerDiscordId";
+        
+        var discordInputModel = new InputModel(
+            InputTypes.Text,
+            discordInputLabel,
+            discordId,
+            discordInputPlaceholder
+        );
+        
+        var (lastTrySuccess, lastTry, cachedLastUpdate, cachedData) = await discordGuildMembersCachedService.GetCachedData();
+        if (lastTrySuccess.HasValue && lastTrySuccess.Value && cachedData is not null)
+        {
+            var selectOptions = cachedData
+                .Select(discordGuildUser => 
+                    new InputOptionModel(discordGuildUser.DiscordId.ToString(), discordGuildUser.Username))
+                .ToList();
+
+            discordInputModel = new InputModel(
+                InputTypes.Select,
+                discordInputLabel,
+                discordId,
+                discordInputPlaceholder,
+                selectOptions
+            );
+        }
+        
         var inputs = new List<InputModel>
         {
             new(
@@ -25,12 +53,7 @@ public static class AccountHelper
                 socialClubName,
                 "SuperKuhlerSocialClubName"
             ),
-            new(
-                InputTypes.Text,
-                "DiscordId",
-                discordId,
-                "SuperKuhlerDiscordId"
-            ),
+            discordInputModel
         };
 
         var dialogData = await dialogService.OpenDialog(
