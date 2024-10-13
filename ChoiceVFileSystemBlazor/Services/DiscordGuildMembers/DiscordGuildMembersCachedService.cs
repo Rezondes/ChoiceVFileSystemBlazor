@@ -52,11 +52,6 @@ public class DiscordGuildMembersCachedService(IDiscordApi discordApi, ILogger<Di
         await _semaphore.WaitAsync();
         try
         {
-            if (_cachedData is null)
-            {
-                await FetchDataFromApi();
-            }
-            
             return (_lastTrySuccess, _lastTry, _cachedLastUpdate, _cachedData);
         }
         finally
