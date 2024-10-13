@@ -28,7 +28,7 @@ else
         <MudItem xs="5" >
             <MudGrid>
                 <MudItem xs="12">
-                    <MudPaper Height="495px">
+                    <MudPaper Height="250px">
                         <div class="d-flex flex-row align-items-center px-5 mud-width-full">
                             <MudIcon Icon="@Icons.Material.Filled.Info"/>
                             <MudText Class="px-5" Typo="Typo.h5">Informationen</MudText>
@@ -65,18 +65,58 @@ else
         </MudItem>
 
         <MudItem xs="12">
-            <MudPaper Height="495px">
+            <MudPaper Class="py-5">
                 <div class="d-flex flex-row align-items-center px-5 mud-width-full">
                     <MudIcon Icon="@Icons.Material.Filled.Info"/>
                     <MudText Class="px-5" Typo="Typo.h5">Weitere Informationen</MudText>
                 </div>
-                <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
-                    <MudText>CHAR_NAME: @(_model.DataList.FirstOrDefault(x => x.Name == "CHAR_NAME")?.Data ?? "Keine Daten")</MudText>
-                    <MudText>CHAR_AGE: @(_model.DataList.FirstOrDefault(x => x.Name == "CHAR_AGE")?.Data ?? "Keine Daten")</MudText>
-                    <MudText>CHAR_PROFESSION: @(_model.DataList.FirstOrDefault(x => x.Name == "CHAR_PROFESSION")?.Data ?? "Keine Daten")</MudText>
-                    <MudText>SOCIALCLUB: @(_model.DataList.FirstOrDefault(x => x.Name == "SOCIALCLUB")?.Data ?? "Keine Daten")</MudText>
-                    <MudText>TEAMSPEAK_ID: @(_model.DataList.FirstOrDefault(x => x.Name == "TEAMSPEAK_ID")?.Data ?? "Keine Daten")</MudText>
-                    <MudText>CHAR_HISTORY: @(_model.DataList.FirstOrDefault(x => x.Name == "CHAR_HISTORY")?.Data ?? "Keine Daten")</MudText>
+                <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8" Style="max-width: 100%">
+                    <MudItem Class="py-5">
+                        <MudText Typo="Typo.h5">Charaktername:</MudText>
+                        <MudText Style="max-width: 100%">
+                            @(_model.DataList.FirstOrDefault(x => x.Name == "CHAR_NAME")?.Data ?? "Keine Daten")
+                        </MudText>
+                    </MudItem>
+                    <MudDivider Class="divider-class"/>
+                    
+                    <MudItem Class="py-5">
+                        <MudText Typo="Typo.h5">Alter:</MudText>
+                        <MudText Style="max-width: 100%">
+                            @(_model.DataList.FirstOrDefault(x => x.Name == "CHAR_AGE")?.Data ?? "Keine Daten")
+                        </MudText>
+                    </MudItem>
+                    <MudDivider Class="divider-class"/>
+
+                    <MudItem Class="py-5">
+                        <MudText Typo="Typo.h5">Berufe:</MudText>
+                        <MudText Style="max-width: 100%">
+                            @(_charProfessions ?? "Keine Daten")
+                        </MudText>
+                    </MudItem>
+                    <MudDivider Class="divider-class"/>
+
+                    <MudItem Class="py-5">
+                        <MudText Typo="Typo.h5">SocialClubName:</MudText>
+                        <MudText Style="max-width: 100%">
+                            @(_model.DataList.FirstOrDefault(x => x.Name == "SOCIALCLUB")?.Data ?? "Keine Daten")
+                        </MudText>
+                    </MudItem>
+                    <MudDivider Class="divider-class"/>
+
+                    <MudItem Class="py-5">
+                        <MudText Typo="Typo.h5">TeamspeakId:</MudText>
+                        <MudText Style="max-width: 100%">
+                            @(_teamspeakId ?? "Keine Daten")
+                        </MudText>
+                    </MudItem>
+                    <MudDivider Class="divider-class"/>
+
+                    <MudItem Class="py-5">
+                        <MudText Typo="Typo.h5">Charaktergeschichte:</MudText>
+                        <MudText Style="max-width: 100%">
+                            @(_model.DataList.FirstOrDefault(x => x.Name == "CHAR_HISTORY")?.Data ?? "Keine Daten")
+                        </MudText>
+                    </MudItem>
                 </MudContainer>
             </MudPaper>
         </MudItem>
@@ -157,6 +197,9 @@ else
 
     private string? _logsSearchString;
     private string? _testSearchString;
+
+    private string? _teamspeakId;
+    private string? _charProfessions;
     
     protected override async Task OnInitializedAsync()
     {
@@ -217,6 +260,31 @@ else
             if (response.IsSuccessStatusCode)
             {
                 _model = response.Content;
+                
+                var teamspeakIdJson = _model.DataList.FirstOrDefault(x => x.Name == "TEAMSPEAK_ID")?.Data;
+                if (teamspeakIdJson is not null)
+                {
+                    var teamspeakIdList = JsonSerializer.Deserialize<List<string>>(teamspeakIdJson);
+                    _teamspeakId = teamspeakIdList?.FirstOrDefault();
+                }
+
+                var charProfessionsJson = _model.DataList.FirstOrDefault(x => x.Name == "CHAR_PROFESSION")?.Data;
+                if (charProfessionsJson is not null)
+                {
+                    var charProfessionsList = JsonSerializer.Deserialize<List<string>>(charProfessionsJson);
+                    if (charProfessionsList is not null)
+                    {
+                        var mappedProfessions = charProfessionsList.Select(profession => profession switch
+                        {
+                            "civil" => "Zivilist",
+                            "crime" => "Kriminell",
+                            "faction" => "Fraktion",
+                            _ => profession 
+                        }).ToList();
+                        
+                        _charProfessions = string.Join(", ", mappedProfessions);
+                    }
+                }
             }
             else
             {
