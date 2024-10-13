@@ -55,7 +55,9 @@ else
                             <MudText Class="px-5" Typo="Typo.h5">Funktionen</MudText>
                         </div>
                         <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
-                            <WorkInProgressComponent/>
+                            <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="OnClickAddAccount">
+                                Spieler whitelisten
+                            </MudButton>
                         </div>
                     </MudPaper>
                 </MudItem>
@@ -301,5 +303,27 @@ else
         };
 
         await DialogService.ShowAsync<WhitelistQuestionTestDialog>(string.Empty, parameter, new DialogOptions { FullWidth = true });
+    }
+    
+    private async Task OnClickAddAccount()
+    {
+        var discordId = string.Empty;
+        var socialClubName = string.Empty;
+
+        if (_model is not null)
+        {
+            discordId = _model.UserId.ToString();
+            socialClubName = _model.DataList.FirstOrDefault(x => x.Name == "SOCIALCLUB")?.Data ?? string.Empty;
+        }
+        
+        var added = await AccountHelper.OpenAddAccountDialog(
+            DialogService, 
+            Snackbar, 
+            AccountApi, 
+            socialClubName, 
+            discordId
+        );
+        if (!added) return;
+        await Load();
     }
 }
