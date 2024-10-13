@@ -8,6 +8,7 @@ namespace ChoiceVFileSystemBlazor.Helper;
 public static class AccountHelper
 {
     public static async Task<bool> OpenAddAccountDialog(
+        IDiscordApi discordApi,
         DiscordService discordService,
         IDialogService dialogService, 
         ISnackbar snackbar, 
