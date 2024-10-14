@@ -49,7 +49,7 @@ else
             </MudButtonGroup>
         </MudAppBar>
 
-        <MudDrawer @bind-Open="_open" ClipMode="_clipMode" Breakpoint="_breakpoint" Variant="DrawerVariant.Mini" Style="height: calc(95% - var(--mud-appbar-height));">
+        <MudDrawer @bind-Open="_open" ClipMode="_clipMode" Breakpoint="_breakpoint" Variant="DrawerVariant.Mini" Style="height: calc(100% - 40px - var(--mud-appbar-height));">
             <NavMenu @ref="_navMenu"/>
         </MudDrawer>
 
@@ -74,7 +74,7 @@ else
 {
     private string GetStyle()
     {
-        const string mainStyle = "position: absolute; bottom: 0; height: 5%; margin-left: 0; background-color: var(--mud-palette-drawer-background);";
+        const string mainStyle = "position: absolute; bottom: 0; height: 40px; margin-left: 0; background-color: var(--mud-palette-drawer-background);";
 
         return _open ? mainStyle + " width: var(--mud-drawer-width-left)" : mainStyle + " width: var(--mud-drawer-width-mini-left)";
     }
