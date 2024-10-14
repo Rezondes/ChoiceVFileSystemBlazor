@@ -32,6 +32,7 @@ public static class AccountHelper
         if (lastTrySuccess.HasValue && lastTrySuccess.Value && cachedData is not null)
         {
             var selectOptions = cachedData
+                .OrderBy(x => x.Username)
                 .Select(discordGuildUser => 
                     new InputOptionModel(discordGuildUser.DiscordId.ToString(), discordGuildUser.Username))
                 .ToList();
