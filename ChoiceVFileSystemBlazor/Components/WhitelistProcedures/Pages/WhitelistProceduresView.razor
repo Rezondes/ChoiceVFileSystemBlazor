@@ -58,6 +58,12 @@ else
                             <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="OnClickAddAccount">
                                 Spieler whitelisten
                             </MudButton>
+                            @if (!_model.Blocked)
+                            {
+                                <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="OnClickPutBlocked">
+                                    Whitelistprozess abschließen
+                                </MudButton>
+                            }
                         </div>
                     </MudPaper>
                 </MudItem>
@@ -394,6 +400,29 @@ else
             discordId
         );
         if (!added) return;
+        await Load();
+    }
+
+    private async Task OnClickPutBlocked()
+    {
+        if (_model is null) return;
+        
+        var result = await DialogService.ShowMessageBox(
+            "Whitelistprozess abschließen", 
+            "Bist du dir sicher diesen Whitelistprozess zu abzuschließen?", 
+            yesText:"Abschließen", cancelText:"Abbrechen"
+        );
+
+        if (result is null or false) return;
+        
+        var response = await WhitelistProcedureApi.SetBlockedStateAsync(_model.Id, true);
+        if (!response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Ein Fehler ist aufgetreten!", Severity.Error);
+            return;
+        }
+
+        Snackbar.Add("Whitelistprozess abgeschlossen!", Severity.Success);
         await Load();
     }
 }
