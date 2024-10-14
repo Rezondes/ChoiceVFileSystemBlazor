@@ -23,9 +23,6 @@ else
         <ToolBarContent>
             <MudText Typo="Typo.h6">Account Übersicht</MudText>
             <MudSpacer />
-            <MudTooltip Text="Spieler whitelisten" Duration="@Constants.TOOLTIP_DURATION">
-                <MudIconButton Color="Color.Success" Icon="@Icons.Material.Outlined.Add" OnClick="() => AddNewAccount()"/>
-            </MudTooltip>
             <MudTextField 
                 T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER" 
                 Adornment="Adornment.Start" Immediate="true"
@@ -147,18 +144,4 @@ else
     {
         Navigation.NavigateTo(AccountView.GetRedirectUrl(args.Item.Id.ToString()));
     }
-
-    private async Task AddNewAccount()
-    {
-        var added = await AccountHelper.OpenAddAccountDialog(
-            DiscordGuildMembersCachedService,
-            DiscordService,
-            DialogService, 
-            Snackbar, 
-            AccountApi
-        );
-        if (!added) return;
-        await Load();
-    }
-
 }
