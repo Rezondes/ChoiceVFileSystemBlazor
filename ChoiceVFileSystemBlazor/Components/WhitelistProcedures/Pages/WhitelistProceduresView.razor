@@ -267,15 +267,15 @@ else
             {
                 _model = response.Content;
                 
-                var teamspeakIdJson = _model.DataList.FirstOrDefault(x => x.Name == "TEAMSPEAK_ID")?.Data;
-                if (teamspeakIdJson is not null)
+                var teamspeakIdJson = _model.DataList.FirstOrDefault(x => x.Name == "TEAMSPEAK_ID")?.Data.Trim();
+                if (teamspeakIdJson is not null && !string.IsNullOrEmpty(teamspeakIdJson))
                 {
                     var teamspeakIdList = JsonSerializer.Deserialize<List<string>>(teamspeakIdJson);
                     _teamspeakId = teamspeakIdList?.FirstOrDefault();
                 }
 
-                var charProfessionsJson = _model.DataList.FirstOrDefault(x => x.Name == "CHAR_PROFESSION")?.Data;
-                if (charProfessionsJson is not null)
+                var charProfessionsJson = _model.DataList.FirstOrDefault(x => x.Name == "CHAR_PROFESSION")?.Data.Trim();
+                if (charProfessionsJson is not null && !string.IsNullOrEmpty(charProfessionsJson))
                 {
                     var charProfessionsList = JsonSerializer.Deserialize<List<string>>(charProfessionsJson);
                     if (charProfessionsList is not null)
@@ -415,14 +415,25 @@ else
 
         if (result is null or false) return;
         
-        var response = await WhitelistProcedureApi.SetBlockedStateAsync(_model.Id, true);
-        if (!response.IsSuccessStatusCode)
+        try
         {
-            Snackbar.Add("Ein Fehler ist aufgetreten!", Severity.Error);
-            return;
+            var response = await WhitelistProcedureApi.SetBlockedStateAsync(_model.Id, true);
+            if (!response.IsSuccessStatusCode)
+            {
+                Snackbar.Add(response.Error.Message, Severity.Error);
+                return;
+            }
+            
+            Snackbar.Add("Whitelistprozess abgeschlossen!", Severity.Success);
+            await Load();
         }
-
-        Snackbar.Add("Whitelistprozess abgeschlossen!", Severity.Success);
-        await Load();
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
     }
 }
