@@ -119,9 +119,14 @@ else
 
                     <MudItem Class="py-5">
                         <MudText Typo="Typo.h5">Charaktergeschichte:</MudText>
-                        <MudText Style="max-width: 100%">
-                            @(_model.DataList.FirstOrDefault(x => x.Name == "CHAR_HISTORY")?.Data ?? "Keine Daten")
-                        </MudText>
+                        <MudTextField
+                            T="string"
+                            Lines="@_charHistoryLines"
+                            MaxLines="25"
+                            Style="max-width: 100%"
+                            ReadOnly
+                            Value="@(_charHistory ?? "Keine Daten")">
+                        </MudTextField>
                     </MudItem>
                 </MudContainer>
             </MudPaper>
@@ -206,6 +211,8 @@ else
 
     private string? _teamspeakId;
     private string? _charProfessions;
+    private string? _charHistory;
+    private int _charHistoryLines = 1;
     
     protected override async Task OnInitializedAsync()
     {
@@ -291,7 +298,18 @@ else
                         _charProfessions = string.Join(", ", mappedProfessions);
                     }
                 }
-            }
+
+                var charHistory = _model.DataList.FirstOrDefault(x => x.Name == "CHAR_HISTORY")?.Data;
+                if (charHistory is not null)
+                {
+                    _charHistory = charHistory;
+                    _charHistoryLines = _charHistory.Split('\n').Length;
+                    if (_charHistoryLines < 15)
+                    {
+                        _charHistoryLines = 15;
+                    }
+                }
+            }       
             else
             {
                 Snackbar.Add(response.Error.Message, Severity.Error);
