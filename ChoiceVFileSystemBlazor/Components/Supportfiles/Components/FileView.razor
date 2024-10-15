@@ -281,7 +281,7 @@ else if (_model is not null)
                     QuickFilter="@QuickFilter" RowClick="OpenLogContent"
                     Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="55vh">
                     <ToolBarContent>
-                        <MudText Typo="Typo.h6">Logs für @_model.Id</MudText>
+                        <MudText Typo="Typo.h6">Logs für @_model.DisplayId</MudText>
                         <MudSpacer />
                         <MudTextField
                             T="string" @bind-Value="_logSearchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
