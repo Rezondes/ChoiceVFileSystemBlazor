@@ -66,11 +66,10 @@
         </MudNavGroup>
     }
 
-
     @if (UserAccessService.HasRight(RightEnum.ViewWhitelistArea))
     {
         <MudNavGroup Icon="@Icons.Material.Filled.Checklist" Title="Whitelist">
-            @if (UserAccessService.HasRight(RightEnum.ViewWhitelistQuestions))
+            @if (UserAccessService.HasRight(RightEnum.ViewWhitelistProcedures))
             {
                 <MudNavLink Href="@WhitelistProceduresOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.QuestionAnswer">Whitelistprozesse</MudNavLink>
             }

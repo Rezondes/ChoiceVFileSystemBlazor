@@ -68,6 +68,7 @@ public enum RightEnum
     ViewBankAccounts = 3501,
     
     ViewWhitelistArea = 4000,
+    ViewWhitelistProcedures = 4001,
     ViewWhitelistQuestions = 4100,
     
     ViewAdminPanelArea = 9000,

@@ -53,7 +53,7 @@ public static class PageRightRegistry
         
         { SupportkeylogsOverview.Url, RightEnum.ViewSupportKeyLogsArea },
         
-        { WhitelistQuestionsOverview.Url, RightEnum.ViewWhitelistQuestions },
+        { WhitelistQuestionsOverview.Url, RightEnum.ViewWhitelistProcedures },
         { WhitelistQuestionsView.Url, RightEnum.ViewWhitelistQuestions },
     };
 
