@@ -56,7 +56,7 @@ else
 
             if (response.IsSuccessStatusCode)
             {
-                _data = response.Content;
+                _data = response.Content.OrderBy(x => x.Id).ToList();
             }
             else
             {
