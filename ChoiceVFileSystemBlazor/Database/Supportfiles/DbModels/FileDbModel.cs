@@ -52,7 +52,7 @@ public class FileDbModel
     public FileStatusEnum Status { get; set; } = FileStatusEnum.Created;
 
     [Required] 
-    public RankEnum MinRank { get; set; } = RankEnum.Rank1;
+    public RankEnum MinRank { get; set; } = RankEnum.SupportTrainee;
     
     public Ulid? CategoryId { get; set; }
     
