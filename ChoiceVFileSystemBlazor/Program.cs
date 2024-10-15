@@ -192,6 +192,8 @@ builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserAccessService>();
 builder.Services.AddScoped<DiscordService>();
 
+builder.Services.AddSingleton<LockService>();
+
 builder.Services.AddSingleton<ServerInformationCachedService>();
 builder.Services.AddHostedService<ServerInformationBackgroundService>();
 

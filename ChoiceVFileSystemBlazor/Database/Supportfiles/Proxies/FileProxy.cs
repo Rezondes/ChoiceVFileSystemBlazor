@@ -2,13 +2,13 @@
 using ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.Enums;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces;
+using ChoiceVFileSystemBlazor.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies;
 
-public class FileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext> dbContextFactory, IFileLogsProxy fileLogsProxy, IFileCategoryProxy fileCategoryProxy) : IFileProxy
+public class FileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext> dbContextFactory, IFileLogsProxy fileLogsProxy, IFileCategoryProxy fileCategoryProxy, LockService lockService) : IFileProxy
 {
-    
     public async Task<List<FileDbModel>> GetAllGroupingfilesAsync()
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
@@ -100,18 +100,43 @@ public class FileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>
     // Return null if adding failed
     public async Task<FileDbModel?> AddAsync(FileDbModel file)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+        return await lockService.LockAsync(async () =>
+        {
+            await using var dbContext = await dbContextFactory.CreateDbContextAsync();
         
-        await dbContext.SupportfileDbModels.AddAsync(file);
-        await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
-            file.Id,
-            FileLogTypeEnum.AddFile,
-            file.CreatedByAccessId,
-            string.Empty
-        ));
-        var changes = await dbContext.SaveChangesAsync();
+            var currentUtcYear = DateTime.UtcNow.Year;
         
-        return changes <= 0 ? null : file;
+            switch (file.Type)
+            {
+                case FileTypeEnum.Supportfile:
+                    var allSupportFiles = await GetAllSupportfilesAsync();
+                    var supportfilesCount = allSupportFiles.Count(x => x.CreatedAt.Year == currentUtcYear) + 1;
+                    file.DisplayId = $"sf_{currentUtcYear}_{supportfilesCount:D4}";
+                    break;
+                
+                case FileTypeEnum.Groupingfile:
+                    var allGroupingfiles = await GetAllGroupingfilesAsync();
+                    var groupingfilesCount = allGroupingfiles.Count(x => x.CreatedAt.Year == currentUtcYear) + 1;
+                    file.DisplayId = $"gf_{currentUtcYear}_{groupingfilesCount:D4}";
+                    break;
+                
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        
+            await dbContext.SupportfileDbModels.AddAsync(file);
+        
+            await fileLogsProxy.AddLogWithoutSaveAsync(dbContext, new(
+                file.Id,
+                FileLogTypeEnum.AddFile,
+                file.CreatedByAccessId,
+                string.Empty
+            ));
+        
+            var changes = await dbContext.SaveChangesAsync();
+        
+            return changes <= 0 ? null : file;
+        });
     }
 
     public async Task<bool> AddCharEntryAsync(FileCharacterEntryDbModel characterEntry, Ulid accessId)

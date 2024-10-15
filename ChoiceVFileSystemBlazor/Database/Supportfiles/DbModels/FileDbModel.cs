@@ -34,6 +34,9 @@ public class FileDbModel
     }
     
     public Ulid Id { get; set; } = Ulid.NewUlid();
+
+    public string? DisplayId { get; set; }
+    
     public FileTypeEnum Type { get; set; }
 
     [Required]
