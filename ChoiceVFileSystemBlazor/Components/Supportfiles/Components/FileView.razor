@@ -10,11 +10,14 @@
 else if (_model is not null)
 {
     <h1>@(GetFileTitle())</h1>
-    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6" Style="height: 90%">
+    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
         <MudTabPanel Text="Allgemein" Icon="@Icons.Material.Filled.Info" OnClick="() => UnlockCharTab()">
             <MudGrid Justify="Justify.FlexStart">
                 <MudItem xs="8">
-                    <MudPaper Class="pa-4">
+                    <MudPaper Class="pa-4" Style="height: 70vh; overflow-y: auto;">
+                        <MudTextField Label="DisplayId" Variant="Variant.Outlined" ReadOnly Value="@_model.DisplayId"/>
+                        
+                        <MudDivider Style="@_dividerStyle"/>
                         <MudTextField Label="Ersteller" Variant="Variant.Outlined" ReadOnly Value="@_model.CreatorAccessModel.Name"/>
                         
                         <MudDivider Style="@_dividerStyle"/>
