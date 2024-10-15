@@ -83,7 +83,7 @@
 
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
-    private bool _loading;
+    private bool _loading = true;
     private CurrentServerInfosApiModel? _data;
     private DateTime _lastFetchedUtc = DateTime.UtcNow;
     private string? _lastFetchedString;
