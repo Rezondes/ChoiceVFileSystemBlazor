@@ -273,6 +273,11 @@ else
             if (response.IsSuccessStatusCode)
             {
                 _model = response.Content;
+
+                foreach (var test in _model.TestList)
+                {
+                    test.QuestionAnswers = test.QuestionAnswers.OrderBy(x => x.MessageId).ToList();
+                }
                 
                 var teamspeakIdJson = _model.DataList.FirstOrDefault(x => x.Name == "TEAMSPEAK_ID")?.Data.Trim();
                 if (teamspeakIdJson is not null && !string.IsNullOrEmpty(teamspeakIdJson))
