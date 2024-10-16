@@ -57,6 +57,11 @@ else
                     {
                         <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="BanAccount">Bann</MudButton>
                     }
+                    
+                    @if (_model.HasLightmodeFlag)
+                    {
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="RemoveLightmode">Lightmode entfernen</MudButton>
+                    }
                 </div>
             </MudPaper>
         </MudItem>
@@ -292,6 +297,35 @@ else
         }
         
         Snackbar.Add("Account wurde gebannt!", Severity.Success);
+        await LoadAllAsync();
+    }
+
+    private async Task RemoveLightmode()
+    {
+        if (_model is null) return;
+        
+        var result = await DialogService.ShowMessageBox(
+            "Lightmode entfernen", 
+            "Bist du dir sicher, dass du den Lightmode entfernen willst?", 
+            yesText:"Lightmode entfernen!", cancelText:"Abbrechen"
+        );
+
+        if (result is null or false) return;
+        
+        var response = await AccountApi.RemoveLightmodeAsync(_model.Id);
+        if (!response.IsSuccessStatusCode)
+        {
+            if (response.Error.Content == "AuthErrorMessage")
+            {
+                Snackbar.Add("Du hast kein Recht dazu das zu machen!", Severity.Error);
+                return;
+            }
+            
+            Snackbar.Add(response.Error.Message, Severity.Error);
+            return;
+        }
+        
+        Snackbar.Add("Lightmode wurde entfernt!", Severity.Success);
         await LoadAllAsync();
     }
 }

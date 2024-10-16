@@ -30,4 +30,8 @@ public interface IAccountApi
     [Post("/api/v1/account/add?socialClubName={socialClubName}&discordId={discordId}")]
     [Headers("Authorization: Bearer")]
     Task<ApiResponse<AccountApiModel>> AddAccountAsync(string socialClubName, string discordId);
+    
+    [Put("/api/v1/account/lightmode/remove?accountId={accountId}")]
+    [Headers("Authorization: Bearer")]
+    Task<ApiResponse<AccountUnbanResultApiModel>> RemoveLightmodeAsync(int accountId);
 }

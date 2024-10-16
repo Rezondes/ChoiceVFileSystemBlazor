@@ -6,7 +6,22 @@ public class AccountApiModel
 {
     public AccountApiModel() {}
 
-    public AccountApiModel(int id, string name, string socialClubName, string discordId, string teamspeakId, DateTime? lastLogin, AccountStateApiEnum state, string? stateReason, int failedLogins, int adminLevel, int charAmount, int strikes, int flag, bool isCurrentlyOnline)
+    public AccountApiModel(
+        int id, 
+        string name, 
+        string socialClubName, 
+        string discordId, 
+        string teamspeakId, 
+        DateTime? lastLogin, 
+        AccountStateApiEnum state, 
+        string? stateReason, 
+        int failedLogins, 
+        int adminLevel, 
+        int charAmount, 
+        int strikes,
+        int flag, 
+        bool hasLightmodeFlag,
+        bool isCurrentlyOnline)
     {
         Id = id;
         Name = name;
@@ -21,6 +36,7 @@ public class AccountApiModel
         CharAmount = charAmount;
         Strikes = strikes;
         Flag = flag;
+        HasLightmodeFlag = hasLightmodeFlag;
         IsCurrentlyOnline = isCurrentlyOnline;
     }
 
@@ -41,10 +57,10 @@ public class AccountApiModel
     
     [JsonPropertyName("lastLogin")]
     public DateTime? LastLogin { get; set; }
-    
+
     [JsonPropertyName("state")]
-    public AccountStateApiEnum State { get; set; } // TODO Enum?
-    
+    public AccountStateApiEnum State { get; set; }
+
     [JsonPropertyName("stateReason")]
     public string? StateReason { get; set; }
     
@@ -62,6 +78,9 @@ public class AccountApiModel
     
     [JsonPropertyName("flag")] 
     public int Flag { get; set; }
+    
+    [JsonPropertyName("hasLightmodeFlag")] 
+    public bool HasLightmodeFlag { get; set; }
     
     [JsonPropertyName("isCurrentlyOnline")]
     public bool IsCurrentlyOnline { get; set; }
