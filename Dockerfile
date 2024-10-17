@@ -3,12 +3,6 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-# Kopiere das Zertifikat als Root
-COPY blazorapp.pfx /https/blazorapp.pfx
-
-# Ändere den Besitzer der Zertifikatsdatei auf den Benutzer, den du später festlegst
-RUN chown 1654 /https/blazorapp.pfx && chmod 600 /https/blazorapp.pfx
-
 # Wechsle nun zum nicht-Root-Benutzer
 USER $APP_UID
 
