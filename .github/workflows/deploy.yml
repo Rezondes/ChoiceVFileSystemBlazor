@@ -32,6 +32,8 @@ jobs:
         SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
       run: |
         sshpass -p $SSH_PASSWORD ssh -o StrictHostKeyChecking=no $SSH_USERNAME@85.114.132.133 << 'EOF'
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+        
           # Pull the latest Docker image from GitHub Container Registry
           docker pull ghcr.io/rezondes/choicev-scp:latest
 
