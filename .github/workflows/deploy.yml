@@ -16,13 +16,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Log in to GitHub Container Registry
-      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-    - name: Build and push Docker image
-      run: |
-        docker build . --tag ghcr.io/rezondes/choicev-scp:latest
-        docker push ghcr.io/rezondes/choicev-scp:latest
-        
     - name: Install sshpass
       run: sudo apt-get install -y sshpass
 
@@ -35,7 +28,7 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
         
           # Pull the latest Docker image from GitHub Container Registry
-          docker pull ghcr.io/rezondes/choicev-scp:latest
+          docker pull rezondes/choicev-scp:latest
 
           # Stop the running container (if exists)
           docker stop choicev-scp || true
@@ -46,5 +39,5 @@ jobs:
           # Run a new container with the latest image and mount the PFX file
           docker run -d -p 443:8080 \
             -v /etc/ssl/certs/blazorapp.pfx:/app/blazorapp.pfx \
-            --name choicev-scp ghcr.io/rezondes/choicev-scp:latest
+            --name choicev-scp rezondes/choicev-scp:latest
         EOF
