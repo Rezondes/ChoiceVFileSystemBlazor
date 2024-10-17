@@ -124,7 +124,7 @@ else
 
         await SendEntryCreated();
 
-        Navigation.NavigateTo(SupportfileView.GetRedirectUrl(response.Id.ToString()));
+        Navigation.NavigateTo(GroupingfileView.GetRedirectUrl(response.Id.ToString()));
     }
 
     private async Task StartHubConnection()
