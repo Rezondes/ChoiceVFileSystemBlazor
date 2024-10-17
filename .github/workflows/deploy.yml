@@ -23,7 +23,7 @@ jobs:
           
           git pull https://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@github.com/Rezondes/ChoiceVFileSystemBlazor.git && \
           docker build -t choicev-scp-image . && \
-          docker stop choicev-scp || true && \
-          docker rm choicev-scp || true && \
+          docker stop choicev-scp && \
+          docker rm choicev-scp && \
           docker run -d -p 443:8080 --name choicev-scp choicev-scp-image
         EOF
