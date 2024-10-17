@@ -33,16 +33,16 @@ jobs:
       run: |
         sshpass -p $SSH_PASSWORD ssh -o StrictHostKeyChecking=no $SSH_USERNAME@85.114.132.133 << 'EOF'
           # Pull the latest Docker image from GitHub Container Registry
-          docker pull ghcr.io/Rezondes/choicev-scp:latest
+          docker pull ghcr.io/rezondes/choicev-scp:latest
 
           # Stop the running container (if exists)
-          docker stop blazor-app-container || true
+          docker stop choicev-scp || true
 
           # Remove the stopped container (if exists)
-          docker rm blazor-app-container || true
+          docker rm choicev-scp || true
 
           # Run a new container with the latest image and mount the PFX file
           docker run -d -p 443:8080 \
             -v /etc/ssl/certs/blazorapp.pfx:/app/blazorapp.pfx \
-            --name blazor-app-container ghcr.io/Rezondes/choicev-scp:latest
+            --name choicev-scp ghcr.io/rezondes/choicev-scp:latest
         EOF
