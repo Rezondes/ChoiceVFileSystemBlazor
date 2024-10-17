@@ -8,36 +8,22 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
-
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-
     - name: Install sshpass
       run: sudo apt-get install -y sshpass
-
     - name: Deploy via SSH
       env:
         SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
         SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
       run: |
         sshpass -p $SSH_PASSWORD ssh -o StrictHostKeyChecking=no $SSH_USERNAME@85.114.132.133 << 'EOF'
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-        
-          # Pull the latest Docker image from GitHub Container Registry
-          docker pull rezondes/choicev-scp:latest
-
-          # Stop the running container (if exists)
-          docker stop choicev-scp || true
-
-          # Remove the stopped container (if exists)
-          docker rm choicev-scp || true
-
-          # Run a new container with the latest image and mount the PFX file
-          docker run -d -p 443:8080 \
-            -v /etc/ssl/certs/blazorapp.pfx:/app/blazorapp.pfx \
-            --name choicev-scp rezondes/choicev-scp:latest
+          cd /root/choiceV/ChoiceVFileSystemBlazor
+          
+          git pull https://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@github.com/Rezondes/ChoiceVFileSystemBlazor.git && \
+          docker build -t choicev-scp-image . && \
+          docker stop choicev-scp || true && \
+          docker rm choicev-scp || true && \
+          docker run -d -p 443:8080 --name choicev-scp choicev-scp-image
         EOF
