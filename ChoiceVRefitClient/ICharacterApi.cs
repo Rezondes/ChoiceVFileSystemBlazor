@@ -27,4 +27,8 @@ public interface ICharacterApi
     [Put("/api/v1/character/dead?characterId={characterId}&state={state}")]
     [Headers("Authorization: Bearer")]
     Task<ApiResponse<CharacterSetPermadeathActivatedResultApiModel>> SetPermadeathActivatedAsync(int characterId, bool state);
+    
+    [Put("/api/v1/character/crimeflag?characterId={characterId}&state={state}")]
+    [Headers("Authorization: Bearer")]
+    Task<ApiResponse<CharacterSetCrimeFlagActiveResultApiModel>> SetCrimeFlagActiveAsync(int characterId, bool state);
 }

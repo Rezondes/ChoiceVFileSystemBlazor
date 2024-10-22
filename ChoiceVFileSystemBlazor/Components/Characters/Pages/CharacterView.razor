@@ -89,22 +89,23 @@ else
                     <MudText>LastLogout: @_model.LastLogout</MudText>
                     
                     <MudText>PermadeathActivated: @_model.PermadeathActivated</MudText>
+                    <MudText>CrimeFlagActivated: @_model.CrimeFlagActivated</MudText>
                 </MudContainer>
             </MudPaper>
         </MudItem>
 
         <MudItem xs="7">
-            <MudPaper Height="140px">
+            <MudPaper>
                 <div class="d-flex flex-row align-items-center px-5 mud-width-full">
                     <MudIcon Icon="@Icons.Material.Filled.AdsClick"/>
                     <MudText Class="px-5" Typo="Typo.h5">Funktionen</MudText>
                 </div>
-                <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
-                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="OpenAccount">Account anzeigen</MudButton>
+                <div Class="d-flex flex-row justify-content-evenly flex-wrap mud-width-full mud-height-full py-8">
+                    <MudButton Class="my-5" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="OpenAccount">Account anzeigen</MudButton>
 
-                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled="@(!_model.IsCurrentlyOnline)" OnClick="ChangeDimension">Dimension ändern</MudButton>
+                    <MudButton Class="my-5" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled="@(!_model.IsCurrentlyOnline)" OnClick="ChangeDimension">Dimension ändern</MudButton>
 
-                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="TogglePermadeathMode">
+                    <MudButton Class="my-5" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="TogglePermadeathMode">
                         @if (_model.PermadeathActivated)
                         {
                             <span>Permadeathmode deaktivieren</span>
@@ -112,6 +113,17 @@ else
                         else
                         {
                             <span>Permadeathmode aktivieren</span>
+                        }
+                    </MudButton>
+
+                    <MudButton Class="my-5" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="ToggleCrimeFlagActive">
+                        @if (_model.CrimeFlagActivated)
+                        {
+                            <span>Crimeflag deaktivieren</span>
+                        }
+                        else
+                        {
+                            <span>Crimeflag aktivieren</span>
                         }
                     </MudButton>
                 </div>
@@ -435,6 +447,34 @@ else
         }
 
         Snackbar.Add("Permadeathmode aktualisiert!", Severity.Success);
+        await LoadAllAsync();
+    }
+
+    private async Task ToggleCrimeFlagActive()
+    {
+        if (_model is null) return;
+        
+        var title = _model.CrimeFlagActivated ? "Crimeflag deaktivieren" : "Crimeflag aktivieren";
+        var message = _model.CrimeFlagActivated ? 
+            "Möchtest du die Crimeflag deaktivieren?" : 
+            "Möchtest du die Crimeflag aktivieren? ";
+        var yesText = _model.CrimeFlagActivated ? "Deaktivieren" : "Aktivieren";
+        
+        var result = await DialogService.ShowMessageBox(
+            title, 
+            message, 
+            yesText: yesText, cancelText: "Abbrechen"
+        );
+        if (result is null or false) return;
+
+        var response = await CharacterApi.SetCrimeFlagActiveAsync(_model.Id, !_model.CrimeFlagActivated);
+        if (!response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Crimeflag konnte nicht geändert werden.", Severity.Error);
+            return;
+        }
+
+        Snackbar.Add("Crimeflag aktualisiert!", Severity.Success);
         await LoadAllAsync();
     }
 }
