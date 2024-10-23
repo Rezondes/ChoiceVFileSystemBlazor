@@ -23,6 +23,14 @@ else
         <ToolBarContent>
             <MudText Typo="Typo.h6">Account Übersicht</MudText>
             <MudSpacer />
+            
+            @if (UserAccessService.HasRight(RightEnum.ExportAccountsExcel))
+            {
+                <MudTooltip Text="Excel export" Duration="@Constants.TOOLTIP_DURATION">
+                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Custom.FileFormats.FileExcel" OnClick="() => ExportExcel()"/>
+                </MudTooltip>
+            }
+            
             <MudTextField 
                 T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER" 
                 Adornment="Adornment.Start" Immediate="true"
@@ -57,7 +65,7 @@ else
     {
         await base.OnInitializedAsync();
 
-        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
     
@@ -144,5 +152,24 @@ else
     void RowClicked(DataGridRowClickEventArgs<AccountApiModel> args)
     {
         Navigation.NavigateTo(AccountView.GetRedirectUrl(args.Item.Id.ToString()));
+    }
+
+    private async Task ExportExcel()
+    {
+        if (!_accounts.Any()) return;
+
+        var user = await UserAccessService.GetUserAccess();
+        
+        var name = $"choiceV_accounts_{DateTime.UtcNow.ConvertTimeFromUtcWithTimeZone(user.Settings.TimeZone)}";
+        
+        var result = await DialogService.ShowMessageBox(
+            "Excel export", 
+            $"Möchtest du die Account Übersicht als XLSX-Datei mit dem Namen \"{name}\" exportieren?", 
+            yesText:"Exportieren", cancelText:"Abbrechen"
+        );
+
+        if (result is null or false) return;
+        
+        await ExportHelper.ExportToExcelAsync(_accounts, name, JS);
     }
 }

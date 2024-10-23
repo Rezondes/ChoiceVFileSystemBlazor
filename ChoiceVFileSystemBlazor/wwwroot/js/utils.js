@@ -7,3 +7,10 @@ function setFavicon(iconUrl) {
     }
     link.href = iconUrl;
 }
+
+function downloadFileFromUrl(filename, url) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+}
