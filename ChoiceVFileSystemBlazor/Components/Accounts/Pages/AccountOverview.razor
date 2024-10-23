@@ -27,7 +27,7 @@ else
             @if (UserAccessService.HasRight(RightEnum.ExportAccountsExcel))
             {
                 <MudTooltip Text="Excel export" Duration="@Constants.TOOLTIP_DURATION">
-                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Custom.FileFormats.FileExcel" OnClick="() => ExportExcel()"/>
+                    <MudIconButton Color="Color.Primary" Icon="@Icons.Custom.FileFormats.FileExcel" OnClick="() => ExportExcel()"/>
                 </MudTooltip>
             }
             
