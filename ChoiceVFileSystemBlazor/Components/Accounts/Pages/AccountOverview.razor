@@ -11,7 +11,11 @@
 
 @if (_loading || !_isAuthorized || _shouldRedirect)
 {
-    <PageLoading/>
+    <LoadingComponent/>
+}
+else if (!_loading && _accounts is null)
+{
+    <ErrorComponent/>
 }
 else
 {
