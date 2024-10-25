@@ -239,7 +239,7 @@ else
     {
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
-        if (!UserAccessService.HasRight(RightEnum.DiscordRoleCreate)) return;
+        if (!await UserAccessService.HasRightAsync(RightEnum.DiscordRoleCreate)) return;
 
         var model = await DiscordRolesProxy.GetByIdAsync(id);
         if (model is null)
@@ -316,14 +316,20 @@ else
 
         var partial = new PartialDiscordRoleDbModel(name, discordRoleId, automaticRank);
         
+        LoadingService.StartLoading();
+        
         var response = await DiscordRolesProxy.UpdateToPartial(model, partial, access.Id);
         if (!response)
         {
             Snackbar.Add("DiscordRoleEntry konnte nicht aktualisiert werden!", Severity.Error);
+            LoadingService.StopLoading();
             return;
         }
         
         Snackbar.Add("DiscordRoleEntry wurde aktualisiert!", Severity.Success);
+        
+        LoadingService.StopLoading();
+        
         await Load();
     }
 
@@ -331,7 +337,7 @@ else
     {
         var access = await UserAccessService.GetUserAccess();
         if (access is null) return;
-        if (!UserAccessService.HasRight(RightEnum.DiscordRoleDelete)) return;
+        if (!await UserAccessService.HasRightAsync(RightEnum.DiscordRoleDelete)) return;
         
         var result = await DialogService.ShowMessageBox(
             "DiscordRoleEntry löschen", 
@@ -341,14 +347,20 @@ else
 
         if (result is null or false) return;
 
+        LoadingService.StartLoading();
+        
         var response = await DiscordRolesProxy.RemoveAsync(id, access.Id);
         if (!response)
         {
             Snackbar.Add("Diese DiscordRoleEntry konnte nicht gelöscht werden!");
+            LoadingService.StopLoading();
             return;
         }
         
         Snackbar.Add("DiscordRoleEntry wurde gelöscht!", Severity.Success);
+        
+        LoadingService.StopLoading();
+        
         await Load();
     }
 }
