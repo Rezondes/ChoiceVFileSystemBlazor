@@ -173,7 +173,11 @@ else
         );
 
         if (result is null or false) return;
+
+        LoadingService.StartLoading();
         
         await ExportHelper.ExportToExcelAsync(_accounts, name, JS);
+        
+        LoadingService.StopLoading();
     }
 }
