@@ -15,6 +15,8 @@
 <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="TestBan">Test Ban</MudButton>
 <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="TestUnban">Test Unban</MudButton>
 
+<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="TestLoading">Test Loading</MudButton>
+
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     private bool _isAuthorized;
@@ -261,5 +263,14 @@
         {
             Console.WriteLine(ex.Message);
         }
+    }
+
+    private async Task TestLoading()
+    {
+        LoadingService.ShowLoading = true;
+        
+        await Task.Delay(3000);
+        
+        LoadingService.ShowLoading = false;
     }
 }

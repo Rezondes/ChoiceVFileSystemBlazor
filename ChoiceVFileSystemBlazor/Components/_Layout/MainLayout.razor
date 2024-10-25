@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+﻿@inherits LayoutComponentDisposableBase
 
 <MudThemeProvider Theme="@_currentTheme" IsDarkMode="@_isDarkMode"/>
 <MudPopoverProvider/>
@@ -54,8 +54,12 @@ else
         </MudDrawer>
 
         <MudMainContent Style="height: 100%; overflow: hidden;">
-            <MudContainer Class="px-8" MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: auto; padding: 16px 0;">
+            <MudContainer Class="px-8" MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: auto; padding: 16px 0; position: relative;">
                 @Body
+
+                <MudOverlay Visible="@LoadingService.ShowLoading" DarkBackground="true" ZIndex="99999" Absolute="true">
+                    <PageLoading/>
+                </MudOverlay>
             </MudContainer>
         </MudMainContent>
 
@@ -88,7 +92,7 @@ else
     private bool _open = true;
     private Breakpoint _breakpoint = Breakpoint.Lg;
     private DrawerClipMode _clipMode = DrawerClipMode.Always;
-
+    
     private MudTheme _currentTheme = new()
     {
         PaletteDark = new PaletteDark()
@@ -109,6 +113,8 @@ else
 
     private Timer? _saveToggleDrawer;
     private Timer? _saveLightMode;
+
+    private bool _showPageLoading;
     
     protected override async Task OnInitializedAsync()
     {
@@ -126,6 +132,13 @@ else
             _isDarkMode = access.Settings.IsDarkMode;
             _open = access.Settings.IsNavbarExpanded;
         }
+        
+        LoadingService.OnChange += StateHasChanged;
+    }
+
+    public override void Dispose()
+    {
+        LoadingService.OnChange -= StateHasChanged;
     }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -220,6 +233,7 @@ else
         var access = await UserAccessService.GetUserAccess();
         _saveToggleDrawer = new Timer(async _ => await AccessProxy.UpdateIsNavbarExpandedAsync(access.Id, _open, access.Id), null, TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
     }
+    
     private async Task ToggleDarkMode(bool newValue)
     {
         _isDarkMode = newValue;

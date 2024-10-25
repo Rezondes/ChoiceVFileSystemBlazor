@@ -191,6 +191,7 @@ builder.Services.AddScoped<ReloadService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserAccessService>();
 builder.Services.AddScoped<DiscordService>();
+builder.Services.AddScoped<PageLoadingService>();
 
 builder.Services.AddSingleton<LockService>();
 
