@@ -223,15 +223,21 @@ else
             .Select(line => line.Trim())
             .ToList();
         
+        LoadingService.StartLoading();
+        
         var news = new NewsDbModel(titleString, content, access.Id);
         var response = await NewsProxy.AddAsync(news);
         if (response is null)
         {
             Snackbar.Add("News konnte nicht hinzugefügt werden!", Severity.Error);
+            LoadingService.StopLoading();
             return;
         }
         
         Snackbar.Add("News wurde aktualisiert!", Severity.Success);
+        
+        LoadingService.StopLoading();
+        
         await Load();
     }
 
@@ -292,6 +298,8 @@ else
             return;
         }
 
+        LoadingService.StartLoading();
+        
         var shouldReload = true;
 
         if (titleString != contextItem.Title)
@@ -326,6 +334,8 @@ else
             }
         }
 
+        LoadingService.StopLoading();
+        
         if (!shouldReload) return;
 
         await Load();
@@ -345,6 +355,8 @@ else
 
         if (result is null or false) return;
 
+        LoadingService.StartLoading();
+        
         var response = await NewsProxy.DeleteAsync(contextItem.Id, access.Id);
         if (!response)
         {
@@ -353,6 +365,9 @@ else
         }
         
         Snackbar.Add("News wurde gelöscht!", Severity.Success);
+        
+        LoadingService.StopLoading();
+        
         await Load();
     }
 
