@@ -152,23 +152,22 @@ else
         );
 
         if (result is null or false) return;
-
-        _loading = true;
-        StateHasChanged();
+        
+        LoadingService.StartLoading();
         
         var (updateCount, addedCount, removedCount) = await RankProxy.ChangeBulkAsync(_checkboxValues);
         
-        _loading = false;
-        StateHasChanged();
-
         if (updateCount <= 0)
         {
             Snackbar.Add("Es bleibt alles so wies hier is!", Severity.Info);
+            LoadingService.StopLoading();
             return;
         }
         
         await MainLayout.BaseHubConnection.SendAsync(BaseHubMethodEnum.UpdateRights.ToString());
 
         Snackbar.Add($"{addedCount}x Rechte zu Rollen hinzugefügt und {removedCount}x Rechte von Rollen entfernt.", Severity.Success);
+        
+        LoadingService.StopLoading();
     }
 }
