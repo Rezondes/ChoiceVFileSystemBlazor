@@ -202,17 +202,22 @@ else
             return;
         }
 
+        LoadingService.StartLoading();
+        
         var partialAccessModel = new PartialAccessModel(accountId, discordId, name, accountRank);
         var response = await AccessProxy.UpdateToPartial(accessDbModel, partialAccessModel, access.Id);
         if (!response)
         {
             Snackbar.Add("Beim Aktualisieren ist ein Fehler aufgetreten oder es wurden keine andere Werte angegeben.", Severity.Error);
+            LoadingService.StopLoading();
             return;
         }
 
         await MainLayout.BaseHubConnection.SendAsync(BaseHubMethodEnum.UpdateAccess.ToString(), accessDbModel.Id);
         
         Snackbar.Add($"[{accessDbModel.Id}] {accessDbModel.Name} wurde aktualisiert.", Severity.Success);
+        
+        LoadingService.StopLoading();
         
         await Load();
     }
