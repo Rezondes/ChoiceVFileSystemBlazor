@@ -17,5 +17,15 @@ public class PageLoadingService
         }
     }
 
+    public void StartLoading()
+    {
+        ShowLoading = true;
+    }
+
+    public void StopLoading()
+    {
+        ShowLoading = false;
+    }
+
     private void NotifyStateChanged() => OnChange?.Invoke();
 }

@@ -14,6 +14,7 @@ public static class AccountHelper
         IDialogService dialogService, 
         ISnackbar snackbar, 
         IAccountApi accountApi,
+        PageLoadingService loadingService,
         string socialClubName = "", 
         string discordId = ""
     )
@@ -63,7 +64,7 @@ public static class AccountHelper
             "Spieler whitelisten",
             inputs);
         if (dialogData is null) return false;
-
+        
         var (validatedSocialClubName, parsedSocialClubName) = dialogData[0].ValidateInput<string>();
         if (!validatedSocialClubName)
         {
@@ -85,10 +86,12 @@ public static class AccountHelper
             return false;
         }
         
+        loadingService.StartLoading();
         var response = await accountApi.AddAccountAsync(parsedSocialClubName!, parsedDiscordId!);
         if (!response.IsSuccessStatusCode)
         {
             snackbar.Add(response.Error.Content, Severity.Error);
+            loadingService.StopLoading();
             return false;
         }
 
@@ -99,6 +102,9 @@ public static class AccountHelper
                      $"DiscordId: {newAccount.DiscordId}, " +
                      $"SocialClubName: {newAccount.SocialClubName}, " +
                      $"Status: {newAccount.State}");
+        
+        loadingService.StopLoading();
+        
         return true;
     }
 }

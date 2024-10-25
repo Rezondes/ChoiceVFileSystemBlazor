@@ -418,10 +418,12 @@ else
             DiscordService,
             DialogService, 
             Snackbar, 
-            AccountApi, 
+            AccountApi,
+            LoadingService,
             socialClubName, 
             discordId
         );
+        
         if (!added) return;
         await Load();
     }
@@ -437,6 +439,8 @@ else
         );
 
         if (result is null or false) return;
+
+        LoadingService.StartLoading();
         
         try
         {
@@ -458,5 +462,7 @@ else
         {
             Snackbar.Add(ex.Message, Severity.Error);
         }
+        
+        LoadingService.StopLoading();
     }
 }
