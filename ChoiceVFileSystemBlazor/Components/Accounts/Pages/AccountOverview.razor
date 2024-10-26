@@ -27,6 +27,13 @@ else
         <ToolBarContent>
             <MudText Typo="Typo.h6">Account Übersicht</MudText>
             <MudSpacer />
+
+            @if (UserAccessService.HasRight(RightEnum.AddAccount))
+            {
+                <MudTooltip Text="Account hinzufügen" Duration="@Constants.TOOLTIP_DURATION">
+                    <MudIconButton Color="Color.Primary" Icon="@Icons.Material.Filled.Add" OnClick="() => OpenAddAccountDialog()"/>
+                </MudTooltip>
+            }
             
             @if (UserAccessService.HasRight(RightEnum.ExportAccountsExcel))
             {
@@ -179,5 +186,21 @@ else
         await ExportHelper.ExportToExcelAsync(_accounts, name, JS);
         
         LoadingService.StopLoading();
+    }
+    
+    private async Task OpenAddAccountDialog()
+    {
+        var added = await AccountHelper.OpenAddAccountDialog(
+            DiscordGuildMembersCachedService,
+            DiscordService,
+            DialogService, 
+            Snackbar, 
+            AccountApi,
+            LoadingService
+        );
+
+        if (!added) return;
+
+        await Load();
     }
 }

@@ -16,7 +16,8 @@ public static class AccountHelper
         IAccountApi accountApi,
         PageLoadingService loadingService,
         string socialClubName = "", 
-        string discordId = ""
+        string discordId = "",
+        bool manuelInput = false
     )
     {
         const string discordInputLabel = "DiscordId";
@@ -28,23 +29,26 @@ public static class AccountHelper
             discordId,
             discordInputPlaceholder
         );
-        
-        var (lastTrySuccess, lastTry, cachedLastUpdate, cachedData) = await discordGuildMembersCachedService.GetCachedData();
-        if (lastTrySuccess.HasValue && lastTrySuccess.Value && cachedData is not null)
-        {
-            var selectOptions = cachedData
-                .OrderBy(x => x.Username)
-                .Select(discordGuildUser => 
-                    new InputOptionModel(discordGuildUser.DiscordId.ToString(), discordGuildUser.Username))
-                .ToList();
 
-            discordInputModel = new InputModel(
-                InputTypes.Select,
-                discordInputLabel,
-                discordId,
-                discordInputPlaceholder,
-                selectOptions
-            );
+        if (manuelInput)
+        {
+            var (lastTrySuccess, lastTry, cachedLastUpdate, cachedData) = await discordGuildMembersCachedService.GetCachedData();
+            if (lastTrySuccess.HasValue && lastTrySuccess.Value && cachedData is not null)
+            {
+                var selectOptions = cachedData
+                    .OrderBy(x => x.Username)
+                    .Select(discordGuildUser => 
+                        new InputOptionModel(discordGuildUser.DiscordId.ToString(), discordGuildUser.Username))
+                    .ToList();
+
+                discordInputModel = new InputModel(
+                    InputTypes.Select,
+                    discordInputLabel,
+                    discordId,
+                    discordInputPlaceholder,
+                    selectOptions
+                );
+            }
         }
         
         var inputs = new List<InputModel>
