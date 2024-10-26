@@ -53,6 +53,7 @@
 @using ChoiceVFileSystemBlazor.Components.Vehicles.Pages
 @using ChoiceVFileSystemBlazor.Database
 @using ChoiceVFileSystemBlazor.Database._Shared
+@using ChoiceVFileSystemBlazor.Database.Accesses.Proxies
 @using ChoiceVFileSystemBlazor.Database.Accesses.Extensions
 @using ChoiceVFileSystemBlazor.Database.Accesses.DbModels
 @using ChoiceVFileSystemBlazor.Database.Accesses.DbModels.Partials
@@ -90,6 +91,8 @@
 @using FileProxy = ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces.IFileProxy
 
 @using Microsoft.AspNetCore.SignalR.Client
+
+@inject IServiceProvider ServiceProvider
 
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar

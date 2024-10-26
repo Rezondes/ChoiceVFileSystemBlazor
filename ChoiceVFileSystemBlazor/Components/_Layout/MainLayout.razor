@@ -224,24 +224,54 @@ else
         await BaseHubConnection.StartAsync();
     }
 
-    private async Task ToggleDrawer()
+    private void ToggleDrawer()
     {
         _open = !_open;
         StateHasChanged();
 
-        _saveToggleDrawer?.Dispose();
-        var access = await UserAccessService.GetUserAccess();
-        _saveToggleDrawer = new Timer(async _ => await AccessProxy.UpdateIsNavbarExpandedAsync(access.Id, _open, access.Id), null, TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
+        _saveToggleDrawer?.DisposeAsync();
+        
+        _saveToggleDrawer = new Timer(async _ =>
+        {
+            try
+            {
+                using var scope = ServiceProvider.CreateScope();
+                var userAccessService = scope.ServiceProvider.GetRequiredService<UserAccessService>();
+                var accessProxy = scope.ServiceProvider.GetRequiredService<AccessProxy>();
+
+                var access = await userAccessService.GetUserAccess();
+                await accessProxy.UpdateIsNavbarExpandedAsync(access.Id, _open, access.Id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fehler beim Aktualisieren des Navbar-Status: {ex.Message}");
+            }
+        }, null, TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
     }
     
-    private async Task ToggleDarkMode(bool newValue)
+    private void ToggleDarkMode(bool newValue)
     {
         _isDarkMode = newValue;
         StateHasChanged();
         
-        _saveLightMode?.Dispose();
-        var access = await UserAccessService.GetUserAccess();
-        _saveLightMode = new Timer(async _ => await AccessProxy.UpdateIsDarkModeAsync(access.Id, newValue, access.Id), null, TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
+        _saveLightMode?.DisposeAsync();
+        
+        _saveLightMode = new Timer(async _ =>
+        {
+            try
+            {
+                using var scope = ServiceProvider.CreateScope();
+                var userAccessService = scope.ServiceProvider.GetRequiredService<UserAccessService>();
+                var accessProxy = scope.ServiceProvider.GetRequiredService<AccessProxy>();
+
+                var access = await userAccessService.GetUserAccess();
+                await accessProxy.UpdateIsDarkModeAsync(access.Id, newValue, access.Id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fehler beim Aktualisieren des DarkMode-Status: {ex.Message}");
+            }
+        }, null, TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
     }
     
     private async Task OpenAccessPage()
