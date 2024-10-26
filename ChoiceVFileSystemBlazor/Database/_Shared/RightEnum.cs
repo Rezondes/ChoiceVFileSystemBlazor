@@ -58,7 +58,7 @@ public enum RightEnum
     
     ViewGameserverArea = 3000,
     ViewAccountsArea = 3100,
-    AddAccount = 3110,
+    AddAccount = 3102,
     ViewAccounts = 3101,
     ExportAccountsExcel = 3110,
     ViewCharactersArea = 3200,
