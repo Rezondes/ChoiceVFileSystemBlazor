@@ -315,7 +315,7 @@ public class FileProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext>
         var file = await GetAsync(id);
         if (file is null) return false;
 
-        if (!newCategoryId.HasValue) return false;
+        if (newCategoryId.HasValue)
         {
             var checkCategory = await fileCategoryProxy.GetAsync(newCategoryId.Value);
             if (checkCategory is null) return false;

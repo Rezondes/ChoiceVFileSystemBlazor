@@ -13,6 +13,7 @@ public static class SupportfileDbModelExtension
             Status = source.Status,
             MinRank = source.MinRank,
             Type = source.Type,
+            CategoryId = source.CategoryId,
         };
     }
 }
