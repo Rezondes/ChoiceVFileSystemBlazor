@@ -1,0 +1,59 @@
+@using ChoiceVSharedApiModels.SupportKeyInfo.DatabaseJsonModels.SubInformation.InventorySpot
+
+<MudDataGrid
+    T="ItemInfo" MultiSelection="true"
+    Items="@Data.AllItems" SortMode="SortMode.Multiple" Filterable="true"
+    QuickFilter="@QuickFilter" Style="width: 100%;"
+    Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="@(Height is null ? "75vh" : Height)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">@(Label ?? $"[{Data.Id}] InventoryInfo")</MudText>
+        <MudSpacer/>
+        <MudTextField
+            T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+            Adornment="Adornment.Start" Immediate="true"
+            AdornmentIcon="@Icons.Material.Filled.Search"
+            IconSize="Size.Medium" Class="mt-0"/>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.ItemId" Title="ItemId"/>
+        <PropertyColumn Property="x => x.ConfigId" Title="ConfigId"/>
+        <PropertyColumn Property="x => x.Name" Title="Name"/>
+        <PropertyColumn Property="x => x.Description" Title="Description"/>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="ItemInfo"/>
+    </PagerContent>
+</MudDataGrid>
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Height { get; set; }
+    [Parameter] public InventoryInfo Data { get; set; }
+
+    private string? _searchString;
+
+    private Func<ItemInfo, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+
+        var lowerSearchString = _searchString.ToLower();
+
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.Name.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.Description.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if ($"{x.ConfigId}".ToLower().Contains(lowerSearchString))
+            return true;
+        
+        if ($"{x.ItemId}".ToLower().Contains(lowerSearchString))
+            return true;
+
+        return false;
+    };
+}

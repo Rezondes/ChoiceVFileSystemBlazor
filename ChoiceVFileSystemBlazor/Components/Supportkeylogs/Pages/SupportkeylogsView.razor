@@ -1,0 +1,166 @@
+@page "/supportkeylogs/view/{id}"
+
+@using ChoiceVFileSystemBlazor.Components.Supportkeylogs.Components.PlayerInfo
+@using ChoiceVFileSystemBlazor.Components.Supportkeylogs.Components.VehicleInfo
+@using ChoiceVFileSystemBlazor.Components.Supportkeylogs.Components.InventorySpot
+@implements IDisposable
+
+@code {
+    public const string Url = "/supportkeylogs/view/";
+    public static string GetRedirectUrl(string id) => Url + id;
+}
+
+<PageTitle>Supportkeylog Ansicht</PageTitle>
+
+@if (_loading)
+{
+    <PageLoading/>
+}
+else if (!_loading && _model is null)
+{
+    <ErrorComponent/>
+}
+else if (_model is null)
+{
+    <ErrorComponent/>
+}
+else
+{
+    <MudItem Style="height: 75px;">
+        <MudText Typo="Typo.h3">[@_model.Id] </MudText>
+    </MudItem>
+    <MudGrid Justify="Justify.Center">
+        <MudItem xs="5" >
+            <MudPaper Height="240px">
+                <div class="d-flex flex-row align-items-center px-5 mud-width-full">
+                    <MudIcon Icon="@Icons.Material.Filled.Info"/>
+                    <MudText Class="px-5" Typo="Typo.h5">Informationen</MudText>
+                </div>
+                <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
+                    <MudText>SenderCharacterId: @_model.SenderCharacterId</MudText>
+                    <MudText>SenderCharacterName: @_model.SenderCharacterName</MudText>
+                    <MudText>SenderAccountId: @_model.SenderAccountId</MudText>
+                    <MudText>SenderAccountName: @_model.SenderAccountName</MudText>
+                    <MudText>Message: @_model.Message</MudText>
+                </MudContainer>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="7">
+            <MudPaper Height="140px">
+                <div class="d-flex flex-row align-items-center px-5 mud-width-full">
+                    <MudIcon Icon="@Icons.Material.Filled.AdsClick"/>
+                    <MudText Class="px-5" Typo="Typo.h5">Funktionen</MudText>
+                </div>
+                <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
+                    <WorkInProgressComponent/>
+                </div>
+            </MudPaper>
+        </MudItem>
+
+        <MudItem xs="12">
+            <SupportkeylogPlayerInfoDataGrid Data="_model.SurroundingData.PlayerInfos.OrderBy(x => x.DistanceToSender).ToList()" Height="400px" />
+        </MudItem>
+
+        <MudItem xs="12">
+            <SupportkeylogVehicleInfoDataGrid Data="_model.SurroundingData.VehicleInfos" Height="400px" />
+        </MudItem>
+
+        <MudItem xs="12">
+            <SupportkeylogInventorySpotDataGrid Data="_model.SurroundingData.Spots" Height="400px" />
+        </MudItem>
+    </MudGrid>
+}
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+    private bool _loading = true;
+    
+    [Parameter] public string Id { get; set; }
+    private int _id;
+
+    private SupportKeyInfoApiModel? _model;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
+        _shouldRedirect = !_isAuthorized;
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+
+        var parsingSuccess = ParseId();
+        if (!parsingSuccess)
+        {
+            Navigation.NavigateToError();
+            return;
+        }
+
+        await Load();
+    
+        ReloadService.OnCustomReload += Load;
+    }
+    
+    public void Dispose()
+    {
+        ReloadService.OnCustomReload -= Load;
+    }
+    
+    private bool ParseId()
+    {
+        if (!int.TryParse(Id, out var parsedId))
+        {
+            Snackbar.Add("Parsing failed", Severity.Error);
+            _loading = false;
+            return false;
+        }
+
+        _id = parsedId;
+        return true;
+    }
+    
+    private async Task Load()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        try
+        {
+            var response = await SupportKeyInfoApi.GetByIdAsync(_id);
+            if (response.IsSuccessStatusCode)
+            {
+                _model = response.Content;
+            }
+            else
+            {
+                Snackbar.Add(response.Error.Message, Severity.Error);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+        
+        StateHasChanged();
+    }
+}

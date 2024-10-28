@@ -51,6 +51,7 @@
 @using ChoiceVFileSystemBlazor.Components.Supportfiles.Components
 @using ChoiceVFileSystemBlazor.Components.Vehicles.Components
 @using ChoiceVFileSystemBlazor.Components.Vehicles.Pages
+@using ChoiceVFileSystemBlazor.Components.Supportkeylogs.Components
 @using ChoiceVFileSystemBlazor.Database
 @using ChoiceVFileSystemBlazor.Database._Shared
 @using ChoiceVFileSystemBlazor.Database.Accesses.Proxies
@@ -71,11 +72,11 @@
 @using ChoiceVFileSystemBlazor.Database.Supportfiles.Extensions
 @using ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels
 @using ChoiceVFileSystemBlazor.Components.WhitelistQuestions.Pages
-@using ChoiceVSharedApiModels.Whitelist
 @using ChoiceVFileSystemBlazor.Components.WhitelistQuestions.Components
 @using ChoiceVFileSystemBlazor.Components.WhitelistProcedures.Components
 @using ChoiceVFileSystemBlazor.Services.DiscordGuildMembers
 @using ChoiceVFileSystemBlazor.Services.Serverinformations
+@using ChoiceVFileSystemBlazor.Components.Supportkeylogs.Pages
 
 @using ChoiceVRefitClient
 @using ChoiceVSharedApiModels.Accounts
@@ -86,6 +87,8 @@
 @using ChoiceVSharedApiModels.Inventory
 @using ChoiceVSharedApiModels.Server
 @using ChoiceVSharedApiModels.Vehicles
+@using ChoiceVSharedApiModels.Whitelist
+@using ChoiceVSharedApiModels.SupportKeyInfo
 
 @using Refit
 @using FileProxy = ChoiceVFileSystemBlazor.Database.Supportfiles.Proxies.Interfaces.IFileProxy
@@ -117,6 +120,7 @@
 @inject IServerApi ServerApi
 @inject IVehicleApi VehicleApi
 @inject IDiscordApi DiscordApi
+@inject ISupportKeyInfoApi SupportKeyInfoApi
 
 // ChoiceV Whitelist Api
 @inject IWhitelistQuestionApi WhitelistQuestionApi

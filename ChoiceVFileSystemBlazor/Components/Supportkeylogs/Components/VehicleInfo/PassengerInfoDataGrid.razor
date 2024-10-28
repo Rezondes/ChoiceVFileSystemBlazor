@@ -1,0 +1,51 @@
+@using ChoiceVSharedApiModels.SupportKeyInfo.DatabaseJsonModels.SubInformation.Vehicle
+<MudDataGrid
+    T="PassengerInfo" MultiSelection="true"
+    Items="@Data" SortMode="SortMode.Multiple" Filterable="true"
+    QuickFilter="@QuickFilter" Style="width: 100%;"
+    Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="@(Height is null ? "75vh" : Height)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">@(Label ?? "PassengerInfo")</MudText>
+        <MudSpacer/>
+        <MudTextField
+            T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+            Adornment="Adornment.Start" Immediate="true"
+            AdornmentIcon="@Icons.Material.Filled.Search"
+            IconSize="Size.Medium" Class="mt-0"/>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.CharId" Title="CharId"/>
+        <PropertyColumn Property="x => x.SeatId" Title="SeatId"/>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="PassengerInfo"/>
+    </PagerContent>
+</MudDataGrid>
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Height { get; set; }
+    [Parameter] public List<PassengerInfo> Data { get; set; }
+
+    private string? _searchString;
+
+    private Func<PassengerInfo, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+
+        var lowerSearchString = _searchString.ToLower();
+
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if ($"{x.CharId}".ToLower().Contains(lowerSearchString))
+            return true;
+
+        if ($"{x.SeatId}".ToLower().Contains(lowerSearchString))
+            return true;
+
+        return false;
+    };
+
+}

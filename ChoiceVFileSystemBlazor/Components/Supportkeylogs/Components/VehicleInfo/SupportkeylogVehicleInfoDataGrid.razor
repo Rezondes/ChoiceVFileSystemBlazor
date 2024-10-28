@@ -1,0 +1,70 @@
+@using ChoiceVSharedApiModels.SupportKeyInfo.DatabaseJsonModels.SubInformation.Vehicle
+
+<MudDataGrid
+    T="SurroundingVehicleInfo" MultiSelection="true"
+    Items="@Data" SortMode="SortMode.Multiple" Filterable="true"
+    QuickFilter="@QuickFilter" RowClick="@RowClicked" Style="width: 100%;"
+    Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="@(Height is null ? "75vh" : Height)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">@(Label ?? "VehicleInfo Übersicht")</MudText>
+        <MudSpacer/>
+        <MudTextField
+            T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+            Adornment="Adornment.Start" Immediate="true"
+            AdornmentIcon="@Icons.Material.Filled.Search"
+            IconSize="Size.Medium" Class="mt-0"/>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.DbId" Title="#" Filterable="false"/>
+        <PropertyColumn Property="x => x.ModelId" Title="ModelId"/>
+        <PropertyColumn Property="x => x.Position" Title="Position"/>
+        <PropertyColumn Property="x => x.CurrentSpeed" Title="CurrentSpeed"/>
+        <PropertyColumn Property="x => x.Passengers.Count" Title="PassengersCount"/>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="SurroundingVehicleInfo"/>
+    </PagerContent>
+</MudDataGrid>
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Height { get; set; }
+    [Parameter] public List<SurroundingVehicleInfo> Data { get; set; }
+
+    private string? _searchString;
+
+    private Func<SurroundingVehicleInfo, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+
+        var lowerSearchString = _searchString.ToLower();
+
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.Position.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if ($"{x.CurrentSpeed}".ToLower().Contains(lowerSearchString))
+            return true;
+        
+        if ($"{x.ModelId}".ToLower().Contains(lowerSearchString))
+            return true;
+        
+        if ($"{x.DbId}".ToLower().Contains(lowerSearchString))
+            return true;
+
+        return false;
+    };
+
+    async Task RowClicked(DataGridRowClickEventArgs<SurroundingVehicleInfo> args)
+    {
+        var parameter = new DialogParameters<SupportkeylogVehicleInfoDialog>
+        {
+            { x => x.Data, args.Item },
+        };
+        
+        await DialogService.ShowAsync<SupportkeylogVehicleInfoDialog>(string.Empty, parameter, new DialogOptions { FullWidth = true, MaxWidth = MaxWidth.ExtraLarge });
+    }
+}

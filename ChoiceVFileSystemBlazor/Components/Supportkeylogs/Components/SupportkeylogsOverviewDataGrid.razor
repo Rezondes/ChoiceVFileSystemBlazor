@@ -1,0 +1,114 @@
+@if (_loading)
+{
+    <LoadingComponent/>
+}
+else if (!_loading && _data is null)
+{
+    <ErrorComponent/>
+}
+else
+{
+    <MudDataGrid
+        T="SupportKeyInfoApiModel" MultiSelection="true"
+        Items="@_data" SortMode="SortMode.Multiple" Filterable="true"
+        QuickFilter="@QuickFilter" RowClick="@RowClicked" Style="width: 100%;"
+        Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="@(Height is null ? "75vh" : Height)">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">@(Label ?? "Supportkeylog Übersicht")</MudText>
+            <MudSpacer/>
+            <MudTextField
+                T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+                Adornment="Adornment.Start" Immediate="true"
+                AdornmentIcon="@Icons.Material.Filled.Search"
+                IconSize="Size.Medium" Class="mt-0"/>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.Id" Title="#" Filterable="false"/>
+            <PropertyColumn Property="x => x.SenderCharacterId" Title="CharacterId"/>
+            <PropertyColumn Property="x => x.SenderCharacterName" Title="CharacterName"/>
+            <PropertyColumn Property="x => x.SenderAccountId" Title="AccountId"/>
+            <PropertyColumn Property="x => x.SenderAccountName" Title="AccountName"/>
+            <PropertyColumn Property="x => x.Message" Title="Message"/>
+            <PropertyColumn Property="x => x.SurroundingData.PlayerInfos.Count" Title="Player.Count"/>
+            <PropertyColumn Property="x => x.SurroundingData.VehicleInfos.Count" Title="Vehicle.Count"/>
+            <PropertyColumn Property="x => x.SurroundingData.Spots.Count" Title="InventorySpots.Count"/>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="SupportKeyInfoApiModel"/>
+        </PagerContent>
+    </MudDataGrid>
+}
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Height { get; set; }
+
+    private bool _loading = true;
+    private string? _searchString;
+
+    private List<SupportKeyInfoApiModel>? _data = [];
+
+    public async Task Load()
+    {
+        var access = await UserAccessService.GetUserAccess();
+        if (access is null) return;
+
+        _loading = true;
+        StateHasChanged();
+
+        try
+        {
+            var result = await SupportKeyInfoApi.GetAllAsync();
+            if (!result.IsSuccessStatusCode)
+            {
+                Snackbar.Add(result.Error.Message, Severity.Error);
+                return;
+            }
+
+            _data = result.Content;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        
+        _loading = false;
+        StateHasChanged();
+    }
+
+    private Func<SupportKeyInfoApiModel, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+
+        var lowerSearchString = _searchString.ToLower();
+
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.SenderCharacterId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.SenderCharacterName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if (x.SenderAccountId.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.SenderAccountName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (x.Message.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if ($"{x.Id}".ToLower().Contains(lowerSearchString))
+            return true;
+
+        return false;
+    };
+
+    void RowClicked(DataGridRowClickEventArgs<SupportKeyInfoApiModel> args)
+    {
+        Navigation.NavigateTo(SupportkeylogsView.GetRedirectUrl(args.Item.Id.ToString()));
+    }
+}

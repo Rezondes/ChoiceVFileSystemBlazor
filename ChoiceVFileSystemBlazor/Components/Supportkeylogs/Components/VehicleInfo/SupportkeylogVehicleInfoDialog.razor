@@ -1,0 +1,44 @@
+@using ChoiceVSharedApiModels.SupportKeyInfo.DatabaseJsonModels.SubInformation.Vehicle
+@using ChoiceVFileSystemBlazor.Components.Supportkeylogs.Components.InventorySpot
+<MudDialog>
+    <TitleContent>
+        [@Data.DbId]
+    </TitleContent>
+    <DialogContent>
+        <MudGrid>
+            <MudItem xs="12">
+                <MudPaper>
+                    <div class="d-flex flex-row align-items-center px-5 mud-width-full">
+                        <MudIcon Icon="@Icons.Material.Filled.Info"/>
+                        <MudText Class="px-5" Typo="Typo.h5">Informationen</MudText>
+                    </div>
+                    <MudContainer Class="d-flex flex-column justify-center mud-width-full py-8">
+                        <MudText>DbId: @Data.DbId</MudText>
+                        <MudText>ModelId: @Data.ModelId</MudText>
+                        <MudText>Position: @Data.Position</MudText>
+                        <MudText>CurrentSpeed: @Data.CurrentSpeed</MudText>
+                    </MudContainer>
+                </MudPaper>
+            </MudItem>
+
+            <MudItem xs="12">
+                <InventoryInfoDataGrid Data="Data.Inventory" Height="400px"/>
+            </MudItem>
+
+            <MudItem xs="12">
+                <PassengerInfoDataGrid Data="Data.Passengers" Height="400px"/>
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public SurroundingVehicleInfo Data { get; set; } = null!;
+
+    private void Cancel() => MudDialog.Cancel();
+}

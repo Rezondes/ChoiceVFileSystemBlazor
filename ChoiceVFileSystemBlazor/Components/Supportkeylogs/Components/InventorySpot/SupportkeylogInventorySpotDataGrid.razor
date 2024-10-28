@@ -1,0 +1,63 @@
+@using ChoiceVSharedApiModels.SupportKeyInfo.DatabaseJsonModels.SubInformation.InventorySpot
+
+<MudDataGrid
+    T="SurroundingInventorySpot" MultiSelection="true"
+    Items="@Data" SortMode="SortMode.Multiple" Filterable="true"
+    QuickFilter="@QuickFilter" RowClick="@RowClicked" Style="width: 100%;"
+    Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="@(Height is null ? "75vh" : Height)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">@(Label ?? "InventorySpot Übersicht")</MudText>
+        <MudSpacer/>
+        <MudTextField
+            T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+            Adornment="Adornment.Start" Immediate="true"
+            AdornmentIcon="@Icons.Material.Filled.Search"
+            IconSize="Size.Medium" Class="mt-0"/>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.Id" Title="#" Filterable="false"/>
+        <PropertyColumn Property="x => x.Position" Title="Position"/>
+        <PropertyColumn Property="x => x.Inventory.AllItems.Count" Title="ItemsCount"/>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="SurroundingInventorySpot"/>
+    </PagerContent>
+</MudDataGrid>
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Height { get; set; }
+    [Parameter] public List<SurroundingInventorySpot> Data { get; set; }
+
+    private string? _searchString;
+
+    private Func<SurroundingInventorySpot, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+
+        var lowerSearchString = _searchString.ToLower();
+
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.Position.ToString().ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        
+        if ($"{x.Id}".ToLower().Contains(lowerSearchString))
+            return true;
+
+        return false;
+    };
+
+    async Task RowClicked(DataGridRowClickEventArgs<SurroundingInventorySpot> args)
+    {
+        var parameter = new DialogParameters<SupportkeylogInventorySpotDialog>
+        {
+            { x => x.Data, args.Item },
+        };
+        
+        await DialogService.ShowAsync<SupportkeylogInventorySpotDialog>(string.Empty, parameter, new DialogOptions { FullWidth = true, MaxWidth = MaxWidth.ExtraLarge });
+    }
+
+}

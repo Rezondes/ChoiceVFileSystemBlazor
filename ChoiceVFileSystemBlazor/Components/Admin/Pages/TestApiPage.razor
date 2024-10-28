@@ -16,6 +16,7 @@
 <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="TestUnban">Test Unban</MudButton>
 
 <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="TestLoading">Test Loading</MudButton>
+<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="TestSupportKeyInfoApi">Test SupportKeyInfoApi</MudButton>
 
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
@@ -272,5 +273,25 @@
         await Task.Delay(3000);
         
         LoadingService.ShowLoading = false;
+    }
+
+    private async Task TestSupportKeyInfoApi()
+    {
+        try
+        {
+            var result = await SupportKeyInfoApi.GetAllAsync();
+            if (!result.IsSuccessStatusCode)
+            {
+                Snackbar.Add(result.Error.Message, Severity.Error);
+                return;
+            }
+
+            var data = result.Content;
+            Snackbar.Add("", Severity.Info);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 }
