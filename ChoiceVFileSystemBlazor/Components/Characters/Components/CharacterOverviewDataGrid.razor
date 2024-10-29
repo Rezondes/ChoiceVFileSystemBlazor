@@ -53,43 +53,25 @@ else
     {
         _loading = true;
         StateHasChanged();
-
-        try
+        
+        var result = await CharacterApi.HandleApiRequestAsync(
+            async token => AccountId.HasValue
+                ? await CharacterApi.GetByAccountIdAsync(AccountId.Value, token)
+                : OnlyLive 
+                    ? await CharacterApi.GetAllLiveAsync(token)
+                    : await CharacterApi.GetAllAsync(token),
+            cancellationToken);
+        
+        if (result.IsSuccess)
         {
-            ApiResponse<List<CharacterApiModel>> response;
-
-            if (AccountId.HasValue)
-            {
-                response = await CharacterApi.GetByAccountIdAsync(AccountId.Value, cancellationToken);
-            }
-            else
-            {
-                response = OnlyLive ? await CharacterApi.GetAllLiveAsync(cancellationToken) : await CharacterApi.GetAllAsync(cancellationToken);
-            }
-
-            if (response.IsSuccessStatusCode)
-            {
-                _data = response.Content;
-            }
-            else
-            {
-                Snackbar.Add(response.Error.Message, Severity.Error);
-            }
+            _data = result.Data;
         }
-        catch (HttpRequestException)
+        else
         {
-            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
-        }
-        catch (TaskCanceledException){}
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-        finally
-        {
-            _loading = false;
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
         }
         
+        _loading = false;
         StateHasChanged();
     }
     
