@@ -214,6 +214,8 @@ else
     private string? _charHistory;
     private int _charHistoryLines = 1;
     
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -246,6 +248,9 @@ else
     
     public void Dispose()
     {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+
         ReloadService.OnCustomReload -= Load;
     }
 
@@ -266,73 +271,62 @@ else
     {
         _loading = true;
         StateHasChanged();
-
-        try
+        
+        var result = await WhitelistProcedureApi.HandleApiRequestAsync(
+            async token => await WhitelistProcedureApi.GetByProcedureIdAsync(_id, token),
+            _cancellationTokenSource.Token);
+        
+        if (result.IsSuccess)
         {
-            var response = await WhitelistProcedureApi.GetByProcedureIdAsync(_id);
-            if (response.IsSuccessStatusCode)
+            _model = result.Data;
+            
+            foreach (var test in _model!.TestList)
             {
-                _model = response.Content;
-
-                foreach (var test in _model.TestList)
-                {
-                    test.QuestionAnswers = test.QuestionAnswers.OrderBy(x => x.MessageId).ToList();
-                }
-                
-                var teamspeakIdJson = _model.DataList.FirstOrDefault(x => x.Name == "TEAMSPEAK_ID")?.Data.Trim();
-                if (teamspeakIdJson is not null && !string.IsNullOrEmpty(teamspeakIdJson))
-                {
-                    var teamspeakIdList = JsonSerializer.Deserialize<List<string>>(teamspeakIdJson);
-                    _teamspeakId = teamspeakIdList?.FirstOrDefault();
-                }
-
-                var charProfessionsJson = _model.DataList.FirstOrDefault(x => x.Name == "CHAR_PROFESSION")?.Data.Trim();
-                if (charProfessionsJson is not null && !string.IsNullOrEmpty(charProfessionsJson))
-                {
-                    var charProfessionsList = JsonSerializer.Deserialize<List<string>>(charProfessionsJson);
-                    if (charProfessionsList is not null)
-                    {
-                        var mappedProfessions = charProfessionsList.Select(profession => profession switch
-                        {
-                            "civil" => "Zivilist",
-                            "crime" => "Kriminell",
-                            "faction" => "Fraktion",
-                            _ => profession 
-                        }).ToList();
-                        
-                        _charProfessions = string.Join(", ", mappedProfessions);
-                    }
-                }
-
-                var charHistory = _model.DataList.FirstOrDefault(x => x.Name == "CHAR_HISTORY")?.Data;
-                if (charHistory is not null)
-                {
-                    _charHistory = charHistory;
-                    _charHistoryLines = _charHistory.Split('\n').Length;
-                    if (_charHistoryLines < 15)
-                    {
-                        _charHistoryLines = 15;
-                    }
-                }
-            }       
-            else
+                test.QuestionAnswers = test.QuestionAnswers.OrderBy(x => x.MessageId).ToList();
+            }
+            
+            var teamspeakIdJson = _model.DataList.FirstOrDefault(x => x.Name == "TEAMSPEAK_ID")?.Data.Trim();
+            if (teamspeakIdJson is not null && !string.IsNullOrEmpty(teamspeakIdJson))
             {
-                Snackbar.Add(response.Error.Message, Severity.Error);
+                var teamspeakIdList = JsonSerializer.Deserialize<List<string>>(teamspeakIdJson);
+                _teamspeakId = teamspeakIdList?.FirstOrDefault();
+            }
+
+            var charProfessionsJson = _model.DataList.FirstOrDefault(x => x.Name == "CHAR_PROFESSION")?.Data.Trim();
+            if (charProfessionsJson is not null && !string.IsNullOrEmpty(charProfessionsJson))
+            {
+                var charProfessionsList = JsonSerializer.Deserialize<List<string>>(charProfessionsJson);
+                if (charProfessionsList is not null)
+                {
+                    var mappedProfessions = charProfessionsList.Select(profession => profession switch
+                    {
+                        "civil" => "Zivilist",
+                        "crime" => "Kriminell",
+                        "faction" => "Fraktion",
+                        _ => profession 
+                    }).ToList();
+                    
+                    _charProfessions = string.Join(", ", mappedProfessions);
+                }
+            }
+
+            var charHistory = _model.DataList.FirstOrDefault(x => x.Name == "CHAR_HISTORY")?.Data;
+            if (charHistory is not null)
+            {
+                _charHistory = charHistory;
+                _charHistoryLines = _charHistory.Split('\n').Length;
+                if (_charHistoryLines < 15)
+                {
+                    _charHistoryLines = 15;
+                }
             }
         }
-        catch (HttpRequestException ex)
+        else
         {
-            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
         }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-        finally
-        {
-            _loading = false;
-        }
-        
+
+        _loading = false;
         StateHasChanged();
     }
     

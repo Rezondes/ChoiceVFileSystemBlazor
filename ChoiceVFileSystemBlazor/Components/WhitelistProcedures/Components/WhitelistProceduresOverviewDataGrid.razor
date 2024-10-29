@@ -1,4 +1,3 @@
-@using ChoiceVFileSystemBlazor.Components.WhitelistProcedures.Pages
 @if (_loading)
 {
     <LoadingComponent/>
@@ -45,37 +44,25 @@ else
 
     private List<WhitelistProcedureApiModel> _data = [];
 
-    public async Task Load()
+    public async Task Load(CancellationToken cancellationToken = default)
     {
         _loading = true;
         StateHasChanged();
-
-        try
+        
+        var result = await WhitelistProcedureApi.HandleApiRequestAsync(
+            async token => await WhitelistProcedureApi.GetAllAsync(token),
+            cancellationToken);
+        
+        if (result.IsSuccess)
         {
-            var response = await WhitelistProcedureApi.GetAllAsync();
-
-            if (response.IsSuccessStatusCode)
-            {
-                _data = response.Content.OrderBy(x => x.Id).ToList();
-            }
-            else
-            {
-                Snackbar.Add(response.Error.Message, Severity.Error);
-            }
+            _data = result.Data!;
         }
-        catch (HttpRequestException ex)
+        else
         {
-            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
         }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-        finally
-        {
-            _loading = false;
-        }
-
+        
+        _loading = false;
         StateHasChanged();
     }
 
