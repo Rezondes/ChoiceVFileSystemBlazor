@@ -278,25 +278,17 @@ else
 
     private async Task LoadCharacterAsync(CancellationToken cancellationToken = default)
     {
-        try
+        var result = await CharacterApi.HandleApiRequestAsync(
+            async token => await CharacterApi.GetByCharacterIdAsync(_id, token),
+            cancellationToken);
+        
+        if (result.IsSuccess)
         {
-            var response = await CharacterApi.GetByCharacterIdAsync(_id, cancellationToken);
-            if (response.IsSuccessStatusCode)
-            {
-                _model = response.Content;
-            }
-            else
-            {
-                Snackbar.Add(response.Error.Message, Severity.Error);
-            }
+            _model = result.Data;
         }
-        catch (HttpRequestException ex)
+        else
         {
-            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
         }
     }
 
@@ -305,25 +297,17 @@ else
         _inventoryLoading = true;
         StateHasChanged();
         
-        try
+        var result = await InventoryApi.HandleApiRequestAsync(
+            async token => await InventoryApi.GetByCharacterIdAsync(_id, token),
+            cancellationToken);
+        
+        if (result.IsSuccess)
         {
-            var response = await InventoryApi.GetByCharacterIdAsync(_id, cancellationToken);
-            if (response.IsSuccessStatusCode)
-            {
-                _inventory = response.Content;
-            }
-            else
-            {
-                Snackbar.Add(response.Error.Message, Severity.Error);
-            }
+            _inventory = result.Data;
         }
-        catch (HttpRequestException ex)
+        else
         {
-            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
         }
 
         _inventoryLoading = false;
@@ -394,38 +378,29 @@ else
             Snackbar.Add("Es wurde keine richtige Dimension eingegeben!", Severity.Error);
             return;
         }
-        
-        try
-        {
-            var response = await CharacterApi.ChangeDimensionAsync(_id, dimension, _cancellationTokenSource.Token);
-            if (response.IsSuccessStatusCode)
-            {
-                var data = response.Content;
-                if (data.CharacterId != _id)
-                {
-                    Snackbar.Add("Wenn dieser Fehler auftritt sind wird geficket.", Severity.Error);
-                    return;
-                }
-                
-                Snackbar.Add($"Dimension von {data.OldDimension} zu {data.NewDimension} gewechselt!", Severity.Success);
 
-                _loading = true;
-                await Task.Delay(TimeSpan.FromSeconds(1));
-                await LoadAllAsync();
-            }
-            else
-            {
-                Snackbar.Add(response.Error.Message, Severity.Error);
-            }
-        }
-        catch (HttpRequestException ex)
+        var result = await CharacterApi.HandleApiRequestAsync(
+            async token => await CharacterApi.ChangeDimensionAsync(_id, dimension, token),
+            _cancellationTokenSource.Token);
+
+        if (!result.IsSuccess)
         {
-            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
+            return;
         }
-        catch (Exception ex)
+        
+        var data = result.Data;
+        if (data!.CharacterId != _id)
         {
-            Snackbar.Add(ex.Message, Severity.Error);
+            Snackbar.Add("Wenn dieser Fehler auftritt sind wird geficket.", Severity.Error);
+            return;
         }
+
+        Snackbar.Add($"Dimension von {data.OldDimension} zu {data.NewDimension} gewechselt!", Severity.Success);
+
+        _loading = true;
+        await Task.Delay(TimeSpan.FromSeconds(1), _cancellationTokenSource.Token);
+        await LoadAllAsync();
     }
 
     private async Task TogglePermadeathMode()
@@ -439,15 +414,18 @@ else
             "Das nächste Mal, wenn der Charakter durch einen anderen Charakter getötet wird stirbt dieser permanent und muss sich im Support melden.";
         var yesText = _model.PermadeathActivated ? "Deaktivieren" : "Aktivieren";
         
-        var result = await DialogService.ShowMessageBox(
+        var dialogResult = await DialogService.ShowMessageBox(
             title, 
             message, 
             yesText: yesText, cancelText: "Abbrechen"
         );
-        if (result is null or false) return;
+        if (dialogResult is null or false) return;
 
-        var response = await CharacterApi.SetPermadeathActivatedAsync(_model.Id, !_model.PermadeathActivated, _cancellationTokenSource.Token);
-        if (!response.IsSuccessStatusCode)
+        var result = await CharacterApi.HandleApiRequestAsync(
+            async token => await CharacterApi.SetPermadeathActivatedAsync(_model.Id, !_model.PermadeathActivated, token),
+            _cancellationTokenSource.Token);
+        
+        if (!result.IsSuccess)
         {
             Snackbar.Add("Permadeathmode konnte nicht geändert werden.", Severity.Error);
             return;
@@ -467,15 +445,18 @@ else
             "Möchtest du die Crimeflag aktivieren? ";
         var yesText = _model.CrimeFlagActivated ? "Deaktivieren" : "Aktivieren";
         
-        var result = await DialogService.ShowMessageBox(
+        var dialogResult = await DialogService.ShowMessageBox(
             title, 
             message, 
             yesText: yesText, cancelText: "Abbrechen"
         );
-        if (result is null or false) return;
+        if (dialogResult is null or false) return;
 
-        var response = await CharacterApi.SetCrimeFlagActiveAsync(_model.Id, !_model.CrimeFlagActivated, _cancellationTokenSource.Token);
-        if (!response.IsSuccessStatusCode)
+        var result = await CharacterApi.HandleApiRequestAsync(
+            async token => await CharacterApi.SetCrimeFlagActiveAsync(_model.Id, !_model.CrimeFlagActivated, token),
+            _cancellationTokenSource.Token);
+        
+        if (!result.IsSuccess)
         {
             Snackbar.Add("Crimeflag konnte nicht geändert werden.", Severity.Error);
             return;
