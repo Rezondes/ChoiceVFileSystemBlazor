@@ -26,6 +26,7 @@ using ChoiceVRefitClient;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MudBlazor;
@@ -262,6 +263,9 @@ if (!builder.Environment.IsDevelopment())
         });
     });
 }
+
+builder.Services.AddDataProtection()
+    .SetDefaultKeyLifetime(TimeSpan.FromDays(14));
 
 var app = builder.Build();
 
