@@ -83,6 +83,8 @@ else
 
     private SupportKeyInfoApiModel? _model;
     
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -115,6 +117,9 @@ else
     
     public void Dispose()
     {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+
         ReloadService.OnCustomReload -= Load;
     }
     
@@ -136,31 +141,20 @@ else
         _loading = true;
         StateHasChanged();
 
-        try
+        var result = await SupportKeyInfoApi.HandleApiRequestAsync(
+            async token => await SupportKeyInfoApi.GetByIdAsync(_id, token),
+            _cancellationTokenSource.Token);
+        
+        if (result.IsSuccess)
         {
-            var response = await SupportKeyInfoApi.GetByIdAsync(_id);
-            if (response.IsSuccessStatusCode)
-            {
-                _model = response.Content;
-            }
-            else
-            {
-                Snackbar.Add(response.Error.Message, Severity.Error);
-            }
+            _model = result.Data;
         }
-        catch (HttpRequestException ex)
+        else
         {
-            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-        finally
-        {
-            _loading = false;
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
         }
         
+        _loading = false;
         StateHasChanged();
     }
 }
