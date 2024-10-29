@@ -49,45 +49,24 @@ else
         _loading = true;
         StateHasChanged();
         
-        try
+        var result = await BankAccountApi.HandleApiRequestAsync(
+            async token => CharacterId.HasValue ?
+                await BankAccountApi.GetBankAccountsByCharacterIdAsync(CharacterId.Value, token) :
+                CompanyId.HasValue ? 
+                    await BankAccountApi.GetBankAccountsByCompanyIdAsync(CompanyId.Value, token) :
+                    await BankAccountApi.GetAllAsync(token),
+            cancellationToken);
+        
+        if (result.IsSuccess)
         {
-            ApiResponse<List<BankAccountApiModel>> response;
-            
-            if (CharacterId.HasValue)
-            {
-                response = await BankAccountApi.GetBankAccountsByCharacterIdAsync(CharacterId.Value);
-            }
-            else if (CompanyId.HasValue)
-            {
-                response = await BankAccountApi.GetBankAccountsByCompanyIdAsync(CompanyId.Value);
-            }
-            else
-            {
-                response = await BankAccountApi.GetAllAsync();
-            }
-
-            if (response.IsSuccessStatusCode)
-            {
-                _data = response.Content;
-            }
-            else
-            {
-                Snackbar.Add(response.Error.Message, Severity.Error);
-            }
+            _data = result.Data!;
         }
-        catch (HttpRequestException ex)
+        else
         {
-            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-        finally
-        {
-            _loading = false;
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
         }
         
+        _loading = false;
         StateHasChanged();
     }
     

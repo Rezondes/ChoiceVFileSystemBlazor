@@ -18,11 +18,13 @@
 
     BankAccountOverviewDataGrid _bankAccountOverviewDataGrid;
     
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
     
@@ -43,12 +45,14 @@
     
     public void Dispose()
     {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+
         ReloadService.OnCustomReload -= Reload;
     }
 
     private async Task Reload()
     {
-        await _bankAccountOverviewDataGrid.Load();
+        await _bankAccountOverviewDataGrid.Load(_cancellationTokenSource.Token);
     }
-
 }
