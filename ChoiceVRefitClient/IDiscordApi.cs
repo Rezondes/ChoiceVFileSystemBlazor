@@ -7,5 +7,5 @@ namespace ChoiceVRefitClient;
 public interface IDiscordApi : IBaseApiInterface
 {
     [Get("/api/v1/discord")]
-    Task<ApiResponse<List<DiscordUserApiModel>>> GetAllDiscordGuildMembersAsync(); 
+    Task<ApiResponse<List<DiscordUserApiModel>>> GetAllDiscordGuildMembersAsync(CancellationToken cancellationToken = default); 
 }

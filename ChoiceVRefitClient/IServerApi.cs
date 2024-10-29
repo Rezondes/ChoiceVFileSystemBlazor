@@ -7,5 +7,5 @@ namespace ChoiceVRefitClient;
 public interface IServerApi : IBaseApiInterface
 {
     [Get("/api/v1/server/info")]
-    Task<ApiResponse<CurrentServerInfosApiModel>> GetCurrentServerInfosAsync(); 
+    Task<ApiResponse<CurrentServerInfosApiModel>> GetCurrentServerInfosAsync(CancellationToken cancellationToken = default); 
 }

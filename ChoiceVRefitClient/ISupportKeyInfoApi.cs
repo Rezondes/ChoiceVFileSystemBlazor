@@ -8,8 +8,8 @@ namespace ChoiceVRefitClient;
 public interface ISupportKeyInfoApi : IBaseApiInterface
 {
     [Get("/api/v1/supportkeyinfo")]
-    Task<ApiResponse<List<SupportKeyInfoApiModel>>> GetAllAsync(); 
+    Task<ApiResponse<List<SupportKeyInfoApiModel>>> GetAllAsync(CancellationToken cancellationToken = default); 
     
     [Get("/api/v1/supportkeyinfo?supportKeyInfoId={supportKeyInfoId}")]
-    Task<ApiResponse<SupportKeyInfoApiModel>> GetByIdAsync(int supportKeyInfoId); 
+    Task<ApiResponse<SupportKeyInfoApiModel>> GetByIdAsync(int supportKeyInfoId, CancellationToken cancellationToken = default); 
 }
