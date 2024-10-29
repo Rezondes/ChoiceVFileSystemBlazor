@@ -4,7 +4,7 @@ using Refit;
 
 namespace ChoiceVRefitClient;
 
-public interface IBankAccountApi
+public interface IBankAccountApi : IBaseApiInterface
 {
     [Get("/api/v1/bankaccount")]
     Task<ApiResponse<List<BankAccountApiModel>>> GetAllAsync(); 

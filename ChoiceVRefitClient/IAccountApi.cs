@@ -4,7 +4,7 @@ using Refit;
 namespace ChoiceVRefitClient;
 
 [Headers("Content-Type: application/json", "accept: application/json")]
-public interface IAccountApi 
+public interface IAccountApi : IBaseApiInterface
 {
     [Get("/api/v1/account")]
     Task<ApiResponse<List<AccountApiModel>>> GetAllAsync(); 

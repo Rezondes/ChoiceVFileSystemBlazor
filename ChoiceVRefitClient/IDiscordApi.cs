@@ -4,7 +4,7 @@ using Refit;
 
 namespace ChoiceVRefitClient;
 
-public interface IDiscordApi
+public interface IDiscordApi : IBaseApiInterface
 {
     [Get("/api/v1/discord")]
     Task<ApiResponse<List<DiscordUserApiModel>>> GetAllDiscordGuildMembersAsync(); 

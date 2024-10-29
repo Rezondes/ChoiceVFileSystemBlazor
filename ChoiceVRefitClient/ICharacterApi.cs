@@ -6,7 +6,7 @@ using Refit;
 namespace ChoiceVRefitClient;
 
 [Headers("Content-Type: application/json", "accept: application/json")]
-public interface ICharacterApi
+public interface ICharacterApi : IBaseApiInterface
 {
     [Get("/api/v1/character")]
     Task<ApiResponse<List<CharacterApiModel>>> GetAllAsync(CancellationToken cancellationToken = default); 

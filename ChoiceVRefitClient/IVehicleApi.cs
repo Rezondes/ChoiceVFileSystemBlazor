@@ -4,7 +4,7 @@ using Refit;
 namespace ChoiceVRefitClient;
 
 [Headers("Content-Type: application/json", "accept: application/json")]
-public interface IVehicleApi
+public interface IVehicleApi : IBaseApiInterface
 {
     [Get("/api/v1/vehicle")]
     Task<ApiResponse<List<VehicleApiModel>>> GetAllAsync(); 

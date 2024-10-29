@@ -3,7 +3,7 @@ using Refit;
 
 namespace ChoiceVRefitClient;
 
-public interface IWhitelistQuestionApi
+public interface IWhitelistQuestionApi : IBaseApiInterface
 {
     [Get("/api/v1/question")]
     Task<ApiResponse<List<WhitelistQuestionApiModel>>> GetAllAsync(); 
