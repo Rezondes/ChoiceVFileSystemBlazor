@@ -3,9 +3,9 @@ using ChoiceVSharedApiModels.Server;
 
 namespace ChoiceVFileSystemBlazor.Services.Serverinformations;
 
-public class ServerInformationCachedService(IServerApi serverApi, ILogger<ServerInformationCachedService> logger)
+public class ServerInformationCachedService(IServerApi serverApi, ILogger<ServerInformationCachedService> logger, LockService lockService)
 {
-    private readonly object _dataLock = new();
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
     private CurrentServerInfosApiModel? _cachedData;
     private DateTime? _cachedLastUpdate;
     private DateTime? _lastTry;
@@ -21,13 +21,15 @@ public class ServerInformationCachedService(IServerApi serverApi, ILogger<Server
             var response = await serverApi.GetCurrentServerInfosAsync();
             if (response.IsSuccessStatusCode)
             {
-                lock (_dataLock)
+                await lockService.LockAsync(() =>
                 {
                     _cachedData = response.Content;
                     _cachedLastUpdate = DateTime.UtcNow;
                     _lastTrySuccess = true;
                     logger.LogInformation("Server infos fetching successful.");
-                }
+                    
+                    return Task.FromResult(Task.CompletedTask);
+                });
             }
             else
             {
@@ -46,11 +48,8 @@ public class ServerInformationCachedService(IServerApi serverApi, ILogger<Server
         }
     }
 
-    public (bool?, DateTime?, DateTime?, CurrentServerInfosApiModel?) GetCachedData()
+    public async Task<(bool?, DateTime?, DateTime?, CurrentServerInfosApiModel?)> GetCachedData()
     {
-        lock (_dataLock)
-        {
-            return (_lastTrySuccess, _lastTry, _cachedLastUpdate, _cachedData);
-        }
+        return await lockService.LockAsync(() => Task.FromResult((_lastTrySuccess, _lastTry, _cachedLastUpdate, _cachedData)));
     }
 }

@@ -3,10 +3,9 @@ using ChoiceVSharedApiModels.Discord;
 
 namespace ChoiceVFileSystemBlazor.Services.DiscordGuildMembers;
 
-public class DiscordGuildMembersCachedService(IDiscordApi discordApi, ILogger<DiscordGuildMembersCachedService> logger)
+public class DiscordGuildMembersCachedService(IDiscordApi discordApi, ILogger<DiscordGuildMembersCachedService> logger, LockService lockService)
 {
     private readonly SemaphoreSlim _semaphore = new(1, 1);
-    private readonly object _dataLock = new();
     private List<DiscordUserApiModel>? _cachedData;
     private DateTime? _cachedLastUpdate;
     private DateTime? _lastTry;
@@ -22,13 +21,15 @@ public class DiscordGuildMembersCachedService(IDiscordApi discordApi, ILogger<Di
             var response = await discordApi.GetAllDiscordGuildMembersAsync();
             if (response.IsSuccessStatusCode)
             {
-                lock (_dataLock)
+                await lockService.LockAsync(() =>
                 {
                     _cachedData = response.Content;
                     _cachedLastUpdate = DateTime.UtcNow;
                     _lastTrySuccess = true;
                     logger.LogInformation("Server infos fetching successful.");
-                }
+                    
+                    return Task.FromResult(Task.CompletedTask);
+                });
             }
             else
             {
@@ -49,14 +50,6 @@ public class DiscordGuildMembersCachedService(IDiscordApi discordApi, ILogger<Di
 
     public async Task<(bool?, DateTime?, DateTime?, List<DiscordUserApiModel>?)> GetCachedData()
     {
-        await _semaphore.WaitAsync();
-        try
-        {
-            return (_lastTrySuccess, _lastTry, _cachedLastUpdate, _cachedData);
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
+        return await lockService.LockAsync(() => Task.FromResult((_lastTrySuccess, _lastTry, _cachedLastUpdate, _cachedData)));
     }
 }

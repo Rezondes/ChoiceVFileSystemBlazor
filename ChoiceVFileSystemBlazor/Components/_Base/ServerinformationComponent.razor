@@ -88,8 +88,6 @@
     private DateTime _lastFetchedUtc = DateTime.UtcNow;
     private string? _lastFetchedString;
     
-    private static ServerinformationComponent? _instance;
-    
     protected override void OnInitialized()
     {
         ReloadService.OnCustomReload += Reload;
@@ -104,8 +102,6 @@
     {
         if (!firstRender) return;
 
-        _instance = this;
-        
         await Load();
     }
     
@@ -121,11 +117,11 @@
         _loading = true;
         StateHasChanged();
 
-        var access = await UserAccessService.GetUserAccess();
-        
-        var (lastTrySuccess, lastTry, cachedLastUpdate, cachedData) = ServerInformationCachedService.GetCachedData();
+        var (lastTrySuccess, lastTry, cachedLastUpdate, cachedData) = await ServerInformationCachedService.GetCachedData();
         if (lastTrySuccess.HasValue && lastTrySuccess.Value && cachedLastUpdate.HasValue)
         {
+            var access = await UserAccessService.GetUserAccess();
+
             _data = cachedData;
             _lastFetchedUtc = cachedLastUpdate.Value;
             _lastFetchedString = _lastFetchedUtc.ConvertTimeFromUtcWithTimeZone(access.Settings.TimeZone);
