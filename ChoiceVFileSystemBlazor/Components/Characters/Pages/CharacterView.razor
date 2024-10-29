@@ -238,8 +238,8 @@ else
     
     public void Dispose()
     {
-        _cancellationTokenSource?.Cancel();
-        _cancellationTokenSource?.Dispose();
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
         
         ReloadService.OnCustomReload -= LoadAllAsync;
     }
