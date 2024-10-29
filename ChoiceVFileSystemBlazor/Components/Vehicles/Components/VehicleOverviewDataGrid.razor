@@ -49,45 +49,25 @@ else
         _loading = true;
         StateHasChanged();
 
-        try
+        var result = await VehicleApi.HandleApiRequestAsync(
+            async token => 
+                CharacterId.HasValue ? 
+                    await VehicleApi.GetAllByCharacterIdAsync(CharacterId.Value, token) :
+                    CompanyId.HasValue ? 
+                        await VehicleApi.GetAllByCompanyIdAsync(CompanyId.Value, token) :
+                        await VehicleApi.GetAllAsync(token),
+            cancellationToken);
+        
+        if (result.IsSuccess)
         {
-            ApiResponse<List<VehicleApiModel>> response;
-
-            if (CharacterId.HasValue)
-            {
-                response = await VehicleApi.GetAllByCharacterIdAsync(CharacterId.Value);
-            }
-            else if (CompanyId.HasValue)
-            {
-                response = await VehicleApi.GetAllByCompanyIdAsync(CompanyId.Value);
-            }
-            else
-            {
-                response = await VehicleApi.GetAllAsync();
-            }
-
-            if (response.IsSuccessStatusCode)
-            {
-                _data = response.Content;
-            }
-            else
-            {
-                Snackbar.Add(response.Error.Message, Severity.Error);
-            }
+            _data = result.Data!;
         }
-        catch (HttpRequestException ex)
+        else
         {
-            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
         }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-        finally
-        {
-            _loading = false;
-        }
-
+        
+        _loading = false;
         StateHasChanged();
     }
 

@@ -121,11 +121,13 @@ else
     
     private string? _searchString;
     
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
 
@@ -153,6 +155,9 @@ else
     
     public void Dispose()
     {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+        
         ReloadService.OnCustomReload -= Load;
     }
 
@@ -174,31 +179,20 @@ else
         _loading = true;
         StateHasChanged();
 
-        try
+        var result = await VehicleApi.HandleApiRequestAsync(
+            async token => await VehicleApi.GetByVehicleIdAsync(_id, token),
+            _cancellationTokenSource.Token);
+        
+        if (result.IsSuccess)
         {
-            var response = await VehicleApi.GetByVehicleIdAsync(_id);
-            if (response.IsSuccessStatusCode)
-            {
-                _model = response.Content;
-            }
-            else
-            {
-                Snackbar.Add(response.Error.Message, Severity.Error);
-            }
+            _model = result.Data;
         }
-        catch (HttpRequestException ex)
+        else
         {
-            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-        finally
-        {
-            _loading = false;
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
         }
         
+        _loading = false;
         StateHasChanged();
     }
 
