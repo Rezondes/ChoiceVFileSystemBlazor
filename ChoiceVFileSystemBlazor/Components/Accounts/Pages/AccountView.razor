@@ -96,11 +96,13 @@ else
     private SupportfileOverviewDataGrid _supportfileOverviewDataGrid;
     private CharacterOverviewDataGrid _characterOverviewDataGrid;
     
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
     
@@ -128,6 +130,9 @@ else
     
     public void Dispose()
     {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+
         ReloadService.OnCustomReload -= LoadAllAsync;
     }
     
@@ -160,25 +165,17 @@ else
 
     private async Task LoadAccountAsync()
     {
-        try
+        var result = await AccountApi.HandleApiRequestAsync(
+            async token => await AccountApi.GetByIdAsync(_id, token),
+            _cancellationTokenSource.Token);
+        
+        if (result.IsSuccess)
         {
-            var response = await AccountApi.GetByIdAsync(_id);
-            if (response.IsSuccessStatusCode)
-            {
-                _model = response.Content;
-            }
-            else
-            {
-                Snackbar.Add(response.Error.Message, Severity.Error);
-            }
+            _model = result.Data;
         }
-        catch (HttpRequestException ex)
+        else
         {
-            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
         }
     }
     
@@ -210,16 +207,19 @@ else
             message = parsedMessage;
         }
         
-        var response = await AccountApi.KickAccountByAccountIdAsync(_model.Id, message!);
-        if (!response.IsSuccessStatusCode)
+        var result = await AccountApi.HandleApiRequestAsync(
+            async token => await AccountApi.KickAccountByAccountIdAsync(_model.Id, message!, token),
+            _cancellationTokenSource.Token);
+        
+        if (!result.IsSuccess)
         {
-            if (response.Error.Content == "AuthErrorMessage")
+            if (result.Error?.Message == "AuthErrorMessage")
             {
                 Snackbar.Add("Du hast kein Recht dazu das zu machen!", Severity.Error);
                 return;
             }
             
-            Snackbar.Add(response.Error.Message, Severity.Error);
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
             return;
         }
         
@@ -231,24 +231,26 @@ else
     {
         if (_model is null) return;
         
-        var result = await DialogService.ShowMessageBox(
+        var dialogData = await DialogService.ShowMessageBox(
             "Spieler entbannen", 
             "Bist du dir sicher, dass du diesen Spieler entbannen willst?", 
             yesText:"Spieler entbannen!", cancelText:"Abbrechen"
         );
-
-        if (result is null or false) return;
+        if (dialogData is null or false) return;
         
-        var response = await AccountApi.UnbanAccountByAccountIdAsync(_model.Id);
-        if (!response.IsSuccessStatusCode)
+        var result = await AccountApi.HandleApiRequestAsync(
+            async token => await AccountApi.UnbanAccountByAccountIdAsync(_model.Id, token),
+            _cancellationTokenSource.Token);
+        
+        if (!result.IsSuccess)
         {
-            if (response.Error.Content == "AuthErrorMessage")
+            if (result.Error?.Message == "AuthErrorMessage")
             {
                 Snackbar.Add("Du hast kein Recht dazu das zu machen!", Severity.Error);
                 return;
             }
             
-            Snackbar.Add(response.Error.Message, Severity.Error);
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
             return;
         }
         
@@ -284,16 +286,19 @@ else
             message = parsedMessage;
         }
         
-        var response = await AccountApi.BanAccountByAccountIdAsync(_model.Id, message!);
-        if (!response.IsSuccessStatusCode)
+        var result = await AccountApi.HandleApiRequestAsync(
+            async token => await AccountApi.BanAccountByAccountIdAsync(_model.Id, message!, token),
+            _cancellationTokenSource.Token);
+        
+        if (!result.IsSuccess)
         {
-            if (response.Error.Content == "AuthErrorMessage")
+            if (result.Error?.Message == "AuthErrorMessage")
             {
                 Snackbar.Add("Du hast kein Recht dazu das zu machen!", Severity.Error);
                 return;
             }
             
-            Snackbar.Add(response.Error.Message, Severity.Error);
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
             return;
         }
         
@@ -305,24 +310,26 @@ else
     {
         if (_model is null) return;
         
-        var result = await DialogService.ShowMessageBox(
+        var dialogData = await DialogService.ShowMessageBox(
             "Lightmode entfernen", 
             "Bist du dir sicher, dass du den Lightmode entfernen willst?", 
             yesText:"Lightmode entfernen!", cancelText:"Abbrechen"
         );
-
-        if (result is null or false) return;
+        if (dialogData is null or false) return;
         
-        var response = await AccountApi.RemoveLightmodeAsync(_model.Id);
-        if (!response.IsSuccessStatusCode)
+        var result = await AccountApi.HandleApiRequestAsync(
+            async token => await AccountApi.RemoveLightmodeAsync(_id, token),
+            _cancellationTokenSource.Token);
+        
+        if (!result.IsSuccess)
         {
-            if (response.Error.Content == "AuthErrorMessage")
+            if (result.Error?.Message == "AuthErrorMessage")
             {
                 Snackbar.Add("Du hast kein Recht dazu das zu machen!", Severity.Error);
                 return;
             }
             
-            Snackbar.Add(response.Error.Message, Severity.Error);
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
             return;
         }
         

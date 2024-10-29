@@ -17,7 +17,8 @@ public static class AccountHelper
         PageLoadingService loadingService,
         string socialClubName = "", 
         string discordId = "",
-        bool manuelInput = false
+        bool manuelInput = false,
+        CancellationToken cancellationToken = default
     )
     {
         const string discordInputLabel = "DiscordId";
@@ -91,16 +92,19 @@ public static class AccountHelper
         }
         
         loadingService.StartLoading();
-        var response = await accountApi.AddAccountAsync(parsedSocialClubName!, parsedDiscordId!);
-        if (!response.IsSuccessStatusCode)
+        
+        var result = await accountApi.HandleApiRequestAsync(
+            async token => await accountApi.AddAccountAsync(parsedSocialClubName!, parsedDiscordId!, token),
+            cancellationToken);
+        
+        if (!result.IsSuccess)
         {
-            snackbar.Add(response.Error.Content, Severity.Error);
+            snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
             loadingService.StopLoading();
             return false;
         }
-
-        var newAccount = response.Content;
         
+        var newAccount = result.Data;
         snackbar.Add($"Spieler gewhitelisted! " +
                      $"Id: {newAccount.Id}, " +
                      $"DiscordId: {newAccount.DiscordId}, " +

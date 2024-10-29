@@ -72,6 +72,8 @@ else
     
     private List<AccountApiModel> _accounts = [];
    
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
@@ -97,6 +99,9 @@ else
     
     public void Dispose()
     {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+
         ReloadService.OnCustomReload -= Load;
     }
 
@@ -105,31 +110,20 @@ else
         _loading = true;
         StateHasChanged();
         
-        try
+        var result = await AccountApi.HandleApiRequestAsync(
+            async token => await AccountApi.GetAllAsync(token),
+            _cancellationTokenSource.Token);
+        
+        if (result.IsSuccess)
         {
-            var response = await AccountApi.GetAllAsync();
-            if (response.IsSuccessStatusCode)
-            {
-                _accounts = response.Content;
-            }
-            else
-            {
-                Snackbar.Add(response.Error.Message, Severity.Error);
-            }
+            _accounts = result.Data!;
         }
-        catch (HttpRequestException ex)
+        else
         {
-            Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add(ex.Message, Severity.Error);
-        }
-        finally
-        {
-            _loading = false;
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
         }
         
+        _loading = false;
         StateHasChanged();
     }
     
@@ -196,7 +190,8 @@ else
             DialogService, 
             Snackbar, 
             AccountApi,
-            LoadingService
+            LoadingService,
+            cancellationToken: _cancellationTokenSource.Token
         );
 
         if (!added) return;
