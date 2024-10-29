@@ -204,11 +204,13 @@ else
     private CompanyOverviewDataGrid _companyOverviewDataGrid;
     private BankAccountOverviewDataGrid _bankAccountOverviewDataGrid;
     
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
     
@@ -236,6 +238,9 @@ else
     
     public void Dispose()
     {
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+        
         ReloadService.OnCustomReload -= LoadAllAsync;
     }
 
@@ -254,26 +259,28 @@ else
 
     private async Task LoadAllAsync()
     {
+        var cancellationToken = _cancellationTokenSource.Token;
+        
         _loading = true;
         _inventory = null;
         StateHasChanged();
 
-        await LoadCharacterAsync();
+        await LoadCharacterAsync(cancellationToken);
         
         _loading = false;
         StateHasChanged();
 
-        await LoadInventoryAsync();
-        await _vehicleOverviewDataGrid.Load();
-        await _companyOverviewDataGrid.Load();
-        await _bankAccountOverviewDataGrid.Load();
+        await LoadInventoryAsync(cancellationToken);
+        await _vehicleOverviewDataGrid.Load(cancellationToken);
+        await _companyOverviewDataGrid.Load(cancellationToken);
+        await _bankAccountOverviewDataGrid.Load(cancellationToken);
     }
 
-    private async Task LoadCharacterAsync()
+    private async Task LoadCharacterAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            var response = await CharacterApi.GetByCharacterIdAsync(_id);
+            var response = await CharacterApi.GetByCharacterIdAsync(_id, cancellationToken);
             if (response.IsSuccessStatusCode)
             {
                 _model = response.Content;
@@ -293,14 +300,14 @@ else
         }
     }
 
-    private async Task LoadInventoryAsync()
+    private async Task LoadInventoryAsync(CancellationToken cancellationToken = default)
     {
         _inventoryLoading = true;
         StateHasChanged();
         
         try
         {
-            var response = await InventoryApi.GetByCharacterIdAsync(_id);
+            var response = await InventoryApi.GetByCharacterIdAsync(_id, cancellationToken);
             if (response.IsSuccessStatusCode)
             {
                 _inventory = response.Content;
@@ -390,7 +397,7 @@ else
         
         try
         {
-            var response = await CharacterApi.ChangeDimensionAsync(_id, dimension);
+            var response = await CharacterApi.ChangeDimensionAsync(_id, dimension, _cancellationTokenSource.Token);
             if (response.IsSuccessStatusCode)
             {
                 var data = response.Content;
@@ -439,7 +446,7 @@ else
         );
         if (result is null or false) return;
 
-        var response = await CharacterApi.SetPermadeathActivatedAsync(_model.Id, !_model.PermadeathActivated);
+        var response = await CharacterApi.SetPermadeathActivatedAsync(_model.Id, !_model.PermadeathActivated, _cancellationTokenSource.Token);
         if (!response.IsSuccessStatusCode)
         {
             Snackbar.Add("Permadeathmode konnte nicht geändert werden.", Severity.Error);
@@ -467,7 +474,7 @@ else
         );
         if (result is null or false) return;
 
-        var response = await CharacterApi.SetCrimeFlagActiveAsync(_model.Id, !_model.CrimeFlagActivated);
+        var response = await CharacterApi.SetCrimeFlagActiveAsync(_model.Id, !_model.CrimeFlagActivated, _cancellationTokenSource.Token);
         if (!response.IsSuccessStatusCode)
         {
             Snackbar.Add("Crimeflag konnte nicht geändert werden.", Severity.Error);

@@ -42,7 +42,7 @@ else
 
     private List<CompanyApiModel> _data = [];
 
-    public async Task Load()
+    public async Task Load(CancellationToken cancellationToken = default)
     {
         _loading = true;
         StateHasChanged();

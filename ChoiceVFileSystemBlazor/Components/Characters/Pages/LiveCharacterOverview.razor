@@ -18,12 +18,13 @@
     private bool _shouldRedirect;
 
     private CharacterOverviewDataGrid _characterOverviewDataGrid;
-
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        _isAuthorized = UserAccessService.HasRight(PageRightRegistry.GetNeededRankForPage(Url));
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
         _shouldRedirect = !_isAuthorized;
     }
 
@@ -37,13 +38,16 @@
             return;
         }
 
-        await _characterOverviewDataGrid.Load();
+        await _characterOverviewDataGrid.Load(_cancellationTokenSource.Token);
         
         ReloadService.OnCustomReload += Reload;
     }
     
     public void Dispose()
     {
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+        
         ReloadService.OnCustomReload -= Reload;
     }
 

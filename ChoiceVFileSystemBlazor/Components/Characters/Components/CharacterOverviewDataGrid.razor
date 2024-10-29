@@ -49,7 +49,7 @@ else
     
     private List<CharacterApiModel>? _data = [];
     
-    public async Task Load()
+    public async Task Load(CancellationToken cancellationToken = default)
     {
         _loading = true;
         StateHasChanged();
@@ -60,11 +60,11 @@ else
 
             if (AccountId.HasValue)
             {
-                response = await CharacterApi.GetByAccountIdAsync(AccountId.Value);
+                response = await CharacterApi.GetByAccountIdAsync(AccountId.Value, cancellationToken);
             }
             else
             {
-                response = OnlyLive ? await CharacterApi.GetAllLiveAsync() : await CharacterApi.GetAllAsync();
+                response = OnlyLive ? await CharacterApi.GetAllLiveAsync(cancellationToken) : await CharacterApi.GetAllAsync(cancellationToken);
             }
 
             if (response.IsSuccessStatusCode)
@@ -76,10 +76,11 @@ else
                 Snackbar.Add(response.Error.Message, Severity.Error);
             }
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException)
         {
             Snackbar.Add(Constants.API_ERROR_NOT_AVAILABLE, Severity.Error);
         }
+        catch (TaskCanceledException){}
         catch (Exception ex)
         {
             Snackbar.Add(ex.Message, Severity.Error);
