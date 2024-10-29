@@ -70,28 +70,6 @@ public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy,
                 }
                 catch (HttpRequestException) { }
             }
-            else
-            {
-                try
-                {
-                    var accountResponse = await accountApi.GetByDiscordIdAsync(discordId);
-                    if (accountResponse.IsSuccessStatusCode)
-                    {
-                        var account = accountResponse.Content;
-                        if (account.Id != accessDbModel.AccountId)
-                        {
-                            accessDbModel.AccountId = account.Id;
-                            await accessProxy.UpdateAccountIdAsync(accessDbModel.Id, account.Id, Ulid.Empty);
-                        }
-                    }
-                    else
-                    {
-                        accessDbModel.AccountId = -1;
-                        await accessProxy.UpdateAccountIdAsync(accessDbModel.Id, -1, Ulid.Empty);
-                    }
-                }
-                catch (HttpRequestException) { }
-            }
             
             _userAccess = accessDbModel;
         }

@@ -264,9 +264,6 @@ if (!builder.Environment.IsDevelopment())
     });
 }
 
-builder.Services.AddDataProtection()
-    .SetDefaultKeyLifetime(TimeSpan.FromDays(14));
-
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
