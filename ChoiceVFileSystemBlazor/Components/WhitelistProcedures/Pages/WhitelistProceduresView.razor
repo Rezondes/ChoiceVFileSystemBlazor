@@ -432,14 +432,46 @@ else
     {
         if (_model is null) return;
         
-        var result = await DialogService.ShowMessageBox(
+        var result3 = await DialogService.ShowMessageBox(
+            "Whitelistprozess abschließen", 
+            "Hast du noch Zugriff auf den DiscordChannel? Wenn ja klicke auf Abbrechen.", 
+            yesText:"Abschließen", cancelText:"Abbrechen"
+        );
+
+        if (result3 is null or false) return;
+
+        var result1 = await DialogService.ShowMessageBox(
             "Whitelistprozess abschließen", 
             "Bist du dir sicher diesen Whitelistprozess zu abzuschließen?", 
             yesText:"Abschließen", cancelText:"Abbrechen"
         );
 
-        if (result is null or false) return;
+        if (result1 is null or false) return;
+        
+        var result2 = await DialogService.ShowMessageBox(
+            "Whitelistprozess abschließen", 
+            "Bist du dir WIRKLICH sicher diesen Whitelistprozess zu abzuschließen?", 
+            yesText:"Abschließen", cancelText:"Abbrechen"
+        );
 
+        if (result2 is null or false) return;
+        
+        var result4 = await DialogService.ShowMessageBox(
+            "Whitelistprozess abschließen", 
+            "Sicher Sicher Sicher Sicher, dass du keinen Zugriff auf den Channel hast?", 
+            yesText:"Abschließen", cancelText:"Abbrechen"
+        );
+
+        if (result4 is null or false) return;
+        
+        var result5 = await DialogService.ShowMessageBox(
+            "Whitelistprozess abschließen", 
+            "Letzte Chance!", 
+            yesText:"Abschließen", cancelText:"Abbrechen"
+        );
+
+        if (result5 is null or false) return;
+        
         LoadingService.StartLoading();
         
         try
