@@ -26,7 +26,7 @@ public interface IBaseApiInterface
         {
             if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(List<>))
             {
-                return ApiResult<T>.FromSuccess((T)Activator.CreateInstance(typeof(T))!);
+                return ApiResult<T>.FromSuccess((T)Activator.CreateInstance(typeof(T))!, true);
             }
             
             return ApiResult<T>.FromSuccess(default!, true);
