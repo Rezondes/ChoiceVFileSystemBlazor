@@ -120,11 +120,11 @@ else
                 }
 
                 <MudText Typo="Typo.h6" Class="mt-2">
-                    @((context.Title.Length > 50) ? context.Title.Substring(0, 50) + "..." : context.Title)
+                    @((context.Title.Length > 50) ? context.Title[..50] + "..." : context.Title)
                 </MudText>
 
                 <MudText Typo="Typo.body2" Class="mt-1">
-                    @((context.Description.Length > 100) ? context.Description.Substring(0, 100) + "..." : context.Description)
+                    @((context.Description.Length > 100) ? context.Description[..100] + "..." : context.Description)
                 </MudText>
             </MudPaper>
         </ItemRenderer>
@@ -163,9 +163,9 @@ else
     {
         _hubConnection = HubHelper.GetHubConnection(Navigation, BugTrackerHub.HubPattern);
 
-        _hubConnection.On<BugTrackerTaskItemDbModel>("ReceiveTaskUpdate", async (task) =>
+        _hubConnection.On<Ulid>("ReceiveTaskUpdate", async (taskId) =>
         {
-            await UpdateTaskFromHub(task);
+            await InvokeAsync(UpdateTaskFromHub);
             await InvokeAsync(StateHasChanged);
         });
 
@@ -181,6 +181,8 @@ else
 
     private async Task ItemUpdated(MudItemDropInfo<BugTrackerTaskItemDbModel> dropItem)
     {
+        if (!hasScpAccess) return;
+        
         if (dropItem.Item is null) return;
 
         Enum.TryParse(dropItem.DropzoneIdentifier, out BugTrackerStatusEnum value);
@@ -200,7 +202,7 @@ else
         }
 
         await BugTrackerProxy.UpdateAsync(task);
-        await _hubConnection.InvokeAsync("SendTaskUpdate", task);
+        await _hubConnection.InvokeAsync("SendTaskUpdate", task.Id);
     }
 
     private async Task AddTask(BugTrackerTaskItemDbModel task)
@@ -211,33 +213,23 @@ else
             return;
         }
 
-        await _hubConnection.InvokeAsync("SendTaskUpdate", task);
+        await _hubConnection.InvokeAsync("SendTaskUpdate", task.Id);
     }
 
-    private async Task UpdateTaskFromHub(BugTrackerTaskItemDbModel task)
+    private async Task UpdateTaskFromHub()
     {
-        var existingTask = _data.FirstOrDefault(t => t.Id == task.Id);
-        if (existingTask is null)
-        {
-            _data = [.._data, task];
-        }
-        else
-        {
-            existingTask.Title = task.Title;
-            existingTask.Description = task.Description;
-            existingTask.Status = task.Status;
-            existingTask.Category = task.Category;
-            existingTask.Comments = task.Comments;
+        _loading = true;
+        StateHasChanged();
         
-            _data = [.._data];
-        }
+        _data = await BugTrackerProxy.GetAllAsync();
 
-        await InvokeAsync(StateHasChanged);
+        _loading = false;
+        StateHasChanged();
     }
 
     private async Task AddTask(BugTrackerStatusEnum status)
     {
-        if (!await IsAuthenticated()) return;
+        if (!isAuthenticated) return;
         
         List<InputOptionModel> statusSelect =
         [

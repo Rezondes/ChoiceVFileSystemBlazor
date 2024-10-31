@@ -7,8 +7,8 @@ public class BugTrackerHub : Hub
 {
     public const string HubPattern = "/bugtrackerHub";
     
-    public async Task SendTaskUpdate(BugTrackerTaskItemDbModel task)
+    public async Task SendTaskUpdate(Ulid taskId)
     {
-        await Clients.All.SendAsync("ReceiveTaskUpdate", task);
+        await Clients.All.SendAsync("ReceiveTaskUpdate", taskId);
     }
 }
