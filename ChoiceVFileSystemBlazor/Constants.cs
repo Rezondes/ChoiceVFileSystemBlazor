@@ -2,7 +2,7 @@
 
 public static class Constants
 {
-    public const string VERSION = "v31102024_6";
+    public const string VERSION = "v31102024_7";
     
     public const int TOOLTIP_DURATION = 500;
     public const string CLOUD_URL = "https://cloud.choicev.net/apps/dashboard/";
