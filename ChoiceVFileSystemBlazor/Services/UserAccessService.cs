@@ -10,17 +10,38 @@ using Microsoft.AspNetCore.Components.Authorization;
 
 namespace ChoiceVFileSystemBlazor.Services;
 
-public class UserAccessService(IAccountApi accountApi, IAccessProxy accessProxy, IRankProxy rankProxy, IDiscordRolesProxy discordRolesProxy, AuthenticationStateProvider authenticationStateProvider)
+public class UserAccessService(
+    IAccountApi accountApi, IAccessProxy accessProxy, 
+    IRankProxy rankProxy, IDiscordRolesProxy discordRolesProxy, 
+    AuthenticationStateProvider authenticationStateProvider)
 {
     private AccessDbModel? _userAccess;
     private List<RightEnum> _userRights = [];
 
-    public bool HasClaims(ClaimsPrincipal user)
+    public static string? GetDiscordUserId(ClaimsPrincipal user)
     {
-        var discordId = user.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-        var discordName = user.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
+        return user.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+    }
+    
+    public static string? GetDiscordUserName(ClaimsPrincipal user)
+    {
+        return user.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
+    }
+    
+    public static bool HasClaims(ClaimsPrincipal user)
+    {
+        var discordId = GetDiscordUserId(user);
+        var discordName = GetDiscordUserName(user);
         
         return discordId is not null && discordName is not null;
+    }
+
+    public static async Task<bool> IsDiscordIdValid(ClaimsPrincipal user, DiscordService discordService)
+    {
+        var discordId = GetDiscordUserId(user);
+        if (discordId is null) return false;
+        var isValid = await discordService.ValidateDiscordId(discordId);
+        return isValid;
     }
     
     public async Task InitializeUserAsync(ClaimsPrincipal user)

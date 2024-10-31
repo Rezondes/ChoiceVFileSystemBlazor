@@ -1,0 +1,153 @@
+@inherits LayoutComponentDisposableBase
+
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using Microsoft.AspNetCore.Authentication
+
+<MudThemeProvider Theme="@_currentTheme" IsDarkMode="@_isDarkMode"/>
+<MudPopoverProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<MudLayout>
+    <MudAppBar>
+        <MudImage Src="choicev_logo_full.png"
+                  Alt="ChoiceV Logo"
+                  Style="
+                        width: 115px; 
+                        margin-bottom: 3px;
+                        margin-left: -5px;
+                  " />
+        <MudSpacer/>
+
+        <MudButtonGroup Color="Color.Inherit">
+            <ThemeModeToggle IsDarkMode="_isDarkMode" OnDarkModeChanged="ToggleDarkMode"/>
+            @if (IsAuthenticated().GetAwaiter().GetResult())
+            {
+                <MudTooltip Text="Ausloggen" Duration="Constants.TOOLTIP_DURATION">
+                    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="Logout"/>
+                </MudTooltip>
+            }
+            else
+            {
+                <MudTooltip Text="Einloggen" Duration="Constants.TOOLTIP_DURATION">
+                    <MudIconButton Icon="@Icons.Material.Filled.Login" Color="Color.Inherit" OnClick="Login"/>
+                </MudTooltip>
+            }
+        </MudButtonGroup>
+    </MudAppBar>
+    <MudMainContent Style="height: 100%; overflow: hidden;">
+        <MudContainer Class="px-8" MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: hidden; padding: 16px 0; position: relative;">
+            @Body
+
+            <MudOverlay Visible="@LoadingService.ShowLoading" DarkBackground="true" ZIndex="99999" Absolute="true">
+                <PageLoading/>
+            </MudOverlay>
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private readonly MudTheme _currentTheme = new()
+    {
+        PaletteDark = new PaletteDark
+        {
+            Primary = "rgb(204, 138, 37)",
+            TableHover = "rgb(204, 138, 37)"
+        },
+        PaletteLight = new PaletteLight
+        {
+            Primary = "rgb(204, 138, 37)",
+            AppbarBackground = "rgb(90,90,100)",
+            TableHover = "rgb(204, 138, 37)"
+        }
+    };
+    
+    private bool _isDarkMode = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        
+        var loginRequired = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).ContainsKey("login");
+        if (loginRequired)
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (UserAccessService.HasClaims(authState.User))
+            {
+                Navigation.NavigateTo("/", forceLoad: true);
+                return;
+            }
+            var context = HttpContextAccessor.HttpContext;
+            if (context is null) return;
+            await context.ChallengeAsync("Discord");
+        }
+        
+        var logoutRequired = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).ContainsKey("logout");
+        if (logoutRequired)
+        {
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (!UserAccessService.HasClaims(authState.User)) return;
+            var context = HttpContextAccessor.HttpContext;
+            if (context is null) return;
+            
+            context.Response.Cookies.Delete(".AspNetCore.Identity.Application", new CookieOptions
+            {
+                Secure = true,
+                SameSite = SameSiteMode.None
+            });
+            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            
+            Navigation.NavigateTo("/", forceLoad: true);
+        }
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        await JS.InvokeVoidAsync("setFavicon", "choicev_logo_partial.png");
+    }
+    
+    private void ToggleDarkMode(bool newValue)
+    {
+        _isDarkMode = newValue;
+        StateHasChanged();
+    }
+
+    private async Task<bool> IsAuthenticated()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (!UserAccessService.HasClaims(authState.User))
+        {
+            return false;
+        }
+
+        // var isValid = await UserAccessService.IsDiscordIdValid(authState.User, DiscordService);
+        // if (!isValid)
+        // {
+        //     await Logout();
+        //     Snackbar.Add("Code: PudelKröte. Bitte versuche dich erneut einzuloggen oder melde dich im Support.", Severity.Error);
+        //     return false;
+        // }
+        
+        return true;
+    }
+
+    private async Task Login()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (UserAccessService.HasClaims(authState.User)) return;
+        
+        var currentUrl = Navigation.Uri.Replace(Navigation.BaseUri, "");
+        Navigation.NavigateTo($"/{Uri.EscapeDataString(currentUrl)}?login=true", forceLoad: true);
+    }
+
+    private async Task Logout()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (!UserAccessService.HasClaims(authState.User)) return;
+        
+        var currentUrl = Navigation.Uri.Replace(Navigation.BaseUri, "");
+        Navigation.NavigateTo($"/{Uri.EscapeDataString(currentUrl)}?logout=true", forceLoad: true);
+    }
+}

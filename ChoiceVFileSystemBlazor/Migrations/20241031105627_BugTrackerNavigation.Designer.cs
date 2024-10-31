@@ -3,6 +3,7 @@ using System;
 using ChoiceVFileSystemBlazor.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChoiceVFileSystemBlazor.Migrations
 {
     [DbContext(typeof(ChoiceVFileSystemBlazorDatabaseContext))]
-    partial class ChoiceVFileSystemBlazorDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20241031105627_BugTrackerNavigation")]
+    partial class BugTrackerNavigation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,10 +117,6 @@ namespace ChoiceVFileSystemBlazor.Migrations
                         .HasColumnType("tinyint(1)");
 
                     b.Property<string>("DiscordId")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("DiscordName")
                         .IsRequired()
                         .HasColumnType("longtext");
 

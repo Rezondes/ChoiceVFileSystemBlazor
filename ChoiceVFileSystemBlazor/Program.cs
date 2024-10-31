@@ -4,11 +4,14 @@ using System.Text;
 using System.Text.Json;
 using ChoiceVFileSystemBlazor.Components;
 using ChoiceVFileSystemBlazor.Components._Base;
+using ChoiceVFileSystemBlazor.Components._BugTracker.Hubs;
 using ChoiceVFileSystemBlazor.Components._Layout.Hubs;
 using ChoiceVFileSystemBlazor.Components.Supportfiles.Hubs;
 using ChoiceVFileSystemBlazor.Database;
 using ChoiceVFileSystemBlazor.Database.Accesses.Proxies;
 using ChoiceVFileSystemBlazor.Database.Accesses.Proxies.Interfaces;
+using ChoiceVFileSystemBlazor.Database.BugTracker.Proxies;
+using ChoiceVFileSystemBlazor.Database.BugTracker.Proxies.Interfaces;
 using ChoiceVFileSystemBlazor.Database.Discord.Proxies;
 using ChoiceVFileSystemBlazor.Database.Discord.Proxies.Interfaces;
 using ChoiceVFileSystemBlazor.Database.News.Proxies;
@@ -251,6 +254,7 @@ builder.Services.AddScoped<IAccessLogsProxy, AccessLogsProxy>();
 builder.Services.AddScoped<IDiscordRolesProxy, DiscordRoleProxy>();
 builder.Services.AddScoped<IDiscordRoleLogsProxy, DiscordRoleLogsProxy>();
 builder.Services.AddScoped<INewsProxy, NewsProxy>();
+builder.Services.AddScoped<IBugTrackerProxy, BugTrackerProxy>();
 #endregion
 
 if (!builder.Environment.IsDevelopment())
@@ -284,6 +288,7 @@ app.MapRazorComponents<App>()
 
 app.MapHub<BaseHub>(BaseHub.HubPattern);
 app.MapHub<FileHub>(FileHub.HubPattern);
+app.MapHub<BugTrackerHub>(BugTrackerHub.HubPattern);
 
 app.UseStatusCodePages(context =>
 {

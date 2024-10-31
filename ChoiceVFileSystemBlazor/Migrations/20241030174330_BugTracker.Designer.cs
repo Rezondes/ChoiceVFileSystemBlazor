@@ -3,6 +3,7 @@ using System;
 using ChoiceVFileSystemBlazor.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChoiceVFileSystemBlazor.Migrations
 {
     [DbContext(typeof(ChoiceVFileSystemBlazorDatabaseContext))]
-    partial class ChoiceVFileSystemBlazorDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20241030174330_BugTracker")]
+    partial class BugTracker
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -107,6 +110,9 @@ namespace ChoiceVFileSystemBlazor.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("varchar(255)");
 
+                    b.Property<string>("BugTrackerTaskItemDbModelId")
+                        .HasColumnType("varchar(255)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -117,21 +123,13 @@ namespace ChoiceVFileSystemBlazor.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("DiscordName")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("TaskId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("TaskId");
+                    b.HasIndex("BugTrackerTaskItemDbModelId");
 
                     b.ToTable("BugTrackerTaskCommentDbModels");
                 });
@@ -486,13 +484,9 @@ namespace ChoiceVFileSystemBlazor.Migrations
 
             modelBuilder.Entity("ChoiceVFileSystemBlazor.Database.BugTracker.DbModels.BugTrackerTaskCommentDbModel", b =>
                 {
-                    b.HasOne("ChoiceVFileSystemBlazor.Database.BugTracker.DbModels.BugTrackerTaskItemDbModel", "Task")
+                    b.HasOne("ChoiceVFileSystemBlazor.Database.BugTracker.DbModels.BugTrackerTaskItemDbModel", null)
                         .WithMany("Comments")
-                        .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Task");
+                        .HasForeignKey("BugTrackerTaskItemDbModelId");
                 });
 
             modelBuilder.Entity("ChoiceVFileSystemBlazor.Database.News.DbModels.NewsDbModel", b =>

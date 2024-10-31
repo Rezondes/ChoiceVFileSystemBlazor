@@ -1,5 +1,6 @@
 ﻿@inject UserAccessService UserAccessService
 
+@using ChoiceVFileSystemBlazor.Components._BugTracker.Layout
 @using Microsoft.AspNetCore.Authentication
 @using ChoiceVFileSystemBlazor.Components._CopsAndCrimes._Layout
 @implements IDisposable
@@ -13,6 +14,19 @@
             </Found>
             <NotFound>
                 <LayoutView Layout="@typeof(CopsAndCrimesLayout)">
+                    <p>Sorry, there's nothing at this address.</p>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    }
+    else if (_isBugTracker)
+    {
+        <Router AppAssembly="@typeof(Program).Assembly">
+            <Found Context="routeData">
+                <RouteView RouteData="routeData" DefaultLayout="@typeof(BugTrackerLayout)"/>
+            </Found>
+            <NotFound>
+                <LayoutView Layout="@typeof(BugTrackerLayout)">
                     <p>Sorry, there's nothing at this address.</p>
                 </LayoutView>
             </NotFound>
@@ -45,6 +59,7 @@
 
 @code {
     private static bool _isCopsAndCrimes;
+    private static bool _isBugTracker;
     private static Routes? _instance;
     
     protected override async Task OnInitializedAsync()
@@ -53,13 +68,32 @@
         var newUri = new Uri(currentUri);
         var currentHost = newUri.Host;
 
-        _isCopsAndCrimes = currentHost.Contains("copsandcrimes.de") || currentHost.Contains("localhost");
+        _isCopsAndCrimes = currentHost.Contains("copsandcrimes.de");
+        _isBugTracker = currentHost.Contains("bugtracker.choicev.net");
+
+        if (false)
+        {
+            _isCopsAndCrimes = currentHost.Contains("localhost");
+        }
+        
+        if (false)
+        {
+            _isBugTracker = currentHost.Contains("localhost");
+        }
         
         if (_isCopsAndCrimes)
         {
             if (newUri.AbsolutePath != "/") return;
             
             Navigation.NavigateTo("/landingpage");
+            return;
+        }
+        
+        if (_isBugTracker)
+        {
+            if (newUri.AbsolutePath != "/") return;
+            
+            Navigation.NavigateTo("/bugtracker");
             return;
         }
         
@@ -75,6 +109,7 @@
         await UserAccessService.InitializeUserAsync(authState.User);
         
         if (newUri.AbsolutePath != "/landingpage") return;
+        
         Navigation.NavigateTo("/");
     }
     

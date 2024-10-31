@@ -1,0 +1,114 @@
+@using ChoiceVFileSystemBlazor.Database.BugTracker.DbModels
+@using ChoiceVFileSystemBlazor.Database.BugTracker.Proxies.Interfaces
+@using ChoiceVFileSystemBlazor.Database.BugTracker.Enums
+ 
+@inject IBugTrackerProxy BugTrackerProxy
+
+@code {
+    [CascadingParameter] private MudDialogInstance _dialog { get; set; }
+    [Parameter] public BugTrackerTaskItemDbModel TaskItem { get; set; }
+    private string _newCommentText;
+
+    private void CloseDialog() => _dialog.Close();
+
+    private async Task AddComment()
+    {
+        if (string.IsNullOrWhiteSpace(_newCommentText)) return;
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (!UserAccessService.HasClaims(authState.User)) return;
+
+        var discordId = UserAccessService.GetDiscordUserId(authState.User)!;
+        var discordName = UserAccessService.GetDiscordUserName(authState.User)!;
+        
+        var added = await BugTrackerProxy.AddCommentAsync(
+            TaskItem.Id, 
+            new BugTrackerTaskCommentDbModel(
+                TaskItem.Id, 
+                _newCommentText, 
+                discordId, 
+                discordName
+        ));
+        
+        if (!added)
+        {
+            return;
+        }
+        
+        TaskItem.Comments.Add(new BugTrackerTaskCommentDbModel { Message = _newCommentText });
+        
+        _newCommentText = string.Empty;
+    }
+
+    private async Task SaveTaskChanges()
+    {
+        await BugTrackerProxy.UpdateAsync(TaskItem); 
+        _dialog.Close();
+    }
+}
+
+<style>
+    .divider-class{
+        margin: 10px 0;
+        opacity: 0;
+    }
+</style>
+
+<MudDialog>
+    <DialogContent>
+        <MudPaper Class="pa-4">
+            <MudTextField Label="Titel" @bind-Value="TaskItem.Title" Class="mt-4" />
+        </MudPaper>
+            
+        <MudDivider Class="divider-class"/>
+
+        <MudPaper Class="pa-4">
+            <MudTextField Label="Beschreibung" @bind-Value="TaskItem.Description" Lines="10" />
+        </MudPaper>
+        
+        <MudDivider Class="divider-class"/>
+
+        <MudPaper Class="pa-4">
+            <MudSelect Label="Kategorie" T="BugTrackerCategoryEnum" @bind-Value="TaskItem.Category">
+                @foreach (var category in Enum.GetValues(typeof(BugTrackerCategoryEnum)))
+                {
+                    <MudSelectItem T="BugTrackerCategoryEnum" Value="@((BugTrackerCategoryEnum)category)">@category</MudSelectItem>
+                }
+            </MudSelect>
+        </MudPaper>
+        
+        <MudDivider Class="divider-class"/>
+
+        <MudPaper Class="pa-4">
+            <MudTextField Label="Neuer Kommentar" @bind-Value="_newCommentText" Lines="5" Adornment="Adornment.End"
+                          AdornmentIcon="@Icons.Material.Filled.Send" OnAdornmentClick="AddComment"/>
+       
+            <MudDivider Class="divider-class"/>
+
+            <MudText Typo="Typo.subtitle2" Class="mt-4">Kommentare</MudText>
+            <MudList T="BugTrackerTaskCommentDbModel">
+                @foreach (var comment in TaskItem.Comments)
+                {
+                    <MudListItem>
+                        <MudText Typo="Typo.h6" Class="mt-2">
+                            [@comment.DiscordId] @comment.DiscordName
+                        </MudText>
+
+                        <MudText Typo="Typo.body2" Class="mt-1 py-5">
+                            @comment.Message
+                        </MudText>
+
+                        <MudText Typo="Typo.body2" Class="mt-1" Style="opacity: 0.2; color: white;">
+                            @comment.CreatedAt
+                        </MudText>
+                        
+                    </MudListItem>
+                }
+            </MudList>
+        </MudPaper>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="SaveTaskChanges">Speichern</MudButton>
+        <MudButton Color="Color.Secondary" OnClick="CloseDialog">Abbrechen</MudButton>
+    </DialogActions>
+</MudDialog>

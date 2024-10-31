@@ -1,0 +1,347 @@
+@page "/bugtracker"
+
+@using ChoiceVFileSystemBlazor.Components._BugTracker.Dialogs
+@using ChoiceVFileSystemBlazor.Components._BugTracker.Hubs
+@using ChoiceVFileSystemBlazor.Database.BugTracker.Enums
+@using ChoiceVFileSystemBlazor.Database.BugTracker.Proxies.Interfaces
+@using ChoiceVFileSystemBlazor.Database.BugTracker.DbModels
+
+@inject IBugTrackerProxy BugTrackerProxy
+
+@if (_loading)
+{
+    <LoadingComponent/>
+}
+else
+{
+    <MudDropContainer
+        T="BugTrackerTaskItemDbModel"
+        ItemDisabled="@(item => !IsAuthenticated().GetAwaiter().GetResult())"
+        Items="_data"
+        ItemsSelector="@((item, dropzone) => item.Status.ToString() == dropzone)"
+        ItemDropped="ItemUpdated"
+        Class="d-flex"
+        Style="height: 90vh">
+
+        <ChildContent>
+            <MudGrid>
+                <MudItem xs="4">
+                    <MudDropZone T="BugTrackerTaskItemDbModel" AllowReorder Identifier="@BugTrackerStatusEnum.Created.ToString()" Class="rounded mud-background-gray pa-6 ma-8 flex-grow-1">
+                        <MudItem Class="d-flex">
+                            <MudText Typo="Typo.h6" Class="mb-4">Neu</MudText>
+                            
+                            @if (IsAuthenticated().GetAwaiter().GetResult())
+                            {
+                                <MudTooltip Text="Bug hinzufügen" Duration="@Constants.TOOLTIP_DURATION">
+                                    <MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.Add" OnClick="() => AddTask(BugTrackerStatusEnum.Created)"/>
+                                </MudTooltip>
+                            }
+                        </MudItem>
+                    </MudDropZone>
+                </MudItem>
+                <MudItem xs="4">
+                    <MudDropZone T="BugTrackerTaskItemDbModel" AllowReorder Identifier="@BugTrackerStatusEnum.WorkInProgress.ToString()" Class="rounded mud-background-gray pa-6 ma-8 flex-grow-1">
+                        <MudItem Class="d-flex">
+                            <MudText Typo="Typo.h6" Class="mb-4">In Bearbeitung</MudText>
+
+                            @if (IsAuthenticated().GetAwaiter().GetResult())
+                            {
+                                <MudTooltip Text="Bug hinzufügen" Duration="@Constants.TOOLTIP_DURATION">
+                                    <MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.Add" OnClick="() => AddTask(BugTrackerStatusEnum.WorkInProgress)"/>
+                                </MudTooltip>
+                            }
+                        </MudItem>
+                    </MudDropZone>
+                </MudItem>
+                <MudItem xs="4">
+                    <MudDropZone T="BugTrackerTaskItemDbModel" AllowReorder Identifier="@BugTrackerStatusEnum.Done.ToString()" Class="rounded mud-background-gray pa-6 ma-8 flex-grow-1">
+                        <MudItem Class="d-flex">
+                            <MudText Typo="Typo.h6" Class="mb-4">Abgeschlossen</MudText>
+
+                            @if (IsAuthenticated().GetAwaiter().GetResult())
+                            {
+                                <MudTooltip Text="Bug hinzufügen" Duration="@Constants.TOOLTIP_DURATION">
+                                    <MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.Add" OnClick="() => AddTask(BugTrackerStatusEnum.Done)"/>
+                                </MudTooltip>
+                            }
+                        </MudItem>
+                    </MudDropZone>
+                </MudItem>
+            </MudGrid>
+        </ChildContent>
+        <ItemRenderer>
+            <MudPaper Elevation="25" Class="pa-4 my-4" @onclick="@(() => OpenItemDialog(context))" Style="overflow: hidden">
+                @if (context.Category == BugTrackerCategoryEnum.Allgemein)
+                {
+                    <MudChip T="string" Color="Color.Primary">Allgemein</MudChip>
+                }
+                else if (context.Category == BugTrackerCategoryEnum.Modding)
+                {
+                    <MudChip T="string" Color="Color.Info">Modding</MudChip>
+                }
+                else if (context.Category == BugTrackerCategoryEnum.Performance)
+                {
+                    <MudChip T="string" Color="Color.Secondary">Performance</MudChip>
+                }
+                else if (context.Category == BugTrackerCategoryEnum.Funktion)
+                {
+                    <MudChip T="string" Color="Color.Warning">Funktion</MudChip>
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+
+                <MudText Typo="Typo.h6" Class="mt-2">
+                    @((context.Title.Length > 50) ? context.Title.Substring(0, 50) + "..." : context.Title)
+                </MudText>
+
+                <MudText Typo="Typo.body2" Class="mt-1">
+                    @((context.Description.Length > 100) ? context.Description.Substring(0, 100) + "..." : context.Description)
+                </MudText>
+            </MudPaper>
+        </ItemRenderer>
+    </MudDropContainer>
+}
+
+
+@code {
+    private bool _loading = true;
+
+    private List<BugTrackerTaskItemDbModel> _data = [];
+
+    private HubConnection? _hubConnection;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        _data = await BugTrackerProxy.GetAllAsync();
+        try
+        {
+            await StartHubConnection();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        _loading = false;
+        StateHasChanged();
+    }
+
+    private async Task StartHubConnection()
+    {
+        _hubConnection = HubHelper.GetHubConnection(Navigation, BugTrackerHub.HubPattern);
+
+        _hubConnection.On<BugTrackerTaskItemDbModel>("ReceiveTaskUpdate", async (task) =>
+        {
+            UpdateTaskFromHub(task);
+            await InvokeAsync(StateHasChanged);
+        });
+
+        _hubConnection.Closed += async (_) =>
+        {
+            Console.WriteLine("Connection closed. Attempting to reconnect...");
+            await Task.Delay(1000);
+            await StartHubConnection();
+        };
+
+        await _hubConnection.StartAsync();
+    }
+
+    private async Task ItemUpdated(MudItemDropInfo<BugTrackerTaskItemDbModel> dropItem)
+    {
+        if (dropItem.Item is null) return;
+
+        Enum.TryParse(dropItem.DropzoneIdentifier, out BugTrackerStatusEnum value);
+        if (dropItem.Item.Status == value) return;
+
+        dropItem.Item.Status = value;
+
+        await UpdateTask(dropItem.Item);
+    }
+
+    private async Task UpdateTask(BugTrackerTaskItemDbModel task)
+    {
+        if (_hubConnection is null || _hubConnection.State == HubConnectionState.Disconnected)
+        {
+            Snackbar.Add("Code: BuggyDackel. Bitte Lade die Seite neu!", Severity.Error);
+            return;
+        }
+
+        await BugTrackerProxy.UpdateAsync(task);
+        await _hubConnection.InvokeAsync("SendTaskUpdate", task);
+    }
+
+    private async Task AddTask(BugTrackerTaskItemDbModel task)
+    {
+        if (_hubConnection is null || _hubConnection.State == HubConnectionState.Disconnected)
+        {
+            Snackbar.Add("Code: BuggyCorgie. Bitte Lade die Seite neu!", Severity.Error);
+            return;
+        }
+
+        await _hubConnection.InvokeAsync("SendTaskUpdate", task);
+    }
+
+    private void UpdateTaskFromHub(BugTrackerTaskItemDbModel task)
+    {
+        var existingTask = _data.FirstOrDefault(t => t.Id == task.Id);
+        if (existingTask is null)
+        {
+            _data.Add(task);
+            return;
+        }
+
+        existingTask.Title = task.Title;
+        existingTask.Description = task.Description;
+        existingTask.Status = task.Status;
+        existingTask.Category = task.Category;
+        existingTask.Comments = task.Comments;
+        StateHasChanged();
+    }
+
+    private async Task AddTask(BugTrackerStatusEnum status)
+    {
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                "Titel",
+                string.Empty,
+                "Kuhler Titel"
+            ),
+            new(
+                InputTypes.Text,
+                "Beschreibung",
+                string.Empty,
+                "Kuhle Beschreibung",
+                7
+            ),
+            new(
+                InputTypes.Select,
+                "Kategorie",
+                BugTrackerCategoryEnum.Allgemein.ToString(),
+                BugTrackerCategoryEnum.Allgemein.ToString(),
+                [
+                    new(BugTrackerCategoryEnum.Allgemein.ToString(), BugTrackerCategoryEnum.Allgemein.ToString()),
+                    new(BugTrackerCategoryEnum.Modding.ToString(), BugTrackerCategoryEnum.Modding.ToString()),
+                    new(BugTrackerCategoryEnum.Performance.ToString(), BugTrackerCategoryEnum.Performance.ToString()),
+                    new(BugTrackerCategoryEnum.Funktion.ToString(), BugTrackerCategoryEnum.Funktion.ToString())
+                ]
+            ),
+            new(
+                InputTypes.Select,
+                "Priorität",
+                BugTrackerPriorityEnum.Normal.ToString(),
+                BugTrackerPriorityEnum.Normal.ToString(),
+                [
+                    new(BugTrackerPriorityEnum.Low.ToString(), BugTrackerPriorityEnum.Low.ToString()),
+                    new(BugTrackerPriorityEnum.Normal.ToString(), BugTrackerPriorityEnum.Normal.ToString()),
+                    new(BugTrackerPriorityEnum.Important.ToString(), BugTrackerPriorityEnum.Important.ToString()),
+                    new(BugTrackerPriorityEnum.Critical.ToString(), BugTrackerPriorityEnum.Critical.ToString())
+                ]
+            ),
+            new(
+                InputTypes.Select,
+                "Status",
+                status.ToString(),
+                BugTrackerStatusEnum.Created.ToString(),
+                [
+                    new(BugTrackerStatusEnum.Created.ToString(), BugTrackerStatusEnum.Created.ToString()),
+                    new(BugTrackerStatusEnum.WorkInProgress.ToString(), BugTrackerStatusEnum.WorkInProgress.ToString()),
+                    new(BugTrackerStatusEnum.Done.ToString(), BugTrackerStatusEnum.Done.ToString())
+                ]
+            ),
+        };
+
+        var dialogData = await DialogService.OpenDialog(
+            "Bug melden",
+            "Was benötigen wir von dir?\n- Eine detaillierte Beschreibung des Bugs\n- Wenn vorhanden ein Screenshot / Video",
+            "Bug melden",
+            inputs);
+        if (dialogData is null) return;
+
+        var (validatedTitle, parsedTitle) = dialogData[0].ValidateInput<string>();
+        if (!validatedTitle)
+        {
+            Snackbar.Add("Du hast keinen validen Titel eingegeben!", Severity.Error);
+            return;
+        }
+
+        var (validatedDescription, parsedDescription) = dialogData[1].ValidateInput<string>();
+        if (!validatedDescription)
+        {
+            Snackbar.Add("Du hast keine valide Beschreibung eingegeben!", Severity.Error);
+            return;
+        }
+
+        var (validatedCategory, parsedCategory) = dialogData[2].ValidateInput<BugTrackerCategoryEnum>();
+        if (!validatedCategory)
+        {
+            Snackbar.Add("Du hast keine valide Kategorie eingegeben!", Severity.Error);
+            return;
+        }
+
+        var (validatedPriority, parsedPriority) = dialogData[3].ValidateInput<BugTrackerPriorityEnum>();
+        if (!validatedPriority)
+        {
+            Snackbar.Add("Du hast keine valide Priorität eingegeben!", Severity.Error);
+            return;
+        }
+
+        var (validatedStatus, parsedStatus) = dialogData[4].ValidateInput<BugTrackerStatusEnum>();
+        if (!validatedStatus)
+        {
+            Snackbar.Add("Du hast keinen validen Status eingegeben!", Severity.Error);
+            return;
+        }
+
+        var task = new BugTrackerTaskItemDbModel(parsedTitle!, parsedDescription!, parsedCategory, parsedPriority, parsedStatus);
+
+        var added = await BugTrackerProxy.AddAsync(task);
+        if (!added)
+        {
+            Snackbar.Add("Ein Fehler ist aufgetreten. Der Bug konnte nicht gemeldet werden.", Severity.Error);
+            return;
+        }
+
+        await AddTask(task);
+    }
+
+    private async Task OpenItemDialog(BugTrackerTaskItemDbModel item)
+    {
+        LoadingService.StartLoading();
+
+        var task = await BugTrackerProxy.GetByIdAsync(item.Id);
+        
+        var parameters = new DialogParameters<BugTrackerTaskDetailsDialog>()
+        {
+            { x => x.TaskItem, task },
+        };
+        
+        LoadingService.StopLoading();
+
+        await DialogService.ShowAsync<BugTrackerTaskDetailsDialog>("Aufgabendetails", parameters, new DialogOptions { FullWidth = true, MaxWidth = MaxWidth.Medium });
+    }
+
+    private async Task<bool> IsAuthenticated()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (!UserAccessService.HasClaims(authState.User))
+        {
+            return false;
+        }
+
+        // var isValid = await UserAccessService.IsDiscordIdValid(authState.User, DiscordService);
+        // if (!isValid)
+        // {
+        //     await Logout();
+        //     Snackbar.Add("Code: PudelKröte. Bitte versuche dich erneut einzuloggen oder melde dich im Support.", Severity.Error);
+        //     return false;
+        // }
+        
+        return true;
+    }
+}
