@@ -98,6 +98,27 @@ else
                     throw new ArgumentOutOfRangeException();
                 }
 
+                @if (context.Priority == BugTrackerPriorityEnum.Low)
+                {
+                    <MudChip T="string" Color="Color.Info">Low</MudChip>
+                }
+                else if (context.Priority == BugTrackerPriorityEnum.Normal)
+                {
+                    <MudChip T="string" Color="Color.Success">Normal</MudChip>
+                }
+                else if (context.Priority == BugTrackerPriorityEnum.Important)
+                {
+                    <MudChip T="string" Color="Color.Warning">Important</MudChip>
+                }
+                else if (context.Priority == BugTrackerPriorityEnum.Critical)
+                {
+                    <MudChip T="string" Color="Color.Error">Critical</MudChip>
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+
                 <MudText Typo="Typo.h6" Class="mt-2">
                     @((context.Title.Length > 50) ? context.Title.Substring(0, 50) + "..." : context.Title)
                 </MudText>

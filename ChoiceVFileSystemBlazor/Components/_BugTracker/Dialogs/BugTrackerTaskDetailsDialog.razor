@@ -73,13 +73,24 @@
 
         <MudPaper Class="pa-4">
             <MudSelect Label="Kategorie" T="BugTrackerCategoryEnum" @bind-Value="TaskItem.Category" Disabled="@(!Authenticated)">
-                @foreach (var category in Enum.GetValues(typeof(BugTrackerCategoryEnum)))
-                {
-                    <MudSelectItem T="BugTrackerCategoryEnum" Value="@((BugTrackerCategoryEnum)category)">@category</MudSelectItem>
-                }
+                <MudSelectItem T="BugTrackerCategoryEnum" Value="@BugTrackerCategoryEnum.Allgemein">Allgemein</MudSelectItem>
+                <MudSelectItem T="BugTrackerCategoryEnum" Value="@BugTrackerCategoryEnum.Funktion">Funktion</MudSelectItem>
+                <MudSelectItem T="BugTrackerCategoryEnum" Value="@BugTrackerCategoryEnum.Modding">Modding</MudSelectItem>
+                <MudSelectItem T="BugTrackerCategoryEnum" Value="@BugTrackerCategoryEnum.Performance">Performance</MudSelectItem>
             </MudSelect>
         </MudPaper>
         
+        <MudDivider Class="divider-class"/>
+
+        <MudPaper Class="pa-4">
+            <MudSelect Label="Priorität" T="BugTrackerPriorityEnum" @bind-Value="TaskItem.Priority" Disabled="@(!Authenticated)">
+                <MudSelectItem T="BugTrackerPriorityEnum" Value="@BugTrackerPriorityEnum.Low">Low</MudSelectItem>
+                <MudSelectItem T="BugTrackerPriorityEnum" Value="@BugTrackerPriorityEnum.Normal">Normal</MudSelectItem>
+                <MudSelectItem T="BugTrackerPriorityEnum" Value="@BugTrackerPriorityEnum.Important">Important</MudSelectItem>
+                <MudSelectItem T="BugTrackerPriorityEnum" Value="@BugTrackerPriorityEnum.Critical">Critical</MudSelectItem>
+            </MudSelect>
+        </MudPaper>
+
         <MudDivider Class="divider-class"/>
 
         <MudPaper Class="pa-4">
