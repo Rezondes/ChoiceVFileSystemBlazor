@@ -36,7 +36,7 @@
         </MudButtonGroup>
     </MudAppBar>
     <MudMainContent Style="height: 100%; overflow: hidden;">
-        <MudContainer Class="px-8" MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: hidden; padding: 16px 0; position: relative;">
+        <MudContainer MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: hidden; padding: 16px 0; position: relative; display: flex; justify-content: flex-end;">
             @Body
 
             <MudOverlay Visible="@LoadingService.ShowLoading" DarkBackground="true" ZIndex="99999" Absolute="true">

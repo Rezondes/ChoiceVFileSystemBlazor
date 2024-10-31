@@ -7,6 +7,8 @@
 @code {
     [CascadingParameter] private MudDialogInstance _dialog { get; set; }
     [Parameter] public BugTrackerTaskItemDbModel TaskItem { get; set; }
+    [Parameter] public bool Authenticated { get; set; }
+    [Parameter] public bool CanEdit { get; set; }
     private string _newCommentText;
 
     private void CloseDialog() => _dialog.Close();
@@ -14,6 +16,7 @@
     private async Task AddComment()
     {
         if (string.IsNullOrWhiteSpace(_newCommentText)) return;
+        if (!Authenticated) return;
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         if (!UserAccessService.HasClaims(authState.User)) return;
@@ -57,19 +60,19 @@
 <MudDialog>
     <DialogContent>
         <MudPaper Class="pa-4">
-            <MudTextField Label="Titel" @bind-Value="TaskItem.Title" Class="mt-4" />
+            <MudTextField Label="Titel" @bind-Value="TaskItem.Title" Class="mt-4" Disabled="@(!Authenticated)" />
         </MudPaper>
             
         <MudDivider Class="divider-class"/>
 
         <MudPaper Class="pa-4">
-            <MudTextField Label="Beschreibung" @bind-Value="TaskItem.Description" Lines="10" />
+            <MudTextField Label="Beschreibung" @bind-Value="TaskItem.Description" Lines="10" Disabled="@(!Authenticated)" />
         </MudPaper>
         
         <MudDivider Class="divider-class"/>
 
         <MudPaper Class="pa-4">
-            <MudSelect Label="Kategorie" T="BugTrackerCategoryEnum" @bind-Value="TaskItem.Category">
+            <MudSelect Label="Kategorie" T="BugTrackerCategoryEnum" @bind-Value="TaskItem.Category" Disabled="@(!Authenticated)">
                 @foreach (var category in Enum.GetValues(typeof(BugTrackerCategoryEnum)))
                 {
                     <MudSelectItem T="BugTrackerCategoryEnum" Value="@((BugTrackerCategoryEnum)category)">@category</MudSelectItem>
@@ -80,10 +83,13 @@
         <MudDivider Class="divider-class"/>
 
         <MudPaper Class="pa-4">
-            <MudTextField Label="Neuer Kommentar" @bind-Value="_newCommentText" Lines="5" Adornment="Adornment.End"
-                          AdornmentIcon="@Icons.Material.Filled.Send" OnAdornmentClick="AddComment"/>
-       
-            <MudDivider Class="divider-class"/>
+            @if (Authenticated)
+            {
+                <MudTextField Label="Neuer Kommentar" @bind-Value="_newCommentText" Lines="5" Adornment="Adornment.End"
+                              AdornmentIcon="@Icons.Material.Filled.Send" OnAdornmentClick="AddComment"/>
+
+                <MudDivider Class="divider-class"/>
+            }
 
             <MudText Typo="Typo.subtitle2" Class="mt-4">Kommentare</MudText>
             <MudList T="BugTrackerTaskCommentDbModel">
@@ -101,14 +107,17 @@
                         <MudText Typo="Typo.body2" Class="mt-1" Style="opacity: 0.2; color: white;">
                             @comment.CreatedAt
                         </MudText>
-                        
+
                     </MudListItem>
                 }
             </MudList>
         </MudPaper>
     </DialogContent>
     <DialogActions>
-        <MudButton Color="Color.Primary" OnClick="SaveTaskChanges">Speichern</MudButton>
-        <MudButton Color="Color.Secondary" OnClick="CloseDialog">Abbrechen</MudButton>
+        @if (Authenticated)
+        {
+            <MudButton Color="Color.Primary" OnClick="SaveTaskChanges">Speichern</MudButton>
+        }
+        <MudButton Color="Color.Secondary" OnClick="CloseDialog">Schließen</MudButton>
     </DialogActions>
 </MudDialog>

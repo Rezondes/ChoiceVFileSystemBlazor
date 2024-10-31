@@ -7,6 +7,7 @@
 @using ChoiceVFileSystemBlazor.Database.BugTracker.DbModels
 
 @inject IBugTrackerProxy BugTrackerProxy
+@inject IAccessProxy AccessProxy
 
 @if (_loading)
 {
@@ -14,63 +15,68 @@
 }
 else
 {
+    <style>
+        body {
+            overflow-y: hidden;
+        }
+    </style>
+    
     <MudDropContainer
         T="BugTrackerTaskItemDbModel"
-        ItemDisabled="@(item => !IsAuthenticated().GetAwaiter().GetResult())"
+        ItemDisabled="@(item => !isAuthenticated)"
         Items="_data"
         ItemsSelector="@((item, dropzone) => item.Status.ToString() == dropzone)"
         ItemDropped="ItemUpdated"
-        Class="d-flex"
+        Class="d-flex justify-content-center"
         Style="height: 90vh">
 
         <ChildContent>
-            <MudGrid>
-                <MudItem xs="4">
-                    <MudDropZone T="BugTrackerTaskItemDbModel" AllowReorder Identifier="@BugTrackerStatusEnum.Created.ToString()" Class="rounded mud-background-gray pa-6 ma-8 flex-grow-1">
-                        <MudItem Class="d-flex">
-                            <MudText Typo="Typo.h6" Class="mb-4">Neu</MudText>
-                            
-                            @if (IsAuthenticated().GetAwaiter().GetResult())
-                            {
-                                <MudTooltip Text="Bug hinzufügen" Duration="@Constants.TOOLTIP_DURATION">
-                                    <MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.Add" OnClick="() => AddTask(BugTrackerStatusEnum.Created)"/>
-                                </MudTooltip>
-                            }
-                        </MudItem>
+            <MudGrid Style="align-content: center; justify-content: space-around !important;">
+                <MudItem Class="rounded mud-background-gray pa-6 flex-grow-1" Style="max-height: 85dvh; height: 85dvh; margin: 32px 8px; width: calc(100dvw / 3 - 15px);">
+                    <MudItem Class="d-flex mb-4 justify-content-around" Style="height: 7%;">
+                        <MudText Typo="Typo.h6" Class="align-content-around">Neu</MudText>
+
+                        @if (isAuthenticated)
+                        {
+                            <MudTooltip Text="Bug hinzufügen" Duration="@Constants.TOOLTIP_DURATION">
+                                <MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.Add" OnClick="() => AddTask(BugTrackerStatusEnum.Created)"/>
+                            </MudTooltip>
+                        }
+                    </MudItem>
+                    <MudDropZone
+                        T="BugTrackerTaskItemDbModel" Identifier="@BugTrackerStatusEnum.Created.ToString()"
+                        AllowReorder Class="rounded mud-background-gray flex-grow-1" Style="overflow-y: auto; overflow-x: hidden; height: 93.99%; padding: 0 5px;">
                     </MudDropZone>
                 </MudItem>
-                <MudItem xs="4">
-                    <MudDropZone T="BugTrackerTaskItemDbModel" AllowReorder Identifier="@BugTrackerStatusEnum.WorkInProgress.ToString()" Class="rounded mud-background-gray pa-6 ma-8 flex-grow-1">
-                        <MudItem Class="d-flex">
-                            <MudText Typo="Typo.h6" Class="mb-4">In Bearbeitung</MudText>
+                <MudItem Class="rounded mud-background-gray pa-6 flex-grow-1" Style="max-height: 85dvh; height: 85dvh; margin: 32px 8px; width: calc(100dvw / 3 - 15px);">
+                    <MudItem Class="d-flex mb-4 justify-content-around" Style="height: 7%;">
+                        <MudText Typo="Typo.h6" Class="align-content-around">In Bearbeitung</MudText>
 
-                            @if (IsAuthenticated().GetAwaiter().GetResult())
-                            {
-                                <MudTooltip Text="Bug hinzufügen" Duration="@Constants.TOOLTIP_DURATION">
-                                    <MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.Add" OnClick="() => AddTask(BugTrackerStatusEnum.WorkInProgress)"/>
-                                </MudTooltip>
-                            }
-                        </MudItem>
+                        @if (hasScpAccess)
+                        {
+                            <MudTooltip Text="Bug hinzufügen" Duration="@Constants.TOOLTIP_DURATION">
+                                <MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.Add" OnClick="() => AddTask(BugTrackerStatusEnum.WorkInProgress)"/>
+                            </MudTooltip>
+                        }
+                    </MudItem>
+                    <MudDropZone 
+                        T="BugTrackerTaskItemDbModel" Identifier="@BugTrackerStatusEnum.WorkInProgress.ToString()"
+                        AllowReorder Class="rounded mud-background-gray flex-grow-1" Style="overflow-y: auto; overflow-x: hidden; height: 93.99%; padding: 0 5px;">
                     </MudDropZone>
                 </MudItem>
-                <MudItem xs="4">
-                    <MudDropZone T="BugTrackerTaskItemDbModel" AllowReorder Identifier="@BugTrackerStatusEnum.Done.ToString()" Class="rounded mud-background-gray pa-6 ma-8 flex-grow-1">
-                        <MudItem Class="d-flex">
-                            <MudText Typo="Typo.h6" Class="mb-4">Abgeschlossen</MudText>
-
-                            @if (IsAuthenticated().GetAwaiter().GetResult())
-                            {
-                                <MudTooltip Text="Bug hinzufügen" Duration="@Constants.TOOLTIP_DURATION">
-                                    <MudIconButton Color="Color.Success" Icon="@Icons.Material.Filled.Add" OnClick="() => AddTask(BugTrackerStatusEnum.Done)"/>
-                                </MudTooltip>
-                            }
-                        </MudItem>
+                <MudItem Class="rounded mud-background-gray pa-6 flex-grow-1" Style="max-height: 85dvh; height: 85dvh; margin: 32px 8px; width: calc(100dvw / 3 - 15px);">
+                    <MudItem Class="d-flex mb-4 justify-content-around" Style="height: 7%;">
+                        <MudText Typo="Typo.h6" Class="align-content-around">Abgeschlossen</MudText>
+                    </MudItem>
+                    <MudDropZone 
+                        T="BugTrackerTaskItemDbModel" Identifier="@BugTrackerStatusEnum.Done.ToString()"
+                        AllowReorder Class="rounded mud-background-gray flex-grow-1" Style="overflow-y: auto; overflow-x: hidden; height: 93.99%; padding: 0 5px;">
                     </MudDropZone>
                 </MudItem>
             </MudGrid>
         </ChildContent>
         <ItemRenderer>
-            <MudPaper Elevation="25" Class="pa-4 my-4" @onclick="@(() => OpenItemDialog(context))" Style="overflow: hidden">
+            <MudPaper Elevation="25" Class="pa-4 my-4" @onclick="@(() => OpenItemDialog(context))" Style="overflow: hidden;">
                 @if (context.Category == BugTrackerCategoryEnum.Allgemein)
                 {
                     <MudChip T="string" Color="Color.Primary">Allgemein</MudChip>
@@ -112,19 +118,21 @@ else
 
     private HubConnection? _hubConnection;
 
+    private bool hasScpAccess;
+    private bool isAuthenticated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isAuthenticated = await IsAuthenticated();
+        hasScpAccess = await HasScpAccess();
+    }
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
 
         _data = await BugTrackerProxy.GetAllAsync();
-        try
-        {
-            await StartHubConnection();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
+        await StartHubConnection();
 
         _loading = false;
         StateHasChanged();
@@ -136,7 +144,7 @@ else
 
         _hubConnection.On<BugTrackerTaskItemDbModel>("ReceiveTaskUpdate", async (task) =>
         {
-            UpdateTaskFromHub(task);
+            await UpdateTaskFromHub(task);
             await InvokeAsync(StateHasChanged);
         });
 
@@ -185,25 +193,41 @@ else
         await _hubConnection.InvokeAsync("SendTaskUpdate", task);
     }
 
-    private void UpdateTaskFromHub(BugTrackerTaskItemDbModel task)
+    private async Task UpdateTaskFromHub(BugTrackerTaskItemDbModel task)
     {
         var existingTask = _data.FirstOrDefault(t => t.Id == task.Id);
         if (existingTask is null)
         {
-            _data.Add(task);
-            return;
+            _data = [.._data, task];
+        }
+        else
+        {
+            existingTask.Title = task.Title;
+            existingTask.Description = task.Description;
+            existingTask.Status = task.Status;
+            existingTask.Category = task.Category;
+            existingTask.Comments = task.Comments;
+        
+            _data = [.._data];
         }
 
-        existingTask.Title = task.Title;
-        existingTask.Description = task.Description;
-        existingTask.Status = task.Status;
-        existingTask.Category = task.Category;
-        existingTask.Comments = task.Comments;
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 
     private async Task AddTask(BugTrackerStatusEnum status)
     {
+        if (!await IsAuthenticated()) return;
+        
+        List<InputOptionModel> statusSelect =
+        [
+            new(BugTrackerStatusEnum.Created.ToString(), BugTrackerStatusEnum.Created.ToString()),
+        ];
+
+        if (hasScpAccess)
+        {
+            statusSelect.Add(new(BugTrackerStatusEnum.WorkInProgress.ToString(), BugTrackerStatusEnum.WorkInProgress.ToString()));
+        }
+        
         var inputs = new List<InputModel>
         {
             new(
@@ -248,11 +272,7 @@ else
                 "Status",
                 status.ToString(),
                 BugTrackerStatusEnum.Created.ToString(),
-                [
-                    new(BugTrackerStatusEnum.Created.ToString(), BugTrackerStatusEnum.Created.ToString()),
-                    new(BugTrackerStatusEnum.WorkInProgress.ToString(), BugTrackerStatusEnum.WorkInProgress.ToString()),
-                    new(BugTrackerStatusEnum.Done.ToString(), BugTrackerStatusEnum.Done.ToString())
-                ]
+                statusSelect
             ),
         };
 
@@ -297,15 +317,23 @@ else
             Snackbar.Add("Du hast keinen validen Status eingegeben!", Severity.Error);
             return;
         }
+        
+        LoadingService.StartLoading();
+        
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var discordId = UserAccessService.GetDiscordUserId(authState.User)!;
+        var discordName = UserAccessService.GetDiscordUserName(authState.User)!;
 
-        var task = new BugTrackerTaskItemDbModel(parsedTitle!, parsedDescription!, parsedCategory, parsedPriority, parsedStatus);
+        var task = new BugTrackerTaskItemDbModel(parsedTitle!, parsedDescription!, discordId, discordName, parsedCategory, parsedPriority, parsedStatus);
 
         var added = await BugTrackerProxy.AddAsync(task);
         if (!added)
         {
             Snackbar.Add("Ein Fehler ist aufgetreten. Der Bug konnte nicht gemeldet werden.", Severity.Error);
+            LoadingService.StopLoading();
             return;
         }
+        LoadingService.StopLoading();
 
         await AddTask(task);
     }
@@ -319,29 +347,32 @@ else
         var parameters = new DialogParameters<BugTrackerTaskDetailsDialog>()
         {
             { x => x.TaskItem, task },
+            { x => x.Authenticated, await IsAuthenticated() },
+            { x => x.CanEdit, true }
         };
         
         LoadingService.StopLoading();
 
-        await DialogService.ShowAsync<BugTrackerTaskDetailsDialog>("Aufgabendetails", parameters, new DialogOptions { FullWidth = true, MaxWidth = MaxWidth.Medium });
+        await DialogService.ShowAsync<BugTrackerTaskDetailsDialog>("Bugticketdetails", parameters, new DialogOptions { FullWidth = true, MaxWidth = MaxWidth.Medium });
     }
 
     private async Task<bool> IsAuthenticated()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        if (!UserAccessService.HasClaims(authState.User))
-        {
-            return false;
-        }
-
-        // var isValid = await UserAccessService.IsDiscordIdValid(authState.User, DiscordService);
-        // if (!isValid)
-        // {
-        //     await Logout();
-        //     Snackbar.Add("Code: PudelKröte. Bitte versuche dich erneut einzuloggen oder melde dich im Support.", Severity.Error);
-        //     return false;
-        // }
+        return UserAccessService.HasClaims(authState.User);
+    }
+    
+    private async Task<bool> HasScpAccess()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        if (!UserAccessService.HasClaims(authState.User)) return false;
         
+        var discordId = UserAccessService.GetDiscordUserId(authState.User);
+
+        var access = await AccessProxy.GetAsync(discordId!);
+        if (access is null) return false;
+        if (access.Rank <= RankEnum.None) return false;
+
         return true;
     }
 }
