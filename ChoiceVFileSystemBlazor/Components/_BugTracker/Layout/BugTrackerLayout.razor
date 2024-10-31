@@ -24,13 +24,13 @@
             @if (IsAuthenticated().GetAwaiter().GetResult())
             {
                 <MudTooltip Text="Ausloggen" Duration="Constants.TOOLTIP_DURATION">
-                    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Success" OnClick="Logout"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Error" OnClick="Logout"/>
                 </MudTooltip>
             }
             else
             {
                 <MudTooltip Text="Einloggen" Duration="Constants.TOOLTIP_DURATION">
-                    <MudIconButton Icon="@Icons.Material.Filled.Login" Color="Color.Error" OnClick="Login"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Login" Color="Color.Success" OnClick="Login"/>
                 </MudTooltip>
             }
         </MudButtonGroup>
