@@ -19,19 +19,19 @@
             </NotFound>
         </Router>
     }
-    else if (_isBugTracker)
-    {
-        <Router AppAssembly="@typeof(Program).Assembly">
-            <Found Context="routeData">
-                <RouteView RouteData="routeData" DefaultLayout="@typeof(BugTrackerLayout)"/>
-            </Found>
-            <NotFound>
-                <LayoutView Layout="@typeof(BugTrackerLayout)">
-                    <p>Sorry, there's nothing at this address.</p>
-                </LayoutView>
-            </NotFound>
-        </Router>
-    }
+    @* else if (_isBugTracker) *@
+    @* { *@
+    @*     <Router AppAssembly="@typeof(Program).Assembly"> *@
+    @*         <Found Context="routeData"> *@
+    @*             <RouteView RouteData="routeData" DefaultLayout="@typeof(BugTrackerLayout)"/> *@
+    @*         </Found> *@
+    @*         <NotFound> *@
+    @*             <LayoutView Layout="@typeof(BugTrackerLayout)"> *@
+    @*                 <p>Sorry, there's nothing at this address.</p> *@
+    @*             </LayoutView> *@
+    @*         </NotFound> *@
+    @*     </Router> *@
+    @* } *@
     else
     {
         <AuthorizeView Policy="DiscordPolicy">
@@ -59,7 +59,7 @@
 
 @code {
     private static bool _isCopsAndCrimes;
-    private static bool _isBugTracker;
+    // private static bool _isBugTracker;
     private static Routes? _instance;
     
     protected override async Task OnInitializedAsync()
@@ -69,18 +69,18 @@
         var currentHost = newUri.Host;
 
         _isCopsAndCrimes = currentHost.Contains("copsandcrimes.de");
-        _isBugTracker = currentHost.Contains("bugtracker.choicev.net") || currentHost.Contains("bugtracker.rezondes.net");
+        // _isBugTracker = currentHost.Contains("bugtracker.choicev.net") || currentHost.Contains("bugtracker.rezondes.net");
 
         if (false)
         {
             _isCopsAndCrimes = currentHost.Contains("localhost");
         }
         
-        if (false)
-        {
-            _isBugTracker = currentHost.Contains("localhost");
-        }
-        
+        // if (false)
+        // {
+        //     _isBugTracker = currentHost.Contains("localhost");
+        // }
+        //
         if (_isCopsAndCrimes)
         {
             if (newUri.AbsolutePath != "/") return;
@@ -89,14 +89,14 @@
             return;
         }
         
-        if (_isBugTracker)
-        {
-            if (newUri.AbsolutePath != "/") return;
-            
-            Navigation.NavigateTo("/bugtracker");
-            return;
-        }
-        
+        // if (_isBugTracker)
+        // {
+        //     if (newUri.AbsolutePath != "/") return;
+        //     
+        //     Navigation.NavigateTo("/bugtracker");
+        //     return;
+        // }
+        //
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
         if (!UserAccessService.HasClaims(authState.User))

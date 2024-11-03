@@ -288,7 +288,7 @@ app.MapRazorComponents<App>()
 
 app.MapHub<BaseHub>(BaseHub.HubPattern);
 app.MapHub<FileHub>(FileHub.HubPattern);
-app.MapHub<BugTrackerHub>(BugTrackerHub.HubPattern);
+// app.MapHub<BugTrackerHub>(BugTrackerHub.HubPattern);
 
 app.UseStatusCodePages(context =>
 {
