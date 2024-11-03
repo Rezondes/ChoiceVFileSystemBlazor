@@ -6,7 +6,7 @@
 <MudNavMenu Style="height: 100%;">
     <MudNavLink Href="/" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.SpaceDashboard">Dashboard</MudNavLink>
     
-    <MudNavLink Href="/bugtracker" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.BugReport">Bugtracker</MudNavLink>
+    @* <MudNavLink Href="/bugtracker" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.BugReport">Bugtracker</MudNavLink> *@
     
     @if (UserAccessService.HasRight(RightEnum.ViewCharactersArea))
     {
