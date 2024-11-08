@@ -12,6 +12,7 @@ public class SupportKeyInfoApiModel {
         string senderCharacterName,
         int senderAccountId,
         string senderAccountName, 
+        DateTime creationDate,
         string message,
         SupportKeySurroundingInfo surroundingData) {
         Id = id;
@@ -19,6 +20,7 @@ public class SupportKeyInfoApiModel {
         SenderCharacterName = senderCharacterName;
         SenderAccountId = senderAccountId;
         SenderAccountName = senderAccountName;
+        CreatedAt = creationDate;
         Message = message;
         SurroundingData = surroundingData;
     }
@@ -37,6 +39,9 @@ public class SupportKeyInfoApiModel {
     
     [JsonPropertyName("senderAccountName")]
     public string SenderAccountName { get; set; }
+    
+    [JsonPropertyName("CreatedAt")]
+    public DateTime CreatedAt { get; set; }
     
     [JsonPropertyName("message")]
     public string Message { get; set; }
