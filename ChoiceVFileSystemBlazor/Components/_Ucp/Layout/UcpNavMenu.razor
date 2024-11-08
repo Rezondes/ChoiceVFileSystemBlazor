@@ -1,0 +1,14 @@
+<MudNavMenu Style="height: 100%;">
+    <MudNavLink Href="@UcpHome.GetRedirectUrl()" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.SpaceDashboard">Dashboard</MudNavLink>
+
+</MudNavMenu>
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+
+    public void Reload()
+    {
+        StateHasChanged();
+    }
+
+}

@@ -1,9 +1,7 @@
 ﻿using ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
-using ChoiceVFileSystemBlazor.Database.BugTracker.DbModels;
 using ChoiceVFileSystemBlazor.Database.Discord.DbModels;
 using ChoiceVFileSystemBlazor.Database.News.DbModels;
 using ChoiceVFileSystemBlazor.Database.Ranks.DbModels;
-using ChoiceVFileSystemBlazor.Database.Supportfiles;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,11 +37,6 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
     public DbSet<FileUploadDbModel> SupportfileFileUploadDbModels  { get; set; }
     #endregion
 
-    #region BugTracker
-    public DbSet<BugTrackerTaskItemDbModel> BugTrackerTaskItemDbModels { get; set; }
-    public DbSet<BugTrackerTaskCommentDbModel> BugTrackerTaskCommentDbModels { get; set; }
-    #endregion
-    
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
@@ -282,35 +275,6 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
                 .WithMany(a => a.FileUploads)
                 .HasForeignKey(s => s.EntryId);
         });
-        #endregion
-
-        #region BugTracker
-
-        modelBuilder.Entity<BugTrackerTaskItemDbModel>(entity => 
-        {
-            entity.Property(e => e.Id)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => Ulid.Parse(v));
-        });
-        
-        modelBuilder.Entity<BugTrackerTaskCommentDbModel>(entity => 
-        {
-            entity.Property(e => e.Id)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => Ulid.Parse(v));
-            
-            entity.Property(e => e.TaskId)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => Ulid.Parse(v));
-            
-            entity.HasOne(comment => comment.Task)
-                .WithMany(task => task.Comments)
-                .HasForeignKey(comment => comment.TaskId);
-        });
-        
         #endregion
     }
 }

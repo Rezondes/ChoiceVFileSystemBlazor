@@ -80,6 +80,7 @@
 @using ChoiceVFileSystemBlazor.Components.WhitelistProcedures.Pages
 @using ChoiceVSharedApiModels.SupportKeyInfo.DatabaseJsonModels.SubInformation.Vehicle
 @using ChoiceVFileSystemBlazor.Components.Supportkeylogs.Components.InventorySpot
+@using ChoiceVFileSystemBlazor.Services.Vikunja
 @using ChoiceVSharedApiModels.SupportKeyInfo.DatabaseJsonModels.SubInformation.Vehicle
 @using ChoiceVSharedApiModels.SupportKeyInfo.DatabaseJsonModels.SubInformation.Player
 @using ChoiceVSharedApiModels.SupportKeyInfo.DatabaseJsonModels.SubInformation.InventorySpot
@@ -113,6 +114,8 @@
 @inject DiscordGuildMembersCachedService DiscordGuildMembersCachedService
 @inject DiscordService DiscordService
 @inject PageLoadingService LoadingService
+
+@inject VikunjaClientService VikunjaClientService
 
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IJSRuntime JS

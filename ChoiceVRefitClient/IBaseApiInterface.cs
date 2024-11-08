@@ -7,7 +7,7 @@ public interface IBaseApiInterface
 {
     public async Task<ApiResult<T>> HandleApiRequestAsync<T>(
         Func<CancellationToken, Task<ApiResponse<T>>> apiCall,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken = default)
     {
         try
         {

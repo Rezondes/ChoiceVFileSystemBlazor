@@ -8,15 +8,20 @@
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
-<MudLayout>
+<MudLayout Style="height: 100vh; overflow: hidden;">
     <MudAppBar>
-        <MudImage Src="choicev_logo_full.png"
-                  Alt="ChoiceV Logo"
+        @if (IsAuthenticated().GetAwaiter().GetResult())
+        {
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer"/>
+        }
+        
+        <MudImage Src="choicev_logo_ucp.png"
+                  Alt="ChoiceV UCP Logo"
                   Style="
-                        width: 115px; 
+                        width: 400px; 
                         margin-bottom: 3px;
                         margin-left: -5px;
-                  " />
+                        " />
         <MudSpacer/>
 
         <MudButtonGroup Color="Color.Inherit">
@@ -35,15 +40,42 @@
             }
         </MudButtonGroup>
     </MudAppBar>
+    
+    @if (IsAuthenticated().GetAwaiter().GetResult())
+    {
+        <MudDrawer @bind-Open="_open" ClipMode="_clipMode" Breakpoint="_breakpoint" Variant="DrawerVariant.Mini" Style="height: calc(100% - 40px - var(--mud-appbar-height)); transition: width;">
+            <UcpNavMenu @ref="_navMenu"/>
+        </MudDrawer>
+    }
+    
     <MudMainContent Style="height: 100%; overflow: hidden;">
-        <MudContainer MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: hidden; padding: 16px 0; position: relative; display: flex; justify-content: flex-end;">
-            @Body
+        <MudContainer MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: hidden; padding: 16px 0; position: relative; display: flex; justify-content: center;">
+            @if (IsAuthenticated().GetAwaiter().GetResult())
+            {
+                @Body
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Info" Style="height: fit-content">Du bist noch nicht eingeloggt.</MudAlert>
+            }
 
             <MudOverlay Visible="@LoadingService.ShowLoading" DarkBackground="true" ZIndex="99999" Absolute="true">
                 <PageLoading/>
             </MudOverlay>
         </MudContainer>
     </MudMainContent>
+    
+    @if (IsAuthenticated().GetAwaiter().GetResult())
+    {
+        <MudNavLink Href="https://github.com/Rezondes"
+                    Icon="@Icons.Custom.Brands.GitHub"
+                    Style="@GetStyle()">
+            @if (_open)
+            {
+                <span>Created by Rezondes</span>
+            }
+        </MudNavLink>
+    }
 </MudLayout>
 
 @code {
@@ -64,6 +96,11 @@
     
     private bool _isDarkMode = true;
 
+    private UcpNavMenu? _navMenu;
+    private bool _open = true;
+    private Breakpoint _breakpoint = Breakpoint.Lg;
+    private DrawerClipMode _clipMode = DrawerClipMode.Always;
+    
     protected override async Task OnInitializedAsync()
     {
         var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
@@ -108,6 +145,12 @@
         await JS.InvokeVoidAsync("setFavicon", "choicev_logo_partial.png");
     }
     
+    private void ToggleDrawer()
+    {
+        _open = !_open;
+        StateHasChanged();
+    }
+    
     private void ToggleDarkMode(bool newValue)
     {
         _isDarkMode = newValue;
@@ -121,16 +164,15 @@
         {
             return false;
         }
-
-        // var isValid = await UserAccessService.IsDiscordIdValid(authState.User, DiscordService);
-        // if (!isValid)
-        // {
-        //     await Logout();
-        //     Snackbar.Add("Code: PudelKröte. Bitte versuche dich erneut einzuloggen oder melde dich im Support.", Severity.Error);
-        //     return false;
-        // }
         
         return true;
+    }
+    
+    private string GetStyle()
+    {
+        const string mainStyle = "position: absolute; bottom: 0; height: 40px; margin-left: 0; background-color: var(--mud-palette-drawer-background);";
+
+        return _open ? mainStyle + " width: var(--mud-drawer-width-left)" : mainStyle + " width: var(--mud-drawer-width-mini-left)";
     }
 
     private async Task Login()

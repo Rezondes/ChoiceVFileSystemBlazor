@@ -49,7 +49,7 @@ else
             </MudButtonGroup>
         </MudAppBar>
 
-        <MudDrawer @bind-Open="_open" ClipMode="_clipMode" Breakpoint="_breakpoint" Variant="DrawerVariant.Mini" Style="height: calc(100% - 40px - var(--mud-appbar-height));">
+        <MudDrawer @bind-Open="_open" ClipMode="_clipMode" Breakpoint="_breakpoint" Variant="DrawerVariant.Mini" Style="height: calc(100% - 40px - var(--mud-appbar-height)); transition: width;">
             <NavMenu @ref="_navMenu"/>
         </MudDrawer>
 

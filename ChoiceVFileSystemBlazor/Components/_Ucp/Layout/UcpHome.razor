@@ -1,0 +1,104 @@
+@page "/u"
+
+@code {
+    public const string Url = "/u";
+    public static string GetRedirectUrl() => Url;
+}
+
+@if (_loading)
+{
+    <LoadingComponent/>
+}
+else
+{
+    <style>
+        .server-info-item {
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            margin: 5px;
+            width: 300px;
+        }
+    </style>
+
+    <PageTitle>Dashboard</PageTitle>
+
+    <MudGrid Class="px-5">
+        <MudItem xs="12" sm="6" md="12">
+            <MudText Class="d-flex flex-column align-center justify-center mud-width-full" Typo="Typo.h4">
+                Willkommen auf dem ChoiceV User Control Panel!
+            </MudText>
+        </MudItem>
+    
+        <MudItem xs="12" sm="6" md="12">
+            <MudPaper Elevation="2" Class="pa-4" Style="height: 285px;">
+                
+                <div class="d-flex justify-center align-items-center mud-width-full" style="position: relative; padding-bottom: 15px;">
+                    <MudText Typo="Typo.h5">
+                        Bugtickets
+                    </MudText>
+                </div>
+
+                @if (_loading)
+                {
+                    <LoadingComponent/>
+                }
+                else
+                {
+                    <MudPaper class="d-flex server-info-item" Elevation="2">
+                        <MudText Typo="Typo.h6">
+                            <MudIcon Icon="@Icons.Material.Filled.BugReport"/> Bugtickets eingestellt
+                        </MudText>
+                        <MudText Typo="Typo.body1">@_bugTicketsCount</MudText>
+                    </MudPaper>
+                    <MudPaper class="d-flex server-info-item" Elevation="2">
+                        <MudText Typo="Typo.h6">
+                            <MudIcon Icon="@Icons.Material.Filled.BugReport"/> Bugtickets aktzeptiert
+                        </MudText>
+                        <MudText Typo="Typo.body1">@_bugTicketsAcceptedCount</MudText>
+                    </MudPaper>
+                }
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+}
+
+
+@code {
+    private bool _loading = true;
+
+    private int _bugTicketsCount;
+    private int _bugTicketsAcceptedCount;
+
+    private HubConnection? _hubConnection;
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        await Load();
+    }
+    
+    private async Task Load()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        var result = await VikunjaClientService.Client.HandleApiRequestAsync(
+            async _ => await VikunjaClientService.Client.GetAllAsync());
+        
+        if (result.IsSuccess)
+        {
+            // TODO richtige Daten ersetzen
+            _bugTicketsCount = result.Data!.Count;
+            _bugTicketsAcceptedCount = result.Data!.Count;
+        }
+        else
+        {
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
+        }
+        
+        _loading = false;
+        StateHasChanged();
+    }
+}
