@@ -24,7 +24,7 @@ public class BugtrackerProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseCo
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        if (await dbContext.Set<DiscordIdToBugTaskIdDbModel>().AnyAsync(m => m.Id == model.Id))
+        if (await dbContext.Set<DiscordIdToBugTaskIdDbModel>().AnyAsync(m => m.DiscordId == model.DiscordId && m.BugTaskId == model.BugTaskId))
             throw new InvalidOperationException("Ein Eintrag mit dieser ID existiert bereits.");
 
         dbContext.Set<DiscordIdToBugTaskIdDbModel>().Add(model);

@@ -49,7 +49,7 @@
     }
     
     <MudMainContent Style="height: 100%; overflow: hidden;">
-        <MudContainer MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: hidden; padding: 16px 0; position: relative; display: flex; justify-content: center;">
+        <MudContainer MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: hidden; padding: 0 0; position: relative; display: flex; justify-content: center;">
             @if (AuthenticationStateProvider.IsAuthenticatedAsync().GetAwaiter().GetResult())
             {
                 @Body

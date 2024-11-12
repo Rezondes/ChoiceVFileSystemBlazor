@@ -4,13 +4,14 @@ public class DiscordIdToBugTaskIdDbModel
 {
     public DiscordIdToBugTaskIdDbModel(){}
 
-    public DiscordIdToBugTaskIdDbModel(string discordId, int bugTaskId)
+    public DiscordIdToBugTaskIdDbModel(string discordId, int bugTaskId, string bugTaskName)
     {
         DiscordId = discordId;
         BugTaskId = bugTaskId;
+        BugTaskName = bugTaskName;
     }
 
-    public Ulid Id { get; set; }
+    public Ulid Id { get; set; } = Ulid.NewUlid();
     
     public string DiscordId { get; set; }
     

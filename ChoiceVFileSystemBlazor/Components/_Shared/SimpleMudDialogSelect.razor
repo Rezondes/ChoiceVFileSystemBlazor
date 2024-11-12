@@ -1,0 +1,15 @@
+<MudSelect T="string" @bind-Value="InputModel.Value"
+           MultiSelection
+           Label="@InputModel.Label"
+           Variant="Variant.Outlined"
+           AnchorOrigin="Origin.BottomCenter"
+           Clearable="false">
+    @foreach (var option in InputModel.Options)
+    {
+        <MudSelectItem T="string" Value="@option.Value">@option.Text</MudSelectItem>
+    }
+</MudSelect>
+
+@code {
+    [Parameter] public InputModel InputModel { get; set; }
+}

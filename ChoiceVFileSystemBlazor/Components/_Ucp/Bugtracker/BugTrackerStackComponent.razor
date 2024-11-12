@@ -1,15 +1,41 @@
 @using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.DbModels
 @using ChoiceVFileSystemBlazor.Services.Vikunja.Models
 
+<style>
+    .paper{
+        height: 85dvh;
+    }
+    .title{
+        height: 50px;
+    }
+    .stack{
+        min-width: 400px;
+        overflow-y: auto;
+        max-height: calc(100% - 50px);
+        padding: 5px;
+    }
+    .stack-item{
+        min-height: 60px;
+    }
+    .clickable {
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .clickable:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+</style>
+
 <MudPaper Class="paper">
-    <MudPaper Class="py-2">
+    <MudPaper Class="title py-2">
         <MudText Typo="Typo.h5" Align="Align.Center">@Title</MudText>
     </MudPaper>
     <MudStack Class="stack">
         @foreach (var task in Data)
         {
-            <MudPaper>
-                [@task.Key.BugTaskId] @task.Key.BugTaskName
+            <MudPaper Class="@GetTaskClass()" @onclick="() => OnTaskClick(task)" Elevation="3">
+                <MudText Typo="Typo.body1" Class="p-2">[@task.BugTaskId] @task.BugTaskName</MudText>
             </MudPaper>
         }
     </MudStack>
@@ -17,5 +43,61 @@
 
 @code {
     [Parameter] public string Title { get; set; }
-    [Parameter] public Dictionary<DiscordIdToBugTaskIdDbModel, VikunjaTask?> Data { get; set; }
+    [Parameter] public List<DiscordIdToBugTaskIdDbModel> Data { get; set; }
+    [Parameter] public bool ClickAbleChild { get; set; } = true;
+    
+    private async Task OnTaskClick(DiscordIdToBugTaskIdDbModel discordIdToBugTaskIdDbModel)
+    {
+        if (!ClickAbleChild) return;
+        
+        var result = await VikunjaClientService.Client.HandleApiRequestAsync(
+            async _ => await VikunjaClientService.Client.GetTaskByIdAsync(discordIdToBugTaskIdDbModel.BugTaskId));
+        if (!result.IsSuccess)
+        {
+            Snackbar.Add("Der Bug konnte nicht geladen werden.", Severity.Error);
+            return;
+        }
+        
+        // var resultAttachments = await VikunjaClientService.Client.HandleApiRequestAsync(
+        //     async _ => await VikunjaClientService.Client.GetAllAttachmentsForTaskAsync(discordIdToBugTaskIdDbModel.BugTaskId));
+        // if (!resultAttachments.IsSuccess)
+        // {
+        //     Snackbar.Add("Der Bug konnte nicht geladen werden.", Severity.Error);
+        //     return;
+        // }
+        
+        var resultComments = await VikunjaClientService.Client.HandleApiRequestAsync(
+            async _ => await VikunjaClientService.Client.GetAllCommentsForTaskAsync(discordIdToBugTaskIdDbModel.BugTaskId));
+        if (!resultComments.IsSuccess)
+        {
+            Snackbar.Add("Der Bug konnte nicht geladen werden.", Severity.Error);
+            return;
+        }
+        
+        var discordUserName = await AuthenticationStateProvider.GetDiscordUserNameAsync();
+        
+        var parameter = new DialogParameters<BugTrackerTaskDialog>
+        {
+            { x => x.Task, result.Data },
+            // { x => x.Attachments, resultAttachments.Data },
+            { x => x.Comments, resultComments.Data },
+            { x => x.OwnDiscordName, discordUserName },
+        };
+
+        await DialogService.ShowAsync<BugTrackerTaskDialog>(
+            string.Empty,
+            parameter,
+            new DialogOptions
+            {
+                FullWidth = true,
+                MaxWidth = MaxWidth.ExtraLarge, 
+                CloseOnEscapeKey = true,
+                NoHeader = true
+            });
+    }
+
+    private string? GetTaskClass()
+    {
+        return ClickAbleChild ? "stack-item clickable" : "stack-item";
+    }
 }

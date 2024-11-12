@@ -25,12 +25,7 @@
                     <MudNumericField Variant="Variant.Outlined" @bind-Value="@input.Value" Label="@input.Label" Placeholder="@input.Placeholder" Min="input.Min" Max="input.Max" Clearable="false" />
                     break;
                 case InputTypes.Select:
-                    <MudSelect T="string" @bind-Value="@input.Value" Label="@input.Label" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter" Clearable="false">
-                        @foreach (var option in input.Options)
-                        {
-                            <MudSelectItem T="string" Value="@option.Value">@option.Text</MudSelectItem>
-                        }
-                    </MudSelect>
+                    <SimpleMudDialogSelect InputModel="input" />
                     break;
                 case InputTypes.Hidden:
                     <MudTextField @bind-Value="@input.Value" Label="@input.Label" Variant="Variant.Outlined" Disabled="true" />

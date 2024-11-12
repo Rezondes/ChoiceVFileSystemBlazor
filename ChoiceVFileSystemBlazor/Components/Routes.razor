@@ -77,7 +77,7 @@
             _isCopsAndCrimes = currentHost.Contains("localhost");
         }
         
-        if (false)
+        if (true)
         {
             _isUcp = currentHost.Contains("localhost");
         }
@@ -117,6 +117,7 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
+        if (_isCopsAndCrimes || _isUcp) return;
         
         _instance = this;
         await JS.InvokeVoidAsync("initializeCustomReload");
@@ -125,13 +126,13 @@
     [JSInvokable]
     public static async Task CustomReload()
     {
-        if (_instance == null || _isCopsAndCrimes) return;
+        if (_instance == null || _isCopsAndCrimes || _isUcp) return;
         await _instance.Reload();
     }
     
     private async Task Reload()
     {
-        if (ReloadService is null || _isCopsAndCrimes) return;
+        if (ReloadService is null || _isCopsAndCrimes || _isUcp) return;
         await ReloadService.TriggerCustomReload();
     }
     

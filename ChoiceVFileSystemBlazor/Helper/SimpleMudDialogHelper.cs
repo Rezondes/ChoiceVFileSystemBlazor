@@ -26,90 +26,80 @@ public static class SimpleMudDialogHelper
     public static (bool, T?) ValidateInput<T>(this InputModel inputModel)
     {
         var value = inputModel.Value;
-        
-        if (typeof(T) == typeof(string))
+
+        if (string.IsNullOrEmpty(value) && !typeof(T).IsValueType)
         {
-            return string.IsNullOrEmpty(inputModel.Value) ? (false, default) : (true, (T?)(object)inputModel.Value);
-        }
-    
-        if (typeof(T) == typeof(ulong))
-        {
-            return ulong.TryParse(value, out var parsedValue) ? (true, (T?)(object)parsedValue) : (false, default);
+            return (false, default);
         }
 
-        if (typeof(T) == typeof(long))
+        try
         {
-            return long.TryParse(value, out var parsedValue) ? (true, (T?)(object)parsedValue) : (false, default);
-        }
-
-        if (typeof(T) == typeof(int))
-        {
-            return int.TryParse(value, out var parsedValue) ? (true, (T?)(object)parsedValue) : (false, default);
-        }
-
-        if (typeof(T) == typeof(double))
-        {
-            return double.TryParse(value, out var parsedValue) ? (true, (T?)(object)parsedValue) : (false, default);
-        }
-
-        if (typeof(T) == typeof(decimal))
-        {
-            return decimal.TryParse(value, out var parsedValue) ? (true, (T?)(object)parsedValue) : (false, default);
-        }
-
-        if (typeof(T) == typeof(float))
-        {
-            return float.TryParse(value, out var parsedValue) ? (true, (T?)(object)parsedValue) : (false, default);
-        }   
-        
-        if (typeof(T) == typeof(DateTime))
-        {
-            return DateTime.TryParse(value, out var parsedValue) ? (true, (T?)(object)parsedValue) : (false, default);
-        }
-        
-        if (typeof(T) == typeof(bool))
-        {
-            return bool.TryParse(value, out var parsedValue) ? (true, (T?)(object)parsedValue) : (false, default);
-        }
-        
-        if (typeof(T) == typeof(byte))
-        {
-            return byte.TryParse(value, out var parsedValue) ? (true, (T?)(object)parsedValue) : (false, default);
-        }
-
-        if (typeof(T) == typeof(sbyte))
-        {
-            return sbyte.TryParse(value, out var parsedValue) ? (true, (T?)(object)parsedValue) : (false, default);
-        }
-
-        if (typeof(T) == typeof(short))
-        {
-            return short.TryParse(value, out var parsedValue) ? (true, (T?)(object)parsedValue) : (false, default);
-        }
-
-        if (typeof(T) == typeof(ushort))
-        {
-            return ushort.TryParse(value, out var parsedValue) ? (true, (T?)(object)parsedValue) : (false, default);
-        }
-
-        if (typeof(T) == typeof(char))
-        {
-            return char.TryParse(value, out var parsedValue) ? (true, (T?)(object)parsedValue) : (false, default);
-        }
-        
-        if (typeof(T).IsEnum)
-        {
-            try
+            if (typeof(T) == typeof(string))
             {
-                var parsedValue = (T)Enum.Parse(typeof(T), value, true);
-                return (true, parsedValue);
+                return (true, (T?)(object)value);
             }
-            catch
+        
+            
+            if (typeof(T).IsEnum)
             {
+                if (Enum.TryParse(typeof(T), value, true, out var enumValue))
+                {
+                    return (true, (T?)enumValue);
+                }
                 return (false, default);
             }
+
+            
+            var parsedValue = Convert.ChangeType(value, typeof(T));
+            return (true, (T?)parsedValue);
         }
+        catch
+        {
+            return (false, default);
+        }
+    }
+    public static (bool, IEnumerable<T>) ValidateInputAsEnumerable<T>(this InputModel inputModel)
+    {
+        var value = inputModel.Value;
         
-        return (false, default);
+        if (string.IsNullOrEmpty(value))
+        {
+            return (false, Enumerable.Empty<T>());
+        }
+
+        try
+        {
+            var values = value.Split(',')
+              .Select(val => val.Trim())
+              .Where(val => !string.IsNullOrEmpty(val))
+              .Select(val =>
+              {
+                  if (typeof(T).IsEnum)
+                  {
+                      if (Enum.TryParse(typeof(T), val, true, out var enumValue))
+                      {
+                          return (T?)enumValue;
+                      }
+                      return default(T?); 
+                  }
+
+                  try
+                  {
+                      return (T?)Convert.ChangeType(val, typeof(T));
+                  }
+                  catch
+                  {
+                      return default(T?);
+                  }
+              })
+              .Where(val => val != null)
+              .Cast<T>();
+
+            return values.Any() ? (true, values) : (false, Enumerable.Empty<T>());
+        }
+        catch
+        {
+            return (false, Enumerable.Empty<T>());
+        }
     }
 }

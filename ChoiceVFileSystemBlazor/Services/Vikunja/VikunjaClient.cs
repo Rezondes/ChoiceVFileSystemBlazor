@@ -14,10 +14,26 @@ public interface IVikunjaClient : IBaseApiInterface
     
     [Put("/projects/{projectId}/tasks")]
     Task<ApiResponse<VikunjaTask>> CreateNewTaskAsync(int projectId, [Body] VikunjaTask task);
-
-    [Get("/projects/{projectId}/views/{viewId}/tasks")]
-    Task<ApiResponse<VikunjaTask>> GetTasksAsync(int projectId, int viewId);
+    
+    [Get("/projects/{projectId}/tasks")]
+    Task<ApiResponse<List<VikunjaTask>>> GetTasksInProjectAsync(int projectId);
     
     [Get("/tasks/{tasksId}")]
     Task<ApiResponse<VikunjaTask>> GetTaskByIdAsync(int tasksId);
+    
+    [Get("/labels")]
+    Task<ApiResponse<List<VikunjaLabel>>> GetAllLabelsAsync();
+    
+    [Put("/tasks/{taskId}/labels")]
+    Task<ApiResponse<VikunjaAddLabelToTaskModel>> AddLabelToTaskAsync(int taskId, [Body] VikunjaAddLabelToTaskModel labelToTaskModel);
+
+    [Get("/tasks/{taskId}/attachments/15")]
+    Task<ApiResponse<List<VikunjaAttachment>>> GetAllAttachmentsForTaskAsync(int taskId);
+    
+    [Get("/tasks/{taskId}/comments")]
+    Task<ApiResponse<List<VikunjaComment>>> GetAllCommentsForTaskAsync(int taskId);
+    
+    [Put("/tasks/{taskId}/comments")]
+    Task<ApiResponse<VikunjaComment>> CreateNewTaskComment(int taskId, [Body] VikunjaComment newComment);
+    
 }

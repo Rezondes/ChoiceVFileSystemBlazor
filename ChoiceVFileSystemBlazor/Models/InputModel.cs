@@ -1,4 +1,5 @@
-﻿using ChoiceVFileSystemBlazor.Database._Shared;
+﻿using System.Reflection.Metadata.Ecma335;
+using ChoiceVFileSystemBlazor.Database._Shared;
 
 namespace ChoiceVFileSystemBlazor.Models;
 
@@ -10,9 +11,10 @@ public class InputModel(InputTypes type, string label, string value, string plac
     }
     
     // Select
-    public InputModel(InputTypes type, string label, string value, string placeholder, List<InputOptionModel> options) : this(type, label, value, placeholder)
+    public InputModel(InputTypes type, string label, string value, string placeholder, IEnumerable<InputOptionModel> options, bool multiSelect = false) : this(type, label, value, placeholder)
     {
         Options = options;
+        MultiSelect = multiSelect;
     }
 
     // InputTypes.Number
@@ -29,7 +31,8 @@ public class InputModel(InputTypes type, string label, string value, string plac
     public string Min { get; set; }
     public string Max { get; set; }
     public int Lines { get; set; } = 1;
-    public List<InputOptionModel> Options { get; set; }
+    public bool MultiSelect { get; set; } = false;
+    public IEnumerable<InputOptionModel> Options { get; set; }
 }
 
 public enum InputTypes
@@ -45,7 +48,7 @@ public class InputOptionModel(string value, string text)
     public string Value { get; set; } = value;
     public string Text { get; set; } = text;
 
-    public static List<InputOptionModel> GetOptionsForRankEnum()
+    public static IEnumerable<InputOptionModel> GetOptionsForRankEnum()
     {
         var rankSelectOptions = new List<InputOptionModel>();
         foreach (RankEnum rank in Enum.GetValues(typeof(RankEnum)))

@@ -1,12 +1,10 @@
-@page "/u/bugs"
+@page "/u/bugs/my"
 
 @using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.DbModels
-@using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.Proxies
 @using ChoiceVFileSystemBlazor.Services.Vikunja.Models
-@implements IDisposable
 
 @code {
-    public const string Url = "/u/bugs";
+    public const string Url = "/u/bugs/my";
     public static string GetRedirectUrl() => Url;
 }
 
@@ -21,23 +19,19 @@ else if (_failed)
 else
 {
     <style>
-        .paper{
-            height: 80dvh;
-        }
-        .stack{
-            min-width: 350px;
+        .fixed-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
         }
     </style>
     
     <MudContainer Gutters="false" MaxWidth="MaxWidth.ExtraLarge">
-        <MudAppBar Fixed="false" Gutters="true">
-            <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large">Bugreport erstellen</MudButton>
-        </MudAppBar>
-        
         <MudContainer Gutters="false" MaxWidth="MaxWidth.ExtraLarge" Class="d-flex justify-content-around py-5">
             @* @if (_rejectedData.Any()) *@
             @* { *@
-            <BugTrackerStackComponent Title="Abgelehnt" Data="_rejectedData"/>
+            <BugTrackerStackComponent Title="Abgelehnt" Data="_rejectedData" ClickAbleChild="false"/>
             @* } *@
 
             <BugTrackerStackComponent Title="In Prüfung" Data="_underExaminationData"/>
@@ -47,15 +41,17 @@ else
             <BugTrackerStackComponent Title="Abgeschlossen" Data="_doneData"/>
         </MudContainer>
     </MudContainer>
+    
+    <MudFab StartIcon="@Icons.Material.Filled.Add" OnClick="AddBugReport" Color="Color.Tertiary" Size="Size.Large" Class="fixed-button"/>
 }
 
 @code {
     private bool _loading = true;
     private bool _failed;
-    private readonly Dictionary<DiscordIdToBugTaskIdDbModel, VikunjaTask?> _rejectedData = new();
-    private readonly Dictionary<DiscordIdToBugTaskIdDbModel, VikunjaTask?> _underExaminationData = new();
-    private readonly Dictionary<DiscordIdToBugTaskIdDbModel, VikunjaTask?> _acceptedData = new();
-    private readonly Dictionary<DiscordIdToBugTaskIdDbModel, VikunjaTask?> _doneData = new();
+    private readonly List<DiscordIdToBugTaskIdDbModel> _rejectedData = new();
+    private readonly List<DiscordIdToBugTaskIdDbModel> _underExaminationData = new();
+    private readonly List<DiscordIdToBugTaskIdDbModel> _acceptedData = new();
+    private readonly List<DiscordIdToBugTaskIdDbModel> _doneData = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -73,7 +69,12 @@ else
     {
         _loading = true;
         StateHasChanged();
-
+        
+        _rejectedData.Clear();
+        _underExaminationData.Clear();
+        _acceptedData.Clear();
+        _doneData.Clear();
+        
         var discordId = await AuthenticationStateProvider.GetDiscordUserIdAsync();
         if (discordId is null)
         {
@@ -83,41 +84,122 @@ else
             return;
         }
         
+        var scpBugsResult = await VikunjaClientService.Client.HandleApiRequestAsync(
+            async _ => await VikunjaClientService.Client.GetTasksInProjectAsync(VikunjaClientService.ScpBugsProjectId));
+        if (!scpBugsResult.IsSuccess)
+        {
+            Snackbar.Add("Bugtickets konnten nicht geladen werden.", Severity.Error);
+            
+            _loading = true;
+            StateHasChanged();
+            return;
+        }
+        
+        var choiceVBugsResult = await VikunjaClientService.Client.HandleApiRequestAsync(
+            async _ => await VikunjaClientService.Client.GetTasksInProjectAsync(VikunjaClientService.ChoiceVBugsProjectId));
+        if (!choiceVBugsResult.IsSuccess)
+        {
+            Snackbar.Add("Bugtickets konnten nicht geladen werden.", Severity.Error);
+            
+            _loading = true;
+            StateHasChanged();
+            return;
+        }
+        
         var dbSavedTasks = await BugtrackerProxy.GetAllForDiscordIdAsync(discordId);
         foreach (var dbTask in dbSavedTasks)
         {
-            var result = await VikunjaClientService.Client.HandleApiRequestAsync(
-                async _ => await VikunjaClientService.Client.GetTaskByIdAsync(dbTask.BugTaskId));
+            if (scpBugsResult.Data!.Select(x => x.Id).Contains(dbTask.BugTaskId))
+            {
+                _underExaminationData.Add(dbTask);
+                continue;
+            }
+            if (choiceVBugsResult.Data!.Select(x => x.Id).Contains(dbTask.BugTaskId))
+            {
+                var result = await VikunjaClientService.Client.HandleApiRequestAsync(
+                    async _ => await VikunjaClientService.Client.GetTaskByIdAsync(dbTask.BugTaskId));
 
-            if (!result.IsSuccess)
-            {
-                _rejectedData.Add(dbTask, null);
-                continue;
-            }
-
-            var data = result.Data!;
-            
-            if (data.ProjectId == VikunjaClientService.ScpBugsProjectId)
-            {
-                _underExaminationData.Add(dbTask, data);
+                if (result.Data!.Done)
+                {
+                    _doneData.Add(dbTask);
+                }
+                else
+                {
+                    _acceptedData.Add(dbTask);
+                }
                 continue;
             }
             
-            if (data.ProjectId == VikunjaClientService.ChoiceVBugsProjectId && !data.Done)
-            {
-                _acceptedData.Add(dbTask, data);
-                continue;
-            }
-            
-            _doneData.Add(dbTask, data);
+            _rejectedData.Add(dbTask);
         }
         
         _loading = false;
         StateHasChanged();
     }
 
-    public void Dispose()
+    private async Task AddBugReport()
     {
+        var discordId = await AuthenticationStateProvider.GetDiscordUserIdAsync();
+        if (discordId is null)
+        {
+            return;
+        }
         
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                "Titel",
+                string.Empty,
+                "Ultra fetter Bug digga"
+            ),
+            new(
+                InputTypes.Text,
+                "Beschreibung",
+                string.Empty,
+                "Beschreibe hier deinen Bug/Feature so ausführlich wie möglich.",
+                7
+            )
+        };
+
+        var dialogData = await DialogService.OpenDialog(
+            "Bug reporten", 
+            "Was möchtest du reporten?", 
+            "Absenden",
+            inputs);
+        if (dialogData is null) return;
+
+        var (validatedTitle, parsedTitle) = dialogData[0].ValidateInput<string>();
+        if (!validatedTitle)
+        {
+            Snackbar.Add("Es wurde kein richtiger Titel angegeben!", Severity.Error);
+            return;
+        }
+        
+        var (validatedDescription, parsedDescription) = dialogData[1].ValidateInput<string>();
+        if (!validatedDescription)
+        {
+            Snackbar.Add("Es wurde keine richtige Beschreibung angegeben!", Severity.Error);
+            return;
+        }
+        
+        LoadingService.StartLoading();
+        
+        var addResult = await VikunjaClientService.Client.HandleApiRequestAsync(
+            async _ => await VikunjaClientService.Client.CreateNewTaskAsync(VikunjaClientService.ScpBugsProjectId, new VikunjaTask(parsedTitle!, parsedDescription!)));
+        
+        LoadingService.StopLoading();
+        
+        if (!addResult.IsSuccess)
+        {
+            Snackbar.Add("Ein Fehler ist aufgetreten.");
+            return;
+        }
+
+        var addedTask = addResult.Data!;
+        await BugtrackerProxy.AddAsync(new DiscordIdToBugTaskIdDbModel(discordId, addedTask.Id, addedTask.Title));
+        
+        Snackbar.Add($"[{addedTask.Id}] {addedTask.Title} wurde hinzufügt!", Severity.Success);
+        await Load();
     }
 }

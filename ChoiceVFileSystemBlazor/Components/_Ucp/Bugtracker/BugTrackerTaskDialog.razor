@@ -1,0 +1,81 @@
+@using ChoiceVFileSystemBlazor.Services.Vikunja.Models
+
+<MudDialog Style="height: 100%">
+    <TitleContent>
+        <MudText Typo="Typo.h3">#@Task.Id</MudText> <MudText Typo="Typo.h3">@Task.Title</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudContainer Class="py-5">
+            <MudText Typo="Typo.h4"><MudIcon Icon="@Icons.Material.Filled.Description"/> Beschreibung</MudText>
+            <MudText Typo="Typo.h5">@Task.Description</MudText>
+        </MudContainer>
+        
+        <MudContainer Class="py-5">
+            <MudText Typo="Typo.h4"><MudIcon Icon="@Icons.Material.Filled.AttachFile"/> Anhänge</MudText>
+            <WorkInProgressComponent/>
+        </MudContainer>
+        
+        <MudContainer Class="py-5">
+            <MudText Typo="Typo.h4"><MudIcon Icon="@Icons.Material.Filled.Comment"/> Kommentare</MudText>
+            <MudTextField T="string" Clearable Lines="10" @bind-Text="NewCommentText" Placeholder="Füge hier deinen Kommentar ein...">
+                
+            </MudTextField>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-2" OnClick="AddComment">Kommentieren</MudButton>
+
+            <MudList T="string">
+                @foreach (var comment in Comments.OrderByDescending(x => x.Created))
+                {
+                    var authorName = comment.Author.Id == VikunjaClientService.VikunjaApiUserId ? OwnDiscordName : comment.Author.Name;
+                    var labelText = $"{authorName} am {comment.Created}";
+                    
+                    <MudListItem>
+                        <MudTextField ReadOnly Lines="10" Label="@labelText" Value="@comment.Comment"/>
+                    </MudListItem>
+                }
+            </MudList>
+        </MudContainer>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public VikunjaTask Task { get; set; }
+    [Parameter] public List<VikunjaAttachment> Attachments { get; set; }
+    [Parameter] public List<VikunjaComment> Comments { get; set; }
+    [Parameter] public string OwnDiscordName { get; set; }
+
+    private string NewCommentText = string.Empty;
+
+    private async Task AddComment(MouseEventArgs obj)
+    {
+        if (string.IsNullOrEmpty(NewCommentText)) return;
+        
+        LoadingService.StartLoading();
+        
+        var addResult = await VikunjaClientService.Client.HandleApiRequestAsync(
+            async _ => await VikunjaClientService.Client.CreateNewTaskComment(Task.Id, new VikunjaComment(null, NewCommentText, null, null, null, null)));
+
+        if (!addResult.IsSuccess)
+        {
+            LoadingService.StopLoading();
+            Snackbar.Add("Etwas ist schief gelaufen. Kommentar wurde nicht hinzugefügt.", Severity.Error);
+            return;
+        }
+        
+        var getComments = await VikunjaClientService.Client.HandleApiRequestAsync(
+            async _ => await VikunjaClientService.Client.GetAllCommentsForTaskAsync(Task.Id));
+        if (getComments.IsSuccess)
+        {
+            Comments = getComments.Data;
+        }
+        else
+        {
+            Snackbar.Add("Kommentare konnten nicht neugeladen werden. Bitte lade die Seite manuell neu.", Severity.Error);
+        }
+        
+        NewCommentText = string.Empty;
+        LoadingService.StopLoading();
+    }
+
+}
