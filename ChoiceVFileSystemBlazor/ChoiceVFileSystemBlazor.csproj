@@ -18,8 +18,8 @@
       </PackageReference>
       <PackageReference Include="MudBlazor" Version="7.6.0" />
       <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
-      <PackageReference Include="Refit" Version="7.1.2" />
-      <PackageReference Include="Refit.HttpClientFactory" Version="7.1.2" />
+      <PackageReference Include="Refit" Version="8.0.0" />
+      <PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
       <PackageReference Include="TimeZoneConverter" Version="6.1.0" />
     </ItemGroup>
 
