@@ -71,12 +71,13 @@ builder.Services.AddMudServices(config =>
 
 builder.Services.AddDistributedMemoryCache();
 
-#region Discord Authentication
+#region Discord
 builder.Services.Configure<DiscordBotSettingsModel>(builder.Configuration.GetSection("Discord"));
 builder.Services.AddDiscordAuthentication(options =>
 {
     options.DiscordSettings = builder.Services.BuildServiceProvider().GetRequiredService<IOptions<DiscordBotSettingsModel>>();
 });
+builder.Services.AddHostedService<DiscordBotService>();
 #endregion
 
 builder.Services.AddHttpContextAccessor();
