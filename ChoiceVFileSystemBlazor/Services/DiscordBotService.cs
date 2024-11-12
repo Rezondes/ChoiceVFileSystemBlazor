@@ -35,6 +35,13 @@ public class DiscordBotService : IHostedService
         await _client.LogoutAsync();
         await _client.StopAsync();
     }
+    
+    public async Task<bool> ValidateDiscordId(string discordId)
+    {
+        var user = await _client.GetUserAsync(ulong.Parse(discordId));
+        
+        return user != null;
+    }
 
     private Task LogAsync(LogMessage message)
     {

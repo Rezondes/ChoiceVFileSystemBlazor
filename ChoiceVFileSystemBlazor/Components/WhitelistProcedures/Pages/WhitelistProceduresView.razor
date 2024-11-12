@@ -407,9 +407,11 @@ else
             socialClubName = _model.DataList.FirstOrDefault(x => x.Name == "SOCIALCLUB")?.Data ?? string.Empty;
         }
         
+        var botService = ServiceProvider.GetRequiredService<DiscordBotService>();
+        
         var added = await AccountHelper.OpenAddAccountDialog(
             DiscordGuildMembersCachedService,
-            DiscordService,
+            botService,
             DialogService, 
             Snackbar, 
             AccountApi,

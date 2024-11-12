@@ -10,7 +10,7 @@ public static class AccountHelper
 {
     public static async Task<bool> OpenAddAccountDialog(
         DiscordGuildMembersCachedService discordGuildMembersCachedService,
-        DiscordService discordService,
+        DiscordBotService discordBotService,
         IDialogService dialogService, 
         ISnackbar snackbar, 
         IAccountApi accountApi,
@@ -84,7 +84,7 @@ public static class AccountHelper
             return false;
         }
         
-        var discordIdValidated = await discordService.ValidateDiscordId(parsedDiscordId!);
+        var discordIdValidated = await discordBotService.ValidateDiscordId(parsedDiscordId!);
         if (!discordIdValidated)
         {
             snackbar.Add("Du hast keine valide DiscordId!", Severity.Error);

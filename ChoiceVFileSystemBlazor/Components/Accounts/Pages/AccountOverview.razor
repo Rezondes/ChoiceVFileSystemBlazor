@@ -184,9 +184,11 @@ else
     
     private async Task OpenAddAccountDialog()
     {
+        var botService = ServiceProvider.GetRequiredService<DiscordBotService>();
+        
         var added = await AccountHelper.OpenAddAccountDialog(
             DiscordGuildMembersCachedService,
-            DiscordService,
+            botService,
             DialogService, 
             Snackbar, 
             AccountApi,

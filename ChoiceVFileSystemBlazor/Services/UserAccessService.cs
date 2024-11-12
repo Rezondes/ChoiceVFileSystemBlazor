@@ -36,11 +36,11 @@ public class UserAccessService(
         return discordId is not null && discordName is not null;
     }
 
-    public static async Task<bool> IsDiscordIdValid(ClaimsPrincipal user, DiscordService discordService)
+    public static async Task<bool> IsDiscordIdValid(ClaimsPrincipal user, DiscordBotService discordBotService)
     {
         var discordId = GetDiscordUserId(user);
         if (discordId is null) return false;
-        var isValid = await discordService.ValidateDiscordId(discordId);
+        var isValid = await discordBotService.ValidateDiscordId(discordId);
         return isValid;
     }
     
