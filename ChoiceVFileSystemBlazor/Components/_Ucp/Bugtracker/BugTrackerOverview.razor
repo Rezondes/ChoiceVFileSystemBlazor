@@ -1,0 +1,124 @@
+@page "/u/bugs"
+
+@using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.DbModels
+@using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.Proxies
+@using ChoiceVFileSystemBlazor.Services.Vikunja.Models
+@implements IDisposable
+
+@code {
+    public const string Url = "/u/bugs";
+    public static string GetRedirectUrl() => Url;
+}
+
+<h3>BugTrackerOverview</h3>
+
+@if (_loading)
+{
+    <LoadingComponent/>
+}
+else if (_failed)
+{  
+    <ErrorComponent/>
+}
+else
+{
+    <MudButtonGroup Class="mud-width-full">
+        <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large">Bugreport erstellen</MudButton>
+    </MudButtonGroup>
+    <MudContainer>
+        @if (_data.Any(x => x.Value is null))
+        {
+            <MudStack>
+                <MudText>Abgelehnt</MudText>
+                @foreach (var task in _data.Where(x => x.Value is null))
+                {
+                    <MudPaper>
+                        [@task.Key.BugTaskId] @task.Key.BugTaskName
+                    </MudPaper>
+                }
+            </MudStack>
+        }
+
+        <MudStack>
+            <MudText>In Prüfung</MudText>
+            @foreach (var task in _data.Where(x =>
+                          x.Value is not null && x.Value.ProjectId == VikunjaClientService.ScpBugsProjectId))
+            {
+                <MudPaper>
+                    [@task.Value.Id] @task.Value.Title
+                </MudPaper>
+            }
+        </MudStack>
+        <MudStack>
+            <MudText>Akzeptiert</MudText>
+            @foreach (var task in _data.Where(x =>
+                          x.Value is not null && x.Value.ProjectId == VikunjaClientService.ChoiceVBugsProjectId && !x.Value.Done))
+            {
+                <MudPaper>
+                    [@task.Value.Id] @task.Value.Title
+                </MudPaper>
+            }
+        </MudStack>
+        <MudStack>
+            <MudText>Abgeschlossen</MudText>
+            @foreach (var task in _data.Where(x =>
+                          x.Value is not null && x.Value.ProjectId == VikunjaClientService.ChoiceVBugsProjectId && x.Value.Done))
+            {
+                <MudPaper>
+                    [@task.Value.Id] @task.Value.Title
+                </MudPaper>
+            }
+        </MudStack>
+
+    </MudContainer>
+}
+
+@code {
+    private bool _loading = true;
+    private bool _failed = false;
+    private readonly Dictionary<DiscordIdToBugTaskIdDbModel, VikunjaTask?> _data = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        await Load();
+    }
+
+    private async Task Load()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        var discordId = await AuthenticationStateProvider.GetDiscordUserIdAsync();
+        if (discordId is null)
+        {
+            Snackbar.Add("Code: CrazyDuck. Bitte Lade die Seite neu oder melde ich Support!");
+            _failed = true;
+            _loading = false;
+            return;
+        }
+        
+        var dbSavedTasks = await BugtrackerProxy.GetAllForDiscordIdAsync(discordId);
+        foreach (var dbTask in dbSavedTasks)
+        {
+            var result = await VikunjaClientService.Client.HandleApiRequestAsync(
+                async _ => await VikunjaClientService.Client.GetTaskByIdAsync(dbTask.BugTaskId));
+
+            _data.Add(dbTask, result.IsSuccess ? result.Data : null);
+        }
+        
+        _loading = false;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        
+    }
+}

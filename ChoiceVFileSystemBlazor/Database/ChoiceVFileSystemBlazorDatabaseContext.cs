@@ -3,6 +3,7 @@ using ChoiceVFileSystemBlazor.Database.Discord.DbModels;
 using ChoiceVFileSystemBlazor.Database.News.DbModels;
 using ChoiceVFileSystemBlazor.Database.Ranks.DbModels;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
+using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.DbModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChoiceVFileSystemBlazor.Database;
@@ -35,6 +36,10 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
     public DbSet<FileEntryDbModel> SupportfileEntryDbModels { get; set; }
     public DbSet<FileLogsDbModel> SupportfileLogsDbModels  { get; set; }
     public DbSet<FileUploadDbModel> SupportfileFileUploadDbModels  { get; set; }
+    #endregion
+
+    #region UCP
+    public DbSet<DiscordIdToBugTaskIdDbModel> DiscordIdToBugTaskIdDbModels { get; set; }
     #endregion
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -275,6 +280,18 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
                 .WithMany(a => a.FileUploads)
                 .HasForeignKey(s => s.EntryId);
         });
+        #endregion
+        
+        #region UCP
+        
+        modelBuilder.Entity<DiscordIdToBugTaskIdDbModel>(entity => 
+        {
+            entity.Property(e => e.Id)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+        });
+        
         #endregion
     }
 }

@@ -303,7 +303,7 @@
             async token => await VikunjaClientService.Client.GetAllAsync());
         
         var addResult = await VikunjaClientService.Client.HandleApiRequestAsync(
-            async token => await VikunjaClientService.Client.CreateNewTask(VikunjaClientService.ScpBugsProjectId, new VikunjaTask("Test", "Testbeschreibung")));
+            async token => await VikunjaClientService.Client.CreateNewTaskAsync(VikunjaClientService.ScpBugsProjectId, new VikunjaTask("Test", "Testbeschreibung")));
         
         if (result.IsSuccess)
         {

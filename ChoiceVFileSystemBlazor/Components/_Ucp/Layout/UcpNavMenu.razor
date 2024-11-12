@@ -1,6 +1,8 @@
+@using ChoiceVFileSystemBlazor.Components._Ucp.Bugtracker
 <MudNavMenu Style="height: 100%;">
     <MudNavLink Href="@UcpHome.GetRedirectUrl()" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.SpaceDashboard">Dashboard</MudNavLink>
-
+    <MudNavLink Href="@BugTrackerOverview.GetRedirectUrl()" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.BugReport">Bugtickets</MudNavLink>
+    
 </MudNavMenu>
 
 @code {
@@ -10,5 +12,4 @@
     {
         StateHasChanged();
     }
-
 }

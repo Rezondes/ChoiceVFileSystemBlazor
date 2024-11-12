@@ -26,7 +26,7 @@ else
     <MudGrid Class="px-5">
         <MudItem xs="12" sm="6" md="12">
             <MudText Class="d-flex flex-column align-center justify-center mud-width-full" Typo="Typo.h4">
-                Willkommen auf dem ChoiceV User Control Panel!
+                Willkommen auf dem ChoiceV User Control Panel @AuthenticationStateProvider.GetDiscordUserNameAsync().GetAwaiter().GetResult()!
             </MudText>
         </MudItem>
     

@@ -80,6 +80,7 @@
 @using ChoiceVFileSystemBlazor.Components.WhitelistProcedures.Pages
 @using ChoiceVSharedApiModels.SupportKeyInfo.DatabaseJsonModels.SubInformation.Vehicle
 @using ChoiceVFileSystemBlazor.Components.Supportkeylogs.Components.InventorySpot
+@using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.Proxies.Interfaces
 @using ChoiceVFileSystemBlazor.Services.Vikunja
 @using ChoiceVSharedApiModels.SupportKeyInfo.DatabaseJsonModels.SubInformation.Vehicle
 @using ChoiceVSharedApiModels.SupportKeyInfo.DatabaseJsonModels.SubInformation.Player
@@ -150,3 +151,5 @@
 @inject IFileEntryProxy FileEntryProxy
 
 @inject IRankProxy RankProxy
+
+@inject IBugtrackerProxy BugtrackerProxy
