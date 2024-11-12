@@ -1,6 +1,5 @@
 using System.Net.Http.Headers;
-using System.Text.Json;
-using ChoiceVFileSystemBlazor.Models;
+using ChoiceVFileSystemBlazor.Services.DiscordAuthentication;
 using Microsoft.Extensions.Options;
 
 namespace ChoiceVFileSystemBlazor.Services;

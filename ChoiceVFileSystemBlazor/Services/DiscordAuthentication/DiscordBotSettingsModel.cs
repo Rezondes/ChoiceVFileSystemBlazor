@@ -1,4 +1,4 @@
-namespace ChoiceVFileSystemBlazor.Models;
+namespace ChoiceVFileSystemBlazor.Services.DiscordAuthentication;
 
 public class DiscordBotSettingsModel
 {
@@ -6,4 +6,6 @@ public class DiscordBotSettingsModel
     public string ClientSecret { get; set; } 
     public string GuildId { get; set; }
     public string BotToken { get; set; }
+    
+    public DiscordBotSettingsModel(){}
 }
