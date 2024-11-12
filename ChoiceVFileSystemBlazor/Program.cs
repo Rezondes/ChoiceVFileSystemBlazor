@@ -1,6 +1,3 @@
-using System.Net.Http.Headers;
-using System.Security.Claims;
-using System.Text.Json;
 using ChoiceVFileSystemBlazor.Components;
 using ChoiceVFileSystemBlazor.Components._Base;
 using ChoiceVFileSystemBlazor.Components._Layout.Hubs;
@@ -22,13 +19,9 @@ using ChoiceVFileSystemBlazor.Extensions;
 using ChoiceVFileSystemBlazor.Models;
 using ChoiceVFileSystemBlazor.Services;
 using ChoiceVFileSystemBlazor.Services.DiscordAuthentication;
-using ChoiceVFileSystemBlazor.Services.DiscordGuildMembers;
 using ChoiceVFileSystemBlazor.Services.Serverinformations;
 using ChoiceVFileSystemBlazor.Services.Vikunja;
 using ChoiceVRefitClient;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MudBlazor;
@@ -92,9 +85,6 @@ builder.Services.AddSingleton<LockService>();
 builder.Services.AddSingleton<ServerInformationCachedService>();
 builder.Services.AddHostedService<ServerInformationBackgroundService>();
 
-builder.Services.AddSingleton<DiscordGuildMembersCachedService>();
-builder.Services.AddHostedService<DiscordGuildMembersBackgroundService>();
-
 #region ChoiceV Api
 builder.Services.Configure<ChoiceVApiSettingsModel>(builder.Configuration.GetSection("ChoiceVApi"));
 
@@ -105,7 +95,6 @@ builder.Services.ConfigureHttpClient<ICompanyApi>();
 builder.Services.ConfigureHttpClient<IInventoryApi>();
 builder.Services.ConfigureHttpClient<IServerApi>();
 builder.Services.ConfigureHttpClient<IVehicleApi>();
-builder.Services.ConfigureHttpClient<IDiscordApi>();
 builder.Services.ConfigureHttpClient<ISupportKeyInfoApi>();
 #endregion
 

@@ -74,7 +74,6 @@
 @using ChoiceVFileSystemBlazor.Components.WhitelistQuestions.Pages
 @using ChoiceVFileSystemBlazor.Components.WhitelistQuestions.Components
 @using ChoiceVFileSystemBlazor.Components.WhitelistProcedures.Components
-@using ChoiceVFileSystemBlazor.Services.DiscordGuildMembers
 @using ChoiceVFileSystemBlazor.Services.Serverinformations
 @using ChoiceVFileSystemBlazor.Components.Supportkeylogs.Pages
 @using ChoiceVFileSystemBlazor.Components.WhitelistProcedures.Pages
@@ -112,7 +111,6 @@
 
 @inject ReloadService ReloadService
 @inject ServerInformationCachedService ServerInformationCachedService
-@inject DiscordGuildMembersCachedService DiscordGuildMembersCachedService
 @inject PageLoadingService LoadingService
 
 @inject VikunjaClientService VikunjaClientService
@@ -128,7 +126,6 @@
 @inject IInventoryApi InventoryApi
 @inject IServerApi ServerApi
 @inject IVehicleApi VehicleApi
-@inject IDiscordApi DiscordApi
 @inject ISupportKeyInfoApi SupportKeyInfoApi
 
 // ChoiceV Whitelist Api

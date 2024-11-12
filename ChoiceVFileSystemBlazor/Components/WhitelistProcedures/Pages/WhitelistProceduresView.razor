@@ -410,7 +410,6 @@ else
         var botService = ServiceProvider.GetRequiredService<DiscordBotService>();
         
         var added = await AccountHelper.OpenAddAccountDialog(
-            DiscordGuildMembersCachedService,
             botService,
             DialogService, 
             Snackbar, 

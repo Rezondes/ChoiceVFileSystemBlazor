@@ -1,6 +1,5 @@
 using ChoiceVFileSystemBlazor.Models;
 using ChoiceVFileSystemBlazor.Services;
-using ChoiceVFileSystemBlazor.Services.DiscordGuildMembers;
 using ChoiceVRefitClient;
 using MudBlazor;
 
@@ -9,7 +8,6 @@ namespace ChoiceVFileSystemBlazor.Helper;
 public static class AccountHelper
 {
     public static async Task<bool> OpenAddAccountDialog(
-        DiscordGuildMembersCachedService discordGuildMembersCachedService,
         DiscordBotService discordBotService,
         IDialogService dialogService, 
         ISnackbar snackbar, 
@@ -30,27 +28,6 @@ public static class AccountHelper
             discordId,
             discordInputPlaceholder
         );
-
-        if (manuelInput)
-        {
-            var (lastTrySuccess, lastTry, cachedLastUpdate, cachedData) = await discordGuildMembersCachedService.GetCachedData();
-            if (lastTrySuccess.HasValue && lastTrySuccess.Value && cachedData is not null)
-            {
-                var selectOptions = cachedData
-                    .OrderBy(x => x.Username)
-                    .Select(discordGuildUser => 
-                        new InputOptionModel(discordGuildUser.DiscordId.ToString(), discordGuildUser.Username))
-                    .ToList();
-
-                discordInputModel = new InputModel(
-                    InputTypes.Select,
-                    discordInputLabel,
-                    discordId,
-                    discordInputPlaceholder,
-                    selectOptions
-                );
-            }
-        }
         
         var inputs = new List<InputModel>
         {
