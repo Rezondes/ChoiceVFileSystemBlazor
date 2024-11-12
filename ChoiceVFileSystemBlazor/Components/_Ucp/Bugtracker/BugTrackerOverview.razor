@@ -10,8 +10,6 @@
     public static string GetRedirectUrl() => Url;
 }
 
-<h3>BugTrackerOverview</h3>
-
 @if (_loading)
 {
     <LoadingComponent/>
@@ -22,61 +20,42 @@ else if (_failed)
 }
 else
 {
-    <MudButtonGroup Class="mud-width-full">
-        <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large">Bugreport erstellen</MudButton>
-    </MudButtonGroup>
-    <MudContainer>
-        @if (_data.Any(x => x.Value is null))
-        {
-            <MudStack>
-                <MudText>Abgelehnt</MudText>
-                @foreach (var task in _data.Where(x => x.Value is null))
-                {
-                    <MudPaper>
-                        [@task.Key.BugTaskId] @task.Key.BugTaskName
-                    </MudPaper>
-                }
-            </MudStack>
+    <style>
+        .paper{
+            height: 80dvh;
         }
+        .stack{
+            min-width: 350px;
+        }
+    </style>
+    
+    <MudContainer Gutters="false" MaxWidth="MaxWidth.ExtraLarge">
+        <MudAppBar Fixed="false" Gutters="true">
+            <MudButton StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large">Bugreport erstellen</MudButton>
+        </MudAppBar>
+        
+        <MudContainer Gutters="false" MaxWidth="MaxWidth.ExtraLarge" Class="d-flex justify-content-around py-5">
+            @* @if (_rejectedData.Any()) *@
+            @* { *@
+            <BugTrackerStackComponent Title="Abgelehnt" Data="_rejectedData"/>
+            @* } *@
 
-        <MudStack>
-            <MudText>In Prüfung</MudText>
-            @foreach (var task in _data.Where(x =>
-                          x.Value is not null && x.Value.ProjectId == VikunjaClientService.ScpBugsProjectId))
-            {
-                <MudPaper>
-                    [@task.Value.Id] @task.Value.Title
-                </MudPaper>
-            }
-        </MudStack>
-        <MudStack>
-            <MudText>Akzeptiert</MudText>
-            @foreach (var task in _data.Where(x =>
-                          x.Value is not null && x.Value.ProjectId == VikunjaClientService.ChoiceVBugsProjectId && !x.Value.Done))
-            {
-                <MudPaper>
-                    [@task.Value.Id] @task.Value.Title
-                </MudPaper>
-            }
-        </MudStack>
-        <MudStack>
-            <MudText>Abgeschlossen</MudText>
-            @foreach (var task in _data.Where(x =>
-                          x.Value is not null && x.Value.ProjectId == VikunjaClientService.ChoiceVBugsProjectId && x.Value.Done))
-            {
-                <MudPaper>
-                    [@task.Value.Id] @task.Value.Title
-                </MudPaper>
-            }
-        </MudStack>
+            <BugTrackerStackComponent Title="In Prüfung" Data="_underExaminationData"/>
 
+            <BugTrackerStackComponent Title="Akzeptiert" Data="_acceptedData"/>
+            
+            <BugTrackerStackComponent Title="Abgeschlossen" Data="_doneData"/>
+        </MudContainer>
     </MudContainer>
 }
 
 @code {
     private bool _loading = true;
-    private bool _failed = false;
-    private readonly Dictionary<DiscordIdToBugTaskIdDbModel, VikunjaTask?> _data = new();
+    private bool _failed;
+    private readonly Dictionary<DiscordIdToBugTaskIdDbModel, VikunjaTask?> _rejectedData = new();
+    private readonly Dictionary<DiscordIdToBugTaskIdDbModel, VikunjaTask?> _underExaminationData = new();
+    private readonly Dictionary<DiscordIdToBugTaskIdDbModel, VikunjaTask?> _acceptedData = new();
+    private readonly Dictionary<DiscordIdToBugTaskIdDbModel, VikunjaTask?> _doneData = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -110,7 +89,27 @@ else
             var result = await VikunjaClientService.Client.HandleApiRequestAsync(
                 async _ => await VikunjaClientService.Client.GetTaskByIdAsync(dbTask.BugTaskId));
 
-            _data.Add(dbTask, result.IsSuccess ? result.Data : null);
+            if (!result.IsSuccess)
+            {
+                _rejectedData.Add(dbTask, null);
+                continue;
+            }
+
+            var data = result.Data!;
+            
+            if (data.ProjectId == VikunjaClientService.ScpBugsProjectId)
+            {
+                _underExaminationData.Add(dbTask, data);
+                continue;
+            }
+            
+            if (data.ProjectId == VikunjaClientService.ChoiceVBugsProjectId && !data.Done)
+            {
+                _acceptedData.Add(dbTask, data);
+                continue;
+            }
+            
+            _doneData.Add(dbTask, data);
         }
         
         _loading = false;

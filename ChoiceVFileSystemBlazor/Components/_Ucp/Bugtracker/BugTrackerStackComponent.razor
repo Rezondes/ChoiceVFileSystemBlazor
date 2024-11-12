@@ -1,0 +1,21 @@
+@using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.DbModels
+@using ChoiceVFileSystemBlazor.Services.Vikunja.Models
+
+<MudPaper Class="paper">
+    <MudPaper Class="py-2">
+        <MudText Typo="Typo.h5" Align="Align.Center">@Title</MudText>
+    </MudPaper>
+    <MudStack Class="stack">
+        @foreach (var task in Data)
+        {
+            <MudPaper>
+                [@task.Key.BugTaskId] @task.Key.BugTaskName
+            </MudPaper>
+        }
+    </MudStack>
+</MudPaper>
+
+@code {
+    [Parameter] public string Title { get; set; }
+    [Parameter] public Dictionary<DiscordIdToBugTaskIdDbModel, VikunjaTask?> Data { get; set; }
+}
