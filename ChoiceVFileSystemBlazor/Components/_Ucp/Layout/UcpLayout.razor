@@ -10,7 +10,7 @@
 
 <MudLayout Style="height: 100vh; overflow: hidden;">
     <MudAppBar>
-        @if (AuthenticationStateProvider.IsAuthenticatedAsync(DiscordBotService).GetAwaiter().GetResult())
+        @if (AuthenticationStateProvider.IsAuthenticatedAndOnDiscordGuildAsync(DiscordBotService).GetAwaiter().GetResult())
         {
             <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer"/>
         }
@@ -26,7 +26,7 @@
 
         <MudButtonGroup Color="Color.Inherit">
             <ThemeModeToggle IsDarkMode="_isDarkMode" OnDarkModeChanged="ToggleDarkMode"/>
-            @if (AuthenticationStateProvider.IsAuthenticatedAsync(DiscordBotService).GetAwaiter().GetResult())
+            @if (AuthenticationStateProvider.IsAuthenticatedAsync().GetAwaiter().GetResult())
             {
                 <MudTooltip Text="Ausloggen" Duration="Constants.TOOLTIP_DURATION">
                     <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Error" OnClick="Logout"/>
@@ -41,7 +41,7 @@
         </MudButtonGroup>
     </MudAppBar>
     
-    @if (AuthenticationStateProvider.IsAuthenticatedAsync(DiscordBotService).GetAwaiter().GetResult())
+    @if (AuthenticationStateProvider.IsAuthenticatedAndOnDiscordGuildAsync(DiscordBotService).GetAwaiter().GetResult())
     {
         <MudDrawer @bind-Open="_open" ClipMode="_clipMode" Breakpoint="_breakpoint" Variant="DrawerVariant.Mini" Style="height: calc(100% - 40px - var(--mud-appbar-height)); transition: width;">
             <UcpNavMenu @ref="_navMenu"/>
@@ -50,13 +50,17 @@
     
     <MudMainContent Style="height: 100%; overflow: hidden;">
         <MudContainer MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: hidden; padding: 0 0; position: relative; display: flex; justify-content: center;">
-            @if (AuthenticationStateProvider.IsAuthenticatedAsync(DiscordBotService).GetAwaiter().GetResult())
+            @if (!AuthenticationStateProvider.IsAuthenticatedAsync().GetAwaiter().GetResult())
             {
-                @Body
+                <MudAlert Severity="Severity.Info" Style="height: fit-content">Du bist noch nicht eingeloggt.</MudAlert>
+            }
+            else if (!AuthenticationStateProvider.IsOnDiscordGuildAsync(DiscordBotService).GetAwaiter().GetResult())
+            {
+                <MudAlert Severity="Severity.Info" Style="height: fit-content">Du bist noch nicht auf unseren Discord.</MudAlert>
             }
             else
             {
-                <MudAlert Severity="Severity.Info" Style="height: fit-content">Du bist noch nicht eingeloggt.</MudAlert>
+                @Body
             }
 
             <MudOverlay Visible="@LoadingService.ShowLoading" DarkBackground="true" ZIndex="99999" Absolute="true">
@@ -65,7 +69,7 @@
         </MudContainer>
     </MudMainContent>
     
-    @if (AuthenticationStateProvider.IsAuthenticatedAsync(DiscordBotService).GetAwaiter().GetResult())
+    @if (AuthenticationStateProvider.IsAuthenticatedAndOnDiscordGuildAsync(DiscordBotService).GetAwaiter().GetResult())
     {
         <MudNavLink Href="https://github.com/Rezondes"
                     Icon="@Icons.Custom.Brands.GitHub"
@@ -108,7 +112,7 @@
         var loginRequired = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).ContainsKey("login");
         if (loginRequired)
         {
-            if (await AuthenticationStateProvider.IsAuthenticatedAsync(DiscordBotService))
+            if (await AuthenticationStateProvider.IsAuthenticatedAsync())
             {
                 Navigation.NavigateTo("/", forceLoad: true);
                 return;
@@ -122,7 +126,7 @@
         var logoutRequired = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).ContainsKey("logout");
         if (logoutRequired)
         {
-            if (!await AuthenticationStateProvider.IsAuthenticatedAsync(DiscordBotService)) return;
+            if (!await AuthenticationStateProvider.IsAuthenticatedAsync()) return;
             var context = HttpContextAccessor.HttpContext;
             if (context is null) return;
             
@@ -165,7 +169,7 @@
 
     private async Task Login()
     {
-        if (await AuthenticationStateProvider.IsAuthenticatedAsync(DiscordBotService)) return;
+        if (await AuthenticationStateProvider.IsAuthenticatedAsync()) return;
         
         var currentUrl = Navigation.Uri.Replace(Navigation.BaseUri, "");
         Navigation.NavigateTo($"/{Uri.EscapeDataString(currentUrl)}?login=true", forceLoad: true);
@@ -173,7 +177,7 @@
 
     private async Task Logout()
     {
-        if (!await AuthenticationStateProvider.IsAuthenticatedAsync(DiscordBotService)) return;
+        if (!await AuthenticationStateProvider.IsAuthenticatedAsync()) return;
         
         var currentUrl = Navigation.Uri.Replace(Navigation.BaseUri, "");
         Navigation.NavigateTo($"/{Uri.EscapeDataString(currentUrl)}?logout=true", forceLoad: true);
