@@ -22,9 +22,15 @@ public static class AuthenticationStateProviderExtension
         return authState.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name)?.Value;
     }
         
-    public static async Task<bool> IsAuthenticatedAsync(this AuthenticationStateProvider authenticationStateProvider)
+    public static async Task<bool> IsAuthenticatedAsync(this AuthenticationStateProvider authenticationStateProvider, DiscordBotService discordBotService)
     {
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
-        return UserAccessService.HasClaims(authState.User);
+        if (!UserAccessService.HasClaims(authState.User)) return false;
+        
+        var discordId = await authenticationStateProvider.GetDiscordUserIdAsync();
+        if (discordId is null) return false;
+        
+        var user = discordBotService.GetCachedUser(discordId);
+        return user is not null;
     }
 }

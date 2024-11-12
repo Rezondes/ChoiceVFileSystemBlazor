@@ -70,7 +70,8 @@ builder.Services.AddDiscordAuthentication(options =>
 {
     options.DiscordSettings = builder.Services.BuildServiceProvider().GetRequiredService<IOptions<DiscordBotSettingsModel>>();
 });
-builder.Services.AddHostedService<DiscordBotService>();
+builder.Services.AddSingleton<DiscordBotService>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<DiscordBotService>());
 #endregion
 
 builder.Services.AddHttpContextAccessor();
