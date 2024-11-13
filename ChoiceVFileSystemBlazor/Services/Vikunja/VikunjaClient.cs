@@ -33,6 +33,10 @@ public interface IVikunjaClient : IBaseApiInterface
     [Get("/tasks/{taskId}/attachments/{attachmentId}")]
     Task<HttpResponseMessage> DownloadAttachmentAsync(int taskId, int attachmentId);
     
+    [Multipart]
+    [Put("/tasks/{id}/attachments")]
+    Task UploadFile([AliasAs("id")] int taskId, [AliasAs("files")] StreamPart fileStream);
+    
     [Get("/tasks/{taskId}/comments")]
     Task<ApiResponse<List<VikunjaComment>>> GetAllCommentsForTaskAsync(int taskId);
     

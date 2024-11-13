@@ -4,7 +4,7 @@ namespace ChoiceVFileSystemBlazor.Services.Vikunja.Models
         string Created,
         VikunjaUser CreatedBy,
         VikunjaFile File,
-        int Id,
+        int? Id,
         int TaskId
     );
 }

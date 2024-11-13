@@ -20,40 +20,35 @@
                 {
                     <MudPaper Class="my-2 d-flex">
                         <MudGrid>
-                            <MudItem xs="2" @onclick="() => OpenAttachmentInNewTab(attachment)" Class="d-flex justify-content-center align-items-center">
+                            <MudItem xs="4" @onclick="() => OpenAttachmentInPreview(attachment)" Class="d-flex justify-content-center align-items-center">
                             @if (attachment.File.Mime is not null)
                             {
-                                var data = Convert.ToBase64String(attachment.File.Mime);
                                 <div style="max-width: 100px;">
-                                    @if (attachment.File.Name.EndsWith(".jpg") || attachment.File.Name.EndsWith(".jpeg") || attachment.File.Name.EndsWith(".png") || attachment.File.Name.EndsWith(".gif") || attachment.File.Name.EndsWith(".bmp"))
+                                    @if (GetFileUrl(attachment).StartsWith("data:image"))
                                     {
-                                        <img src="@($"data:image/{attachment.File.Mime};base64,{data}")" alt="@attachment.File.Name" style="max-width: 100%; height: auto;"/>
+                                        <img src="@GetFileUrl(attachment)" style="max-width: 100%; height: auto;" alt=""/>
                                     }
-                                    else if (attachment.File.Name.EndsWith(".pdf"))
+                                    else if (GetFileUrl(attachment).StartsWith("data:application/pdf"))
                                     {
-                                        <iframe src="@($"data:application/pdf;base64,{data}")" width="100%" height="600px"></iframe>
+                                        <iframe src="@GetFileUrl(attachment)" width="100%" height="600px"></iframe>
                                     }
-                                    else if (attachment.File.Name.EndsWith(".txt"))
+                                    else if (GetFileUrl(attachment).StartsWith("data:text/plain"))
                                     {
-                                        <MudText>@System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(data))</MudText>
+                                        <MudText>@System.Text.Encoding.UTF8.GetString(previewAttachment.File.Mime)</MudText>
                                     }
-                                    else if (attachment.File.Name.EndsWith(".mp4") || attachment.File.Name.EndsWith(".webm") || attachment.File.Name.EndsWith(".ogg"))
+                                    else if (GetFileUrl(attachment).StartsWith("data:video"))
                                     {
-                                        <video controls style="max-width: 100%;">
-                                            <source src="@($"data:video/{attachment.File.Mime};base64,{data}")" type="@($"video/{attachment.File.Mime}")"/>
+                                        <video style="max-width: 100%;">
+                                            <source src="@GetFileUrl(attachment)" type="@GetFileUrl(attachment).Split(';')[0].Split(':')[1]"/>
                                             Your browser does not support the video tag.
                                         </video>
                                     }
-                                    else if (attachment.File.Name.EndsWith(".mp3") || attachment.File.Name.EndsWith(".wav") || attachment.File.Name.EndsWith(".ogg"))
+                                    else if (GetFileUrl(attachment).StartsWith("data:audio"))
                                     {
-                                        <audio controls style="width: 100%;">
-                                            <source src="@($"data:audio/{attachment.File.Mime};base64,{data}")" type="@($"audio/{attachment.File.Mime}")"/>
+                                        <audio style="width: 100%;">
+                                            <source src="@GetFileUrl(attachment)" type="@GetFileUrl(attachment).Split(';')[0].Split(':')[1]"/>
                                             Your browser does not support the audio element.
                                         </audio>
-                                    }
-                                    else if (attachment.File.Name.EndsWith(".svg"))
-                                    {
-                                        <img src="@($"data:image/svg+xml;base64,{data}")" alt="@attachment.File.Name" style="max-width: 100%; height: auto;"/>
                                     }
                                     else
                                     {
@@ -66,13 +61,20 @@
                                 <MudAlert Severity="Severity.Error">Es konnten keine Daten gefunden werden!</MudAlert>
                             }
                             </MudItem>
-                            <MudItem xs="10">
+                            <MudItem xs="8">
                                 <MudText>Name: @attachment.File.Name</MudText>
                             </MudItem>
                         </MudGrid>
                     </MudPaper>
                 }
             </MudList>
+            <MudFileUpload T="IBrowserFile" FilesChanged="(file) => OpenNewFileInPreview(file)">
+                <ActivatorContent>
+                    <MudTooltip Text="Datei hochladen" Duration="Constants.TOOLTIP_DURATION">
+                        <MudIconButton Icon="@Icons.Material.Filled.CloudUpload" Color="Color.Primary"/>
+                    </MudTooltip>
+                </ActivatorContent>
+            </MudFileUpload>
         </MudContainer>
         
         <MudContainer Class="py-5">
@@ -99,7 +101,7 @@
         
     </DialogContent>
 </MudDialog>
-<MudOverlay @bind-Visible="showImagePreview" Absolute="true" DarkBackground AutoClose>
+<MudOverlay @bind-Visible="showImagePreview" Absolute DarkBackground AutoClose ZIndex="99999"  OnClosed="o => OnClosePreview()">
     @if (GetFileUrl().StartsWith("data:image"))
     {
         <img src="@GetFileUrl()" style="max-width: 100%; height: auto;" alt=""/>
@@ -130,6 +132,14 @@
     {
         <MudText>Unsupported file type.</MudText>
     }
+    @if (isNewUpload)
+    {
+        <MudButtonGroup Color="Color.Primary" Variant="Variant.Text" Style="position: absolute; bottom: -100px;">
+            <MudButton OnClick="() => UploadPreview()"
+                       Variant="Variant.Filled" Color="Color.Primary" 
+                       StartIcon="@Icons.Material.Filled.UploadFile">Hochladen</MudButton>
+        </MudButtonGroup>
+    }
 </MudOverlay>
 
 @code {
@@ -140,7 +150,9 @@
     [Parameter] public List<VikunjaComment> Comments { get; set; }
     [Parameter] public string OwnDiscordName { get; set; }
 
-    private bool showImagePreview = false;
+    private bool showImagePreview;
+    private bool isNewUpload;
+    private IBrowserFile? selectedFile;
     private VikunjaAttachment? previewAttachment;
     
     private string NewCommentText = string.Empty;
@@ -176,7 +188,7 @@
         LoadingService.StopLoading();
     }
     
-    private async Task OpenAttachmentInNewTab(VikunjaAttachment attachment)
+    private async Task OpenAttachmentInPreview(VikunjaAttachment attachment)
     {
         if (attachment.File.Mime is null) return;
 
@@ -184,60 +196,139 @@
         showImagePreview = true;
     }
     
-    private string GetFileUrl()
+    private string GetFileUrl(VikunjaAttachment? vikunjaAttachment = null)
     {
-        var base64Data = Convert.ToBase64String(previewAttachment.File.Mime);
+        var workingAttachment = previewAttachment;
+        if (vikunjaAttachment is not null)
+        {
+            workingAttachment = vikunjaAttachment;
+        }
+        
+        var base64Data = Convert.ToBase64String(workingAttachment.File.Mime);
         var fileType = "application/octet-stream"; 
 
-        if (previewAttachment.File.Name.EndsWith(".jpg") || previewAttachment.File.Name.EndsWith(".jpeg"))
+        if (workingAttachment.File.Name.EndsWith(".jpg") || workingAttachment.File.Name.EndsWith(".jpeg"))
         {
             fileType = "image/jpeg";
         }
-        else if (previewAttachment.File.Name.EndsWith(".png"))
+        else if (workingAttachment.File.Name.EndsWith(".png"))
         {
             fileType = "image/png";
         }
-        else if (previewAttachment.File.Name.EndsWith(".gif"))
+        else if (workingAttachment.File.Name.EndsWith(".gif"))
         {
             fileType = "image/gif";
         }
-        else if (previewAttachment.File.Name.EndsWith(".bmp"))
+        else if (workingAttachment.File.Name.EndsWith(".bmp"))
         {
             fileType = "image/bmp";
         }
-        else if (previewAttachment.File.Name.EndsWith(".pdf"))
+        else if (workingAttachment.File.Name.EndsWith(".pdf"))
         {
             fileType = "application/pdf";
         }
-        else if (previewAttachment.File.Name.EndsWith(".txt"))
+        else if (workingAttachment.File.Name.EndsWith(".txt"))
         {
             fileType = "text/plain";
         }
-        else if (previewAttachment.File.Name.EndsWith(".mp4"))
+        else if (workingAttachment.File.Name.EndsWith(".mp4"))
         {
             fileType = "video/mp4";
         }
-        else if (previewAttachment.File.Name.EndsWith(".webm"))
+        else if (workingAttachment.File.Name.EndsWith(".webm"))
         {
             fileType = "video/webm";
         }
-        else if (previewAttachment.File.Name.EndsWith(".ogg") || previewAttachment.File.Name.EndsWith(".oga"))
+        else if (workingAttachment.File.Name.EndsWith(".ogg") || workingAttachment.File.Name.EndsWith(".oga"))
         {
             fileType = "audio/ogg";
         }
-        else if (previewAttachment.File.Name.EndsWith(".mp3"))
+        else if (workingAttachment.File.Name.EndsWith(".mp3"))
         {
             fileType = "audio/mp3";
         }
-        else if (previewAttachment.File.Name.EndsWith(".wav"))
+        else if (workingAttachment.File.Name.EndsWith(".wav"))
         {
             fileType = "audio/wav";
         }
-        else if (previewAttachment.File.Name.EndsWith(".svg"))
+        else if (workingAttachment.File.Name.EndsWith(".svg"))
         {
             fileType = "image/svg+xml";
         }
 
         return $"data:{fileType};base64,{base64Data}";
+    }
+
+    private async Task OpenNewFileInPreview(IBrowserFile file)
+    {
+        if (file is null) return;
+        
+        selectedFile = file;
+        var vikunjaFile = new VikunjaFile
+        {
+            Name = file.Name,
+            Mime = await ConvertToByteArray(file)
+        };
+
+        previewAttachment = new VikunjaAttachment(null, null, vikunjaFile, null, Task.Id);
+        showImagePreview = true;
+        isNewUpload = true;
+    }
+    
+    const int maxFileSize = 100 * 1024 * 1024;
+    
+    private async Task<byte[]> ConvertToByteArray(IBrowserFile file)
+    {
+        var supportedImageTypes = new HashSet<string> { "image/png", "image/jpeg", "image/jpg", "image/gif", "image/bmp", "image/svg+xml" };
+        var supportedVideoTypes = new HashSet<string> { "video/mp4", "video/webm", "video/ogg" };
+        var supportedAudioTypes = new HashSet<string> { "audio/mpeg", "audio/wav", "audio/ogg" };
+        var supportedDocTypes = new HashSet<string> { "application/pdf", "text/plain" };
+
+        if (supportedImageTypes.Contains(file.ContentType))
+        {
+            var resizedFile = await file.RequestImageFileAsync(file.ContentType, 800, 600);
+            await using var stream = resizedFile.OpenReadStream(maxFileSize);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            return memoryStream.ToArray();
+        }
+        
+        if (supportedVideoTypes.Contains(file.ContentType) || supportedAudioTypes.Contains(file.ContentType) || supportedDocTypes.Contains(file.ContentType))
+        {
+            await using var stream = file.OpenReadStream(maxFileSize);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            return memoryStream.ToArray();
+        }
+        
+        throw new NotSupportedException($"Der Dateityp {file.ContentType} wird nicht unterstützt.");
+    }
+
+    private async Task UploadPreview()
+    {
+        if (selectedFile is null || previewAttachment is null) return;
+
+        var streamPart = new StreamPart(selectedFile.OpenReadStream(maxFileSize), selectedFile.Name, selectedFile.ContentType);
+
+        LoadingService.StartLoading();
+        try
+        {
+            await VikunjaClientService.Client.UploadFile(Task.Id, streamPart);            
+            Attachments = await VikunjaClientService.Client.GetAllAttachmentsAsync(Task.Id);
+            showImagePreview = false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Hochladen der Datei: {ex.Message}");
+        }
+        LoadingService.StopLoading();
+    }
+
+    private void OnClosePreview()
+    {
+        selectedFile = null;
+        previewAttachment = null;
+        showImagePreview = false;
+        isNewUpload = false;
     }
 }

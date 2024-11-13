@@ -46,7 +46,7 @@ public static class VikunjaHelper
 
         foreach (var attachment in attachments)
         {
-            var dataResponse = await vikunjaApi.DownloadAttachmentAsync(taskId, attachment.Id);
+            var dataResponse = await vikunjaApi.DownloadAttachmentAsync(taskId, attachment.Id.Value);
             if (!dataResponse.IsSuccessStatusCode) continue;
             
             var attachmentData = await dataResponse.Content.ReadAsByteArrayAsync();
