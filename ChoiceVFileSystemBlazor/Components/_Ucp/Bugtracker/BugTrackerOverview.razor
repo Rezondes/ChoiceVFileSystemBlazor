@@ -1,5 +1,6 @@
 @page "/u/bugs/my"
 
+@using ChoiceVFileSystemBlazor.Components._Ucp.Helper
 @using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.DbModels
 @using ChoiceVFileSystemBlazor.Services.Vikunja.Models
 
@@ -196,10 +197,15 @@ else
             return;
         }
 
+        LoadingService.StartLoading();
+        
         var addedTask = addResult.Data!;
-        await BugtrackerProxy.AddAsync(new DiscordIdToBugTaskIdDbModel(discordId, addedTask.Id, addedTask.Title));
+        var discordIdToBugTaskIdDbModel = await BugtrackerProxy.AddAsync(new DiscordIdToBugTaskIdDbModel(discordId, addedTask.Id, addedTask.Title));
         
         Snackbar.Add($"[{addedTask.Id}] {addedTask.Title} wurde hinzufügt!", Severity.Success);
         await Load();
+
+        LoadingService.StopLoading();
+        await discordIdToBugTaskIdDbModel.OpenDialog(VikunjaClientService, Snackbar, DialogService, AuthenticationStateProvider);
     }
 }

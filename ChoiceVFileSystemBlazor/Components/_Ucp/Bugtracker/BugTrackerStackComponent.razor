@@ -1,5 +1,5 @@
+@using ChoiceVFileSystemBlazor.Components._Ucp.Helper
 @using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.DbModels
-@using ChoiceVFileSystemBlazor.Services.Vikunja.Models
 
 <style>
     .paper{
@@ -49,51 +49,8 @@
     private async Task OnTaskClick(DiscordIdToBugTaskIdDbModel discordIdToBugTaskIdDbModel)
     {
         if (!ClickAbleChild) return;
-        
-        var result = await VikunjaClientService.Client.HandleApiRequestAsync(
-            async _ => await VikunjaClientService.Client.GetTaskByIdAsync(discordIdToBugTaskIdDbModel.BugTaskId));
-        if (!result.IsSuccess)
-        {
-            Snackbar.Add("Der Bug konnte nicht geladen werden.", Severity.Error);
-            return;
-        }
-        
-        // var resultAttachments = await VikunjaClientService.Client.HandleApiRequestAsync(
-        //     async _ => await VikunjaClientService.Client.GetAllAttachmentsForTaskAsync(discordIdToBugTaskIdDbModel.BugTaskId));
-        // if (!resultAttachments.IsSuccess)
-        // {
-        //     Snackbar.Add("Der Bug konnte nicht geladen werden.", Severity.Error);
-        //     return;
-        // }
-        
-        var resultComments = await VikunjaClientService.Client.HandleApiRequestAsync(
-            async _ => await VikunjaClientService.Client.GetAllCommentsForTaskAsync(discordIdToBugTaskIdDbModel.BugTaskId));
-        if (!resultComments.IsSuccess)
-        {
-            Snackbar.Add("Der Bug konnte nicht geladen werden.", Severity.Error);
-            return;
-        }
-        
-        var discordUserName = await AuthenticationStateProvider.GetDiscordUserNameAsync();
-        
-        var parameter = new DialogParameters<BugTrackerTaskDialog>
-        {
-            { x => x.Task, result.Data },
-            // { x => x.Attachments, resultAttachments.Data },
-            { x => x.Comments, resultComments.Data },
-            { x => x.OwnDiscordName, discordUserName },
-        };
 
-        await DialogService.ShowAsync<BugTrackerTaskDialog>(
-            string.Empty,
-            parameter,
-            new DialogOptions
-            {
-                FullWidth = true,
-                MaxWidth = MaxWidth.ExtraLarge, 
-                CloseOnEscapeKey = true,
-                NoHeader = true
-            });
+        await discordIdToBugTaskIdDbModel.OpenDialog(VikunjaClientService, Snackbar, DialogService, AuthenticationStateProvider);
     }
 
     private string? GetTaskClass()

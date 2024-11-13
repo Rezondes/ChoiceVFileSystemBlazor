@@ -20,7 +20,7 @@ public class BugtrackerProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseCo
         return await dbContext.DiscordIdToBugTaskIdDbModels.AsNoTracking().Where(x => x.DiscordId == discordId).ToListAsync();
     }
 
-    public async Task AddAsync(DiscordIdToBugTaskIdDbModel model)
+    public async Task<DiscordIdToBugTaskIdDbModel> AddAsync(DiscordIdToBugTaskIdDbModel model)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
@@ -29,6 +29,8 @@ public class BugtrackerProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseCo
 
         dbContext.Set<DiscordIdToBugTaskIdDbModel>().Add(model);
         await dbContext.SaveChangesAsync();
+        
+        return model;
     }
 
     public async Task RemoveAsync(Ulid id)
