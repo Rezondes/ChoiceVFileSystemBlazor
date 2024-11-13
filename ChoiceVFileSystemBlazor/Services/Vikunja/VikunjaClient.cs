@@ -28,7 +28,10 @@ public interface IVikunjaClient : IBaseApiInterface
     Task<ApiResponse<VikunjaAddLabelToTaskModel>> AddLabelToTaskAsync(int taskId, [Body] VikunjaAddLabelToTaskModel labelToTaskModel);
 
     [Get("/tasks/{taskId}/attachments")]
-    Task<ApiResponse<List<VikunjaAttachment>>> GetAllAttachmentsForTaskAsync(int taskId);
+    Task<ApiResponse<List<VikunjaAttachment>>> GetAttachmentsAsync(int taskId);
+
+    [Get("/tasks/{taskId}/attachments/{attachmentId}")]
+    Task<HttpResponseMessage> DownloadAttachmentAsync(int taskId, int attachmentId);
     
     [Get("/tasks/{taskId}/comments")]
     Task<ApiResponse<List<VikunjaComment>>> GetAllCommentsForTaskAsync(int taskId);

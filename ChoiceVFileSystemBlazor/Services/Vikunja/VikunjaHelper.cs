@@ -34,5 +34,25 @@ public static class VikunjaHelper
 
         return allTasks;
     }
+    
+    public static async Task<List<VikunjaAttachment>> GetAllAttachmentsAsync(this IVikunjaClient vikunjaApi, int taskId)
+    {
+        var attachmentsResponse = await vikunjaApi.GetAttachmentsAsync(taskId);
 
+        if (!attachmentsResponse.IsSuccessStatusCode || attachmentsResponse.Content == null)
+            return [];
+
+        var attachments = attachmentsResponse.Content;
+
+        foreach (var attachment in attachments)
+        {
+            var dataResponse = await vikunjaApi.DownloadAttachmentAsync(taskId, attachment.Id);
+            if (!dataResponse.IsSuccessStatusCode) continue;
+            
+            var attachmentData = await dataResponse.Content.ReadAsByteArrayAsync();
+            attachment.File.Mime = attachmentData;
+        }
+
+        return attachments;
+    }
 }

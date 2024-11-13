@@ -92,7 +92,7 @@ else
         var dbSavedTasks = await BugtrackerProxy.GetAllForDiscordIdAsync(discordId);
         foreach (var dbTask in dbSavedTasks)
         {
-            if (scpBugsResult!.Select(x => x.Id).Contains(dbTask.BugTaskId))
+            if (scpBugsResult.Select(x => x.Id).Contains(dbTask.BugTaskId))
             {
                 _underExaminationData.Add(dbTask);
                 continue;

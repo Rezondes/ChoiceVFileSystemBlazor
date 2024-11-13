@@ -19,14 +19,8 @@ public static class DiscordIdToBugTaskIdDbModelHelper
             snackbar.Add("Der Bug konnte nicht geladen werden.", Severity.Error);
             return;
         }
-        
-        var resultAttachments = await vikunjaClientService.Client.HandleApiRequestAsync(
-            async _ => await vikunjaClientService.Client.GetAllAttachmentsForTaskAsync(discordIdToBugTaskIdDbModel.BugTaskId));
-        if (!resultAttachments.IsSuccess)
-        {
-            snackbar.Add("Der Bug konnte nicht geladen werden.", Severity.Error);
-            return;
-        }
+
+        var resultAttachments = await vikunjaClientService.Client.GetAllAttachmentsAsync(discordIdToBugTaskIdDbModel.BugTaskId);
         
         var resultComments = await vikunjaClientService.Client.HandleApiRequestAsync(
             async _ => await vikunjaClientService.Client.GetAllCommentsForTaskAsync(discordIdToBugTaskIdDbModel.BugTaskId));
@@ -41,7 +35,7 @@ public static class DiscordIdToBugTaskIdDbModelHelper
         var parameter = new DialogParameters<BugTrackerTaskDialog>
         {
             { x => x.Task, result.Data },
-            { x => x.Attachments, resultAttachments.Data },
+            { x => x.Attachments, resultAttachments },
             { x => x.Comments, resultComments.Data },
             { x => x.OwnDiscordName, discordUserName },
         };
