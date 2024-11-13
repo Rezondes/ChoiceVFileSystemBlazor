@@ -15,6 +15,14 @@ public interface IBaseApiInterface
 
             if (!response.IsSuccessStatusCode) 
                 return ApiResult<T>.FromError(new Exception(response.Error?.Message));
+
+            if (response.Content is null)
+            {
+                if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(List<>))
+                {
+                    return ApiResult<T>.FromSuccess((T)Activator.CreateInstance(typeof(T))!);
+                }
+            }
             
             return ApiResult<T>.FromSuccess(response.Content!);
         }

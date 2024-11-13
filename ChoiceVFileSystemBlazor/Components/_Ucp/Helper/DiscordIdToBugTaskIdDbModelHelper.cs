@@ -21,13 +21,13 @@ public static class DiscordIdToBugTaskIdDbModelHelper
             return;
         }
         
-        // var resultAttachments = await VikunjaClientService.Client.HandleApiRequestAsync(
-        //     async _ => await VikunjaClientService.Client.GetAllAttachmentsForTaskAsync(discordIdToBugTaskIdDbModel.BugTaskId));
-        // if (!resultAttachments.IsSuccess)
-        // {
-        //     Snackbar.Add("Der Bug konnte nicht geladen werden.", Severity.Error);
-        //     return;
-        // }
+        var resultAttachments = await vikunjaClientService.Client.HandleApiRequestAsync(
+            async _ => await vikunjaClientService.Client.GetAllAttachmentsForTaskAsync(discordIdToBugTaskIdDbModel.BugTaskId));
+        if (!resultAttachments.IsSuccess)
+        {
+            snackbar.Add("Der Bug konnte nicht geladen werden.", Severity.Error);
+            return;
+        }
         
         var resultComments = await vikunjaClientService.Client.HandleApiRequestAsync(
             async _ => await vikunjaClientService.Client.GetAllCommentsForTaskAsync(discordIdToBugTaskIdDbModel.BugTaskId));
