@@ -30,10 +30,10 @@ else
     
     <MudContainer Gutters="false" MaxWidth="MaxWidth.ExtraLarge">
         <MudContainer Gutters="false" MaxWidth="MaxWidth.ExtraLarge" Class="d-flex justify-content-around py-5">
-            @* @if (_rejectedData.Any()) *@
-            @* { *@
-            <BugTrackerStackComponent Title="Abgelehnt" Data="_rejectedData" ClickAbleChild="false"/>
-            @* } *@
+            @if (_rejectedData.Any())
+            {
+                <BugTrackerStackComponent Title="Kein Bug/Feature" Data="_rejectedData" ClickAbleChild="false"/>
+            }
 
             <BugTrackerStackComponent Title="In Prüfung" Data="_underExaminationData"/>
 
@@ -85,37 +85,19 @@ else
             return;
         }
         
-        var scpBugsResult = await VikunjaClientService.Client.HandleApiRequestAsync(
-            async _ => await VikunjaClientService.Client.GetTasksInProjectAsync(VikunjaClientService.ScpBugsProjectId));
-        if (!scpBugsResult.IsSuccess)
-        {
-            Snackbar.Add("Bugtickets konnten nicht geladen werden.", Severity.Error);
-            
-            _loading = true;
-            StateHasChanged();
-            return;
-        }
+        var scpBugsResult = await VikunjaClientService.Client.GetAllTasksInProjectAsync(VikunjaClientService.ScpBugsProjectId);
         
-        var choiceVBugsResult = await VikunjaClientService.Client.HandleApiRequestAsync(
-            async _ => await VikunjaClientService.Client.GetTasksInProjectAsync(VikunjaClientService.ChoiceVBugsProjectId));
-        if (!choiceVBugsResult.IsSuccess)
-        {
-            Snackbar.Add("Bugtickets konnten nicht geladen werden.", Severity.Error);
-            
-            _loading = true;
-            StateHasChanged();
-            return;
-        }
+        var choiceVBugsResult = await VikunjaClientService.Client.GetAllTasksInProjectAsync(VikunjaClientService.ChoiceVBugsProjectId);
         
         var dbSavedTasks = await BugtrackerProxy.GetAllForDiscordIdAsync(discordId);
         foreach (var dbTask in dbSavedTasks)
         {
-            if (scpBugsResult.Data!.Select(x => x.Id).Contains(dbTask.BugTaskId))
+            if (scpBugsResult!.Select(x => x.Id).Contains(dbTask.BugTaskId))
             {
                 _underExaminationData.Add(dbTask);
                 continue;
             }
-            if (choiceVBugsResult.Data!.Select(x => x.Id).Contains(dbTask.BugTaskId))
+            if (choiceVBugsResult.Select(x => x.Id).Contains(dbTask.BugTaskId))
             {
                 var result = await VikunjaClientService.Client.HandleApiRequestAsync(
                     async _ => await VikunjaClientService.Client.GetTaskByIdAsync(dbTask.BugTaskId));

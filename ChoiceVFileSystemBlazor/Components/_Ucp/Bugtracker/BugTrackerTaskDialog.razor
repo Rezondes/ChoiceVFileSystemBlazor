@@ -2,7 +2,9 @@
 
 <MudDialog Style="height: 100%">
     <TitleContent>
-        <MudText Typo="Typo.h3">#@Task.Id</MudText> <MudText Typo="Typo.h3">@Task.Title</MudText>
+        <MudItem Class="d-flex">
+            <MudText Typo="Typo.h3" Style="color: rgba(255,255,255, 0.2)">#@Task.Id&nbsp;</MudText><MudText Typo="Typo.h3">@Task.Title</MudText>
+        </MudItem>
     </TitleContent>
     <DialogContent>
         <MudContainer Class="py-5">
@@ -12,7 +14,17 @@
         
         <MudContainer Class="py-5">
             <MudText Typo="Typo.h4"><MudIcon Icon="@Icons.Material.Filled.AttachFile"/> Anhänge</MudText>
-            <WorkInProgressComponent/>
+
+            <MudList T="string">
+                @foreach (var attachment in Attachments.OrderByDescending(x => x.Created))
+                {
+                    <MudPaper Class="my-2">
+                        <MudListItem>
+                            <MudImage Src="@attachment.File.Mime"></MudImage>
+                        </MudListItem>
+                    </MudPaper>
+                }
+            </MudList>
         </MudContainer>
         
         <MudContainer Class="py-5">
@@ -28,9 +40,11 @@
                     var authorName = comment.Author.Id == VikunjaClientService.VikunjaApiUserId ? OwnDiscordName : comment.Author.Name;
                     var labelText = $"{authorName} am {comment.Created}";
                     
-                    <MudListItem>
-                        <MudTextField ReadOnly Lines="10" Label="@labelText" Value="@comment.Comment"/>
-                    </MudListItem>
+                    <MudPaper Class="my-2">
+                        <MudListItem>
+                                <MudTextField ReadOnly Lines="10" Label="@labelText" Value="@comment.Comment"/>
+                        </MudListItem>
+                    </MudPaper>
                 }
             </MudList>
         </MudContainer>

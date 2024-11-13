@@ -12,7 +12,6 @@ public static class DiscordIdToBugTaskIdDbModelHelper
     public static async Task OpenDialog(this DiscordIdToBugTaskIdDbModel discordIdToBugTaskIdDbModel, VikunjaClientService vikunjaClientService, 
         ISnackbar snackbar, IDialogService dialogService, AuthenticationStateProvider authenticationStateProvider)
     {
-        
         var result = await vikunjaClientService.Client.HandleApiRequestAsync(
             async _ => await vikunjaClientService.Client.GetTaskByIdAsync(discordIdToBugTaskIdDbModel.BugTaskId));
         if (!result.IsSuccess)
@@ -42,7 +41,7 @@ public static class DiscordIdToBugTaskIdDbModelHelper
         var parameter = new DialogParameters<BugTrackerTaskDialog>
         {
             { x => x.Task, result.Data },
-            // { x => x.Attachments, resultAttachments.Data },
+            { x => x.Attachments, resultAttachments.Data },
             { x => x.Comments, resultComments.Data },
             { x => x.OwnDiscordName, discordUserName },
         };
@@ -54,8 +53,7 @@ public static class DiscordIdToBugTaskIdDbModelHelper
             {
                 FullWidth = true,
                 MaxWidth = MaxWidth.ExtraLarge, 
-                CloseOnEscapeKey = true,
-                NoHeader = true
+                CloseOnEscapeKey = true
             });
     }
 }

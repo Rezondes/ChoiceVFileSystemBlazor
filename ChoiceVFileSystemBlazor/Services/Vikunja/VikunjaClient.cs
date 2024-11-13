@@ -16,7 +16,7 @@ public interface IVikunjaClient : IBaseApiInterface
     Task<ApiResponse<VikunjaTask>> CreateNewTaskAsync(int projectId, [Body] VikunjaTask task);
     
     [Get("/projects/{projectId}/tasks")]
-    Task<ApiResponse<List<VikunjaTask>>> GetTasksInProjectAsync(int projectId);
+    Task<ApiResponse<List<VikunjaTask>>> GetTasksInProjectAsync(int projectId, int page = 1, int limit = 50);
     
     [Get("/tasks/{tasksId}")]
     Task<ApiResponse<VikunjaTask>> GetTaskByIdAsync(int tasksId);
