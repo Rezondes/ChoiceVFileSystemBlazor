@@ -50,21 +50,28 @@
     
     <MudMainContent Style="height: 100%; overflow: hidden;">
         <MudContainer MaxWidth="MaxWidth.False" style="height: 100%; overflow-y: hidden; padding: 0 0; position: relative; display: flex; justify-content: center;">
-            @if (!AuthenticationStateProvider.IsAuthenticatedAsync().GetAwaiter().GetResult())
+            @if ("/" + Navigation.Uri.Replace(Navigation.BaseUri, "") == PrivacyPolicy.GetRedirectUrl())
             {
-                <MudAlert Severity="Severity.Info" Style="height: fit-content">Du bist noch nicht eingeloggt.</MudAlert>
-            }
-            else if (!AuthenticationStateProvider.IsOnDiscordGuildAsync(DiscordBotService).GetAwaiter().GetResult())
-            {
-                <MudAlert Severity="Severity.Info" Style="height: fit-content">Du bist noch nicht auf unseren Discord.</MudAlert>
-            }
-            else if (!AuthenticationStateProvider.IsCitizenAsync(DiscordBotService).GetAwaiter().GetResult())
-            {
-                <MudAlert Severity="Severity.Info" Style="height: fit-content">Du bist noch nicht gewhitelisted.</MudAlert>
+                @Body
             }
             else
             {
-                @Body
+                if (!AuthenticationStateProvider.IsAuthenticatedAsync().GetAwaiter().GetResult())
+                {
+                    <MudAlert Severity="Severity.Info" Style="height: fit-content">Du bist noch nicht eingeloggt.</MudAlert>
+                }
+                else if (!AuthenticationStateProvider.IsOnDiscordGuildAsync(DiscordBotService).GetAwaiter().GetResult())
+                {
+                    <MudAlert Severity="Severity.Info" Style="height: fit-content">Du bist noch nicht auf unseren Discord.</MudAlert>
+                }
+                else if (!AuthenticationStateProvider.IsCitizenAsync(DiscordBotService).GetAwaiter().GetResult())
+                {
+                    <MudAlert Severity="Severity.Info" Style="height: fit-content">Du bist noch nicht gewhitelisted.</MudAlert>
+                }
+                else
+                {
+                    @Body
+                }
             }
 
             <MudOverlay Visible="@LoadingService.ShowLoading" DarkBackground="true" ZIndex="99999" Absolute="true">
@@ -110,7 +117,7 @@
     private bool _open = true;
     private Breakpoint _breakpoint = Breakpoint.Lg;
     private DrawerClipMode _clipMode = DrawerClipMode.Always;
-    
+
     protected override async Task OnInitializedAsync()
     {
         var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
@@ -152,6 +159,25 @@
         if (!firstRender) return;
 
         await JS.InvokeVoidAsync("setFavicon", "choicev_logo_partial.png");
+
+        if (!await AuthenticationStateProvider.IsAuthenticatedAsync())
+        {
+            Snackbar.Add(
+                "Hier gehts direkt zu unseren Datenschutzrichtlinien.",
+                Severity.Info,
+                options =>
+                {
+                    options.Action = "Öffnen";
+                    options.Onclick = _ =>
+                    {
+                        Navigation.NavigateTo(PrivacyPolicy.GetRedirectUrl(), false);
+                        return Task.CompletedTask;
+                    };
+                    options.SnackbarTypeClass = "wide-snackbar";
+                    options.RequireInteraction = true;
+                }
+            );
+        }
     }
     
     private void ToggleDrawer()
