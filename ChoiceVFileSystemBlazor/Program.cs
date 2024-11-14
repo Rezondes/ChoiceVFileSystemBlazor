@@ -165,7 +165,8 @@ app.UseCookiePolicy();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseRouting();
+app.UseCors("AllowAllOrigins");
+
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -174,6 +175,7 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+app.UseRouting();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapHub<BaseHub>(BaseHub.HubPattern);
