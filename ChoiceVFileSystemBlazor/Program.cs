@@ -138,12 +138,12 @@ if (!builder.Environment.IsDevelopment())
     {
         options.ListenAnyIP(8080, listenOptions =>
         {
-            listenOptions.UseHttps(new X509Certificate2("/https/ucp_choicev_net.pfx", "187test"));
+            listenOptions.UseHttps(new X509Certificate2("/https/ucp.choicev.net.pfx", "187test"));
         });
 
         options.ListenAnyIP(8081, listenOptions =>
         {
-            listenOptions.UseHttps(new X509Certificate2("/https/scp_choicev_net.pfx", "187test"));
+            listenOptions.UseHttps(new X509Certificate2("/https/scp.choicev.net.pfx", "187test"));
         });
     });
 }
