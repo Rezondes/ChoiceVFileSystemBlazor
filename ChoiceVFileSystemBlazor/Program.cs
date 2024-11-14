@@ -47,6 +47,17 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor()
     .AddCircuitOptions(options => { options.DetailedErrors = true; });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+});
+
 builder.Services.AddSignalR();
 
 #region MudBlazor Configurations
@@ -158,6 +169,8 @@ app.UseAuthorization();
 app.UseCookiePolicy();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+app.UseRouting();
 
 app.MapHub<BaseHub>(BaseHub.HubPattern);
 app.MapHub<FileHub>(FileHub.HubPattern);
