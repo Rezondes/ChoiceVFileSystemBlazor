@@ -24,36 +24,7 @@
                             @if (attachment.File.Mime is not null)
                             {
                                 <div style="max-width: 100px;">
-                                    @if (GetFileUrl(attachment).StartsWith("data:image"))
-                                    {
-                                        <img src="@GetFileUrl(attachment)" style="max-width: 100%; height: auto;" alt=""/>
-                                    }
-                                    else if (GetFileUrl(attachment).StartsWith("data:application/pdf"))
-                                    {
-                                        <iframe src="@GetFileUrl(attachment)" width="100%" height="600px"></iframe>
-                                    }
-                                    else if (GetFileUrl(attachment).StartsWith("data:text/plain"))
-                                    {
-                                        <MudText>@System.Text.Encoding.UTF8.GetString(previewAttachment.File.Mime)</MudText>
-                                    }
-                                    else if (GetFileUrl(attachment).StartsWith("data:video"))
-                                    {
-                                        <video style="max-width: 100%;">
-                                            <source src="@GetFileUrl(attachment)" type="@GetFileUrl(attachment).Split(';')[0].Split(':')[1]"/>
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    }
-                                    else if (GetFileUrl(attachment).StartsWith("data:audio"))
-                                    {
-                                        <audio style="width: 100%;">
-                                            <source src="@GetFileUrl(attachment)" type="@GetFileUrl(attachment).Split(';')[0].Split(':')[1]"/>
-                                            Your browser does not support the audio element.
-                                        </audio>
-                                    }
-                                    else
-                                    {
-                                        <MudText>Unsupported file type: @attachment.File.Name</MudText>
-                                    }
+                                    <BugTrackerAttachmentView Attachment="attachment"/>
                                 </div>
                             }
                             else
@@ -101,37 +72,9 @@
         
     </DialogContent>
 </MudDialog>
-<MudOverlay @bind-Visible="showImagePreview" Absolute DarkBackground AutoClose ZIndex="99999"  OnClosed="o => OnClosePreview()">
-    @if (GetFileUrl().StartsWith("data:image"))
-    {
-        <img src="@GetFileUrl()" style="max-width: 100%; height: auto;" alt=""/>
-    }
-    else if (GetFileUrl().StartsWith("data:application/pdf"))
-    {
-        <iframe src="@GetFileUrl()" width="100%" height="600px"></iframe>
-    }
-    else if (GetFileUrl().StartsWith("data:text/plain"))
-    {
-        <MudText>@System.Text.Encoding.UTF8.GetString(previewAttachment.File.Mime)</MudText>
-    }
-    else if (GetFileUrl().StartsWith("data:video"))
-    {
-        <video controls style="max-width: 100%;">
-            <source src="@GetFileUrl()" type="@GetFileUrl().Split(';')[0].Split(':')[1]"/>
-            Your browser does not support the video tag.
-        </video>
-    }
-    else if (GetFileUrl().StartsWith("data:audio"))
-    {
-        <audio controls style="width: 100%;">
-            <source src="@GetFileUrl()" type="@GetFileUrl().Split(';')[0].Split(':')[1]"/>
-            Your browser does not support the audio element.
-        </audio>
-    }
-    else
-    {
-        <MudText>Unsupported file type.</MudText>
-    }
+<MudOverlay @bind-Visible="showImagePreview" Absolute DarkBackground ZIndex="99999" AutoClose OnClosed="o => OnClosePreview()">
+    <BugTrackerAttachmentView Attachment="previewAttachment" ActiveControls="true"/>
+    
     @if (isNewUpload)
     {
         <MudButtonGroup Color="Color.Primary" Variant="Variant.Text" Style="position: absolute; bottom: -100px;">
@@ -196,69 +139,6 @@
         showImagePreview = true;
     }
     
-    private string GetFileUrl(VikunjaAttachment? vikunjaAttachment = null)
-    {
-        var workingAttachment = previewAttachment;
-        if (vikunjaAttachment is not null)
-        {
-            workingAttachment = vikunjaAttachment;
-        }
-        
-        var base64Data = Convert.ToBase64String(workingAttachment.File.Mime);
-        var fileType = "application/octet-stream"; 
-
-        if (workingAttachment.File.Name.EndsWith(".jpg") || workingAttachment.File.Name.EndsWith(".jpeg"))
-        {
-            fileType = "image/jpeg";
-        }
-        else if (workingAttachment.File.Name.EndsWith(".png"))
-        {
-            fileType = "image/png";
-        }
-        else if (workingAttachment.File.Name.EndsWith(".gif"))
-        {
-            fileType = "image/gif";
-        }
-        else if (workingAttachment.File.Name.EndsWith(".bmp"))
-        {
-            fileType = "image/bmp";
-        }
-        else if (workingAttachment.File.Name.EndsWith(".pdf"))
-        {
-            fileType = "application/pdf";
-        }
-        else if (workingAttachment.File.Name.EndsWith(".txt"))
-        {
-            fileType = "text/plain";
-        }
-        else if (workingAttachment.File.Name.EndsWith(".mp4"))
-        {
-            fileType = "video/mp4";
-        }
-        else if (workingAttachment.File.Name.EndsWith(".webm"))
-        {
-            fileType = "video/webm";
-        }
-        else if (workingAttachment.File.Name.EndsWith(".ogg") || workingAttachment.File.Name.EndsWith(".oga"))
-        {
-            fileType = "audio/ogg";
-        }
-        else if (workingAttachment.File.Name.EndsWith(".mp3"))
-        {
-            fileType = "audio/mp3";
-        }
-        else if (workingAttachment.File.Name.EndsWith(".wav"))
-        {
-            fileType = "audio/wav";
-        }
-        else if (workingAttachment.File.Name.EndsWith(".svg"))
-        {
-            fileType = "image/svg+xml";
-        }
-
-        return $"data:{fileType};base64,{base64Data}";
-    }
-
     private async Task OpenNewFileInPreview(IBrowserFile file)
     {
         if (file is null) return;
