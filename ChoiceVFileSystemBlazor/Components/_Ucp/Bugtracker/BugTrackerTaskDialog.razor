@@ -20,20 +20,22 @@
                 {
                     <MudPaper Class="my-2 d-flex">
                         <MudGrid>
-                            <MudItem xs="4" @onclick="() => OpenAttachmentInPreview(attachment)" Class="d-flex justify-content-center align-items-center">
-                            @if (attachment.File.Mime is not null)
-                            {
-                                <div style="max-width: 100px;">
-                                    <BugTrackerAttachmentView Attachment="attachment"/>
-                                </div>
-                            }
-                            else
-                            {
-                                <MudAlert Severity="Severity.Error">Es konnten keine Daten gefunden werden!</MudAlert>
-                            }
-                            </MudItem>
-                            <MudItem xs="8">
-                                <MudText>Name: @attachment.File.Name</MudText>
+                            <MudItem xs="12" Class="d-flex">
+                                <MudItem xs="4" @onclick="() => OpenAttachmentInPreview(attachment)" Class="d-flex justify-content-center align-items-center clickable">
+                                    @if (attachment.File.Mime is not null)
+                                    {
+                                        <div style="max-width: 100px;">
+                                            <BugTrackerAttachmentView Attachment="attachment"/>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <MudAlert Severity="Severity.Error">Es konnten keine Daten gefunden werden!</MudAlert>
+                                    }
+                                </MudItem>
+                                <MudItem xs="8">
+                                    <MudText>Name: @attachment.File.Name</MudText>
+                                </MudItem>
                             </MudItem>
                         </MudGrid>
                     </MudPaper>
