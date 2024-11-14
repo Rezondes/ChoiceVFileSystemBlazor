@@ -4,11 +4,11 @@ EXPOSE 8080
 EXPOSE 8081
 
 # Kopiere das Zertifikat als Root
-COPY ucp_choicev_net.pfx /https/ucp_choicev_net.pfx
-COPY scp_choicev_net.pfx /https/scp_choicev_net.pfx
+COPY ucp.choicev.net.pfx /https/ucp.choicev.net.pfx
+COPY scp.choicev.net.pfx /https/scp.choicev.net.pfx
 # Ändere den Besitzer der Zertifikatsdatei auf den Benutzer, den du später festlegst
-RUN chown 1654 /https/scp_choicev_net.pfx && chmod 600 /https/scp_choicev_net.pfx
-RUN chown 1654 /https/ucp_choicev_net.pfx && chmod 600 /https/ucp_choicev_net.pfx
+RUN chown 1654 /https/scp.choicev.net.pfx && chmod 600 /https/scp.choicev.net.pfx
+RUN chown 1654 /https/ucp.choicev.net.pfx && chmod 600 /https/ucp.choicev.net.pfx
 
 # Wechsle nun zum nicht-Root-Benutzer
 USER $APP_UID
