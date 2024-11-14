@@ -134,7 +134,7 @@ else
                 InputTypes.Text,
                 "Titel",
                 string.Empty,
-                "Ultra fetter Bug digga"
+                "Kurzer, aber aussagekräftiger Titel"
             ),
             new(
                 InputTypes.Text,
@@ -147,7 +147,7 @@ else
 
         var dialogData = await DialogService.OpenDialog(
             "Bug reporten", 
-            "Was möchtest du reporten?", 
+            "Was möchtest du reporten? (Screenshots etc. kann du nach dem Erstellen hochladen)", 
             "Absenden",
             inputs);
         if (dialogData is null) return;
