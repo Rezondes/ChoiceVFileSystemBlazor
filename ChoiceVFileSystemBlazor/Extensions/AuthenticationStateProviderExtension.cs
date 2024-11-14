@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using ChoiceVFileSystemBlazor.Services;
+using ChoiceVFileSystemBlazor.Services.Discord;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace ChoiceVFileSystemBlazor.Extensions;
@@ -36,6 +37,7 @@ public static class AuthenticationStateProviderExtension
         var user = discordBotService.GetCachedUser(discordId);
         return user is not null;
     }
+    
     public static async Task<bool> IsAuthenticatedAndOnDiscordGuildAsync(this AuthenticationStateProvider authenticationStateProvider, DiscordBotService discordBotService)
     {
         var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
@@ -46,5 +48,20 @@ public static class AuthenticationStateProviderExtension
         
         var user = discordBotService.GetCachedUser(discordId);
         return user is not null;
+    }
+
+    public static async Task<bool> IsCitizenAsync(this AuthenticationStateProvider authenticationStateProvider, DiscordBotService discordBotService)
+    {
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        if (!UserAccessService.HasClaims(authState.User)) return false;
+        
+        var discordId = await authenticationStateProvider.GetDiscordUserIdAsync();
+        if (discordId is null) return false;
+        
+        var user = discordBotService.GetCachedUser(discordId);
+        if (user is null) return false;
+
+        var hasCitizenRole = user.HasCitizenRole(discordBotService);
+        return hasCitizenRole;
     }
 }

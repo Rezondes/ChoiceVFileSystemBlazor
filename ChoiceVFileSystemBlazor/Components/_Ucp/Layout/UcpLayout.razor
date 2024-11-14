@@ -10,7 +10,7 @@
 
 <MudLayout Style="height: 100vh; overflow: hidden;">
     <MudAppBar>
-        @if (AuthenticationStateProvider.IsAuthenticatedAndOnDiscordGuildAsync(DiscordBotService).GetAwaiter().GetResult())
+        @if (AuthenticationStateProvider.IsCitizenAsync(DiscordBotService).GetAwaiter().GetResult())
         {
             <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="ToggleDrawer"/>
         }
@@ -41,7 +41,7 @@
         </MudButtonGroup>
     </MudAppBar>
     
-    @if (AuthenticationStateProvider.IsAuthenticatedAndOnDiscordGuildAsync(DiscordBotService).GetAwaiter().GetResult())
+    @if (AuthenticationStateProvider.IsCitizenAsync(DiscordBotService).GetAwaiter().GetResult())
     {
         <MudDrawer @bind-Open="_open" ClipMode="_clipMode" Breakpoint="_breakpoint" Variant="DrawerVariant.Mini" Style="height: calc(100% - 40px - var(--mud-appbar-height)); transition: width;">
             <UcpNavMenu @ref="_navMenu"/>
@@ -58,6 +58,10 @@
             {
                 <MudAlert Severity="Severity.Info" Style="height: fit-content">Du bist noch nicht auf unseren Discord.</MudAlert>
             }
+            else if (!AuthenticationStateProvider.IsCitizenAsync(DiscordBotService).GetAwaiter().GetResult())
+            {
+                <MudAlert Severity="Severity.Info" Style="height: fit-content">Du bist noch nicht gewhitelisted.</MudAlert>
+            }
             else
             {
                 @Body
@@ -69,7 +73,7 @@
         </MudContainer>
     </MudMainContent>
     
-    @if (AuthenticationStateProvider.IsAuthenticatedAndOnDiscordGuildAsync(DiscordBotService).GetAwaiter().GetResult())
+    @if (AuthenticationStateProvider.IsCitizenAsync(DiscordBotService).GetAwaiter().GetResult())
     {
         <MudNavLink Href="https://github.com/Rezondes"
                     Icon="@Icons.Custom.Brands.GitHub"

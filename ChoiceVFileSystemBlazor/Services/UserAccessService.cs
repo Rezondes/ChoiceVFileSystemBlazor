@@ -5,6 +5,7 @@ using ChoiceVFileSystemBlazor.Database.Accesses.DbModels;
 using ChoiceVFileSystemBlazor.Database.Accesses.Proxies.Interfaces;
 using ChoiceVFileSystemBlazor.Database.Discord.Proxies.Interfaces;
 using ChoiceVFileSystemBlazor.Database.Ranks.Proxies.Intefaces;
+using ChoiceVFileSystemBlazor.Services.Discord;
 using ChoiceVRefitClient;
 using Microsoft.AspNetCore.Components.Authorization;
 

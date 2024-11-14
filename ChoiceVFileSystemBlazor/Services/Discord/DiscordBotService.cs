@@ -1,9 +1,8 @@
-using ChoiceVFileSystemBlazor.Services.DiscordAuthentication;
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Options;
 
-namespace ChoiceVFileSystemBlazor.Services;
+namespace ChoiceVFileSystemBlazor.Services.Discord;
 
 public class DiscordBotService : IHostedService
 {
@@ -42,6 +41,11 @@ public class DiscordBotService : IHostedService
     {
         _guildUserCache.TryGetValue(userId, out var user);
         return user;
+    }
+
+    public ulong GetCitizenRoleId()
+    {
+        return _settings.CitizenRoleId;
     }
     
     public async Task StartAsync(CancellationToken cancellationToken)

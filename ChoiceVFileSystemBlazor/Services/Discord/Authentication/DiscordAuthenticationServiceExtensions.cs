@@ -1,6 +1,4 @@
-using Microsoft.Extensions.Options;
-
-namespace ChoiceVFileSystemBlazor.Services.DiscordAuthentication;
+namespace ChoiceVFileSystemBlazor.Services.Discord.Authentication;
 
 public static class DiscordAuthenticationServiceExtensions
 {

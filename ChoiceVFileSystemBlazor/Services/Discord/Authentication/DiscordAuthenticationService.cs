@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.Extensions.Options;
 
-namespace ChoiceVFileSystemBlazor.Services.DiscordAuthentication;
+namespace ChoiceVFileSystemBlazor.Services.Discord.Authentication;
 
 public class DiscordAuthenticationService
 {
