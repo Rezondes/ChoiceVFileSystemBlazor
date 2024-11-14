@@ -174,9 +174,11 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-
-app.MapHub<BaseHub>(BaseHub.HubPattern);
-app.MapHub<FileHub>(FileHub.HubPattern);
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<BaseHub>(BaseHub.HubPattern);
+    endpoints.MapHub<FileHub>(FileHub.HubPattern);
+});
 
 app.UseStatusCodePages(context =>
 {
