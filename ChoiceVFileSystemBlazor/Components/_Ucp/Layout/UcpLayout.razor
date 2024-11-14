@@ -58,15 +58,15 @@
             {
                 if (!AuthenticationStateProvider.IsAuthenticatedAsync().GetAwaiter().GetResult())
                 {
-                    <MudAlert Severity="Severity.Info" Style="height: fit-content">Du bist noch nicht eingeloggt.</MudAlert>
+                    <MudAlert Severity="Severity.Info" Class="my-5" Style="height: fit-content">Du bist noch nicht eingeloggt.</MudAlert>
                 }
                 else if (!AuthenticationStateProvider.IsOnDiscordGuildAsync(DiscordBotService).GetAwaiter().GetResult())
                 {
-                    <MudAlert Severity="Severity.Info" Style="height: fit-content">Du bist noch nicht auf unseren Discord.</MudAlert>
+                    <MudAlert Severity="Severity.Info" Class="my-5" Style="height: fit-content">Du bist noch nicht auf unseren Discord.</MudAlert>
                 }
                 else if (!AuthenticationStateProvider.IsCitizenAsync(DiscordBotService).GetAwaiter().GetResult())
                 {
-                    <MudAlert Severity="Severity.Info" Style="height: fit-content">Du bist noch nicht gewhitelisted.</MudAlert>
+                    <MudAlert Severity="Severity.Info" Class="my-5" Style="height: fit-content">Du bist noch nicht gewhitelisted.</MudAlert>
                 }
                 else
                 {
