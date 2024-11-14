@@ -42,7 +42,7 @@
             <MudFileUpload T="IBrowserFile" FilesChanged="(file) => OpenNewFileInPreview(file)">
                 <ActivatorContent>
                     <MudTooltip Text="Datei hochladen" Duration="Constants.TOOLTIP_DURATION">
-                        <MudIconButton Icon="@Icons.Material.Filled.CloudUpload" Color="Color.Primary"/>
+                        <MudButton StartIcon="@Icons.Material.Filled.CloudUpload" Variant="Variant.Filled" Color="Color.Primary">Datei hochladen</MudButton>
                     </MudTooltip>
                 </ActivatorContent>
             </MudFileUpload>
@@ -53,7 +53,7 @@
             <MudTextField T="string" Clearable Lines="10" @bind-Text="NewCommentText" Placeholder="Füge hier deinen Kommentar ein...">
                 
             </MudTextField>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="my-2" OnClick="AddComment">Kommentieren</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.AddComment" Variant="Variant.Filled" Color="Color.Primary" Class="my-2" OnClick="AddComment">Kommentieren</MudButton>
 
             <MudList T="string">
                 @foreach (var comment in Comments.OrderByDescending(x => x.Created))
