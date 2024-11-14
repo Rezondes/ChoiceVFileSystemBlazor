@@ -1,20 +1,11 @@
+# Basis-Image für die Ausführung der Blazor-App (keine SSL-Konfiguration mehr erforderlich)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-# Kopiere das Zertifikat als Root
-COPY ucp.choicev.net.pfx /https/ucp.choicev.net.pfx
-COPY scp.choicev.net.pfx /https/scp.choicev.net.pfx
-# Ändere den Besitzer der Zertifikatsdatei auf den Benutzer, den du später festlegst
-RUN chown 1654 /https/scp.choicev.net.pfx && chmod 600 /https/scp.choicev.net.pfx
-RUN chown 1654 /https/ucp.choicev.net.pfx && chmod 600 /https/ucp.choicev.net.pfx
-
 # Wechsle nun zum nicht-Root-Benutzer
 USER $APP_UID
-
-# Umgebungsvariablen für HTTPS und Zertifikatspfad
-ENV ASPNETCORE_URLS="https://+:8080;https://+:8081"
 
 # Build- und Publishing-Stufen
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -24,7 +15,7 @@ COPY ["ChoiceVFileSystemBlazor/ChoiceVFileSystemBlazor.csproj", "ChoiceVFileSyst
 COPY ["ChoiceVSharedApiModels/ChoiceVSharedApiModels.csproj", "ChoiceVSharedApiModels/"]
 COPY ["ChoiceVRefitClient/ChoiceVRefitClient.csproj", "ChoiceVRefitClient/"]
 RUN dotnet restore "ChoiceVFileSystemBlazor/ChoiceVFileSystemBlazor.csproj"
-COPY . .
+COPY . . 
 WORKDIR "/src/ChoiceVFileSystemBlazor"
 RUN dotnet build "ChoiceVFileSystemBlazor.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
@@ -36,4 +27,8 @@ RUN dotnet publish "ChoiceVFileSystemBlazor.csproj" -c $BUILD_CONFIGURATION -o /
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+# Konfiguriere Kestrel so, dass es nur HTTP auf den Ports 8080 und 8081 akzeptiert
+ENV ASPNETCORE_URLS="http://+:8080;http://+:8081"
+
 ENTRYPOINT ["dotnet", "ChoiceVFileSystemBlazor.dll"]
