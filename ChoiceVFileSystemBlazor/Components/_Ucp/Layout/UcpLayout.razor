@@ -172,7 +172,8 @@
         if (await AuthenticationStateProvider.IsAuthenticatedAsync()) return;
         
         var currentUrl = Navigation.Uri.Replace(Navigation.BaseUri, "");
-        Navigation.NavigateTo($"/{Uri.EscapeDataString(currentUrl)}?login=true", forceLoad: true);
+        var targetUri = $"/{Uri.EscapeDataString(currentUrl)}?login=true";
+        Navigation.NavigateTo(targetUri, forceLoad: true);
     }
 
     private async Task Logout()
@@ -180,6 +181,7 @@
         if (!await AuthenticationStateProvider.IsAuthenticatedAsync()) return;
         
         var currentUrl = Navigation.Uri.Replace(Navigation.BaseUri, "");
-        Navigation.NavigateTo($"/{Uri.EscapeDataString(currentUrl)}?logout=true", forceLoad: true);
+        var targetUri = $"/{currentUrl}?logout=true";
+        Navigation.NavigateTo(targetUri, forceLoad: true);
     }
 }
