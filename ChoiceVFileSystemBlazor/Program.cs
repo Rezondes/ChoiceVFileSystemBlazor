@@ -136,15 +136,8 @@ if (!builder.Environment.IsDevelopment())
 {
     builder.WebHost.ConfigureKestrel(options =>
     {
-        options.ListenAnyIP(8080, listenOptions =>
-        {
-            listenOptions.UseHttps(new X509Certificate2("/https/ucp.choicev.net.pfx", "187test"));
-        });
-
-        options.ListenAnyIP(8081, listenOptions =>
-        {
-            listenOptions.UseHttps(new X509Certificate2("/https/scp.choicev.net.pfx", "187test"));
-        });
+        options.ListenAnyIP(8080);
+        options.ListenAnyIP(8081); 
     });
 }
 
