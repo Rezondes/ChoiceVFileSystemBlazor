@@ -1,0 +1,40 @@
+<style>
+    .wide-snackbar {
+        max-width: 850px;
+    }
+</style>
+
+@code {
+    private bool ShowBanner = true;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        
+        ShowBanner = await JS.InvokeAsync<bool>("cookieManager.hasAcceptedCookies") == false;
+
+        if (!ShowBanner) return;
+        
+        Snackbar.Add(
+            "Diese Seite verwendet essentielle Cookies, um Ihnen die beste Erfahrung zu bieten." +
+            " Durch die Nutzung der Seite stimmen Sie der Speicherung Ihrer Discord-ID und Authentifizierungsdaten zu.",
+            Severity.Info,
+            options =>
+            {
+                options.Action = "Akzeptieren";
+                options.Onclick = AcceptCookies;
+                options.RequireInteraction = true;
+                options.SnackbarTypeClass = "wide-snackbar";
+            }
+        );
+
+        StateHasChanged();
+    }
+
+    private async Task AcceptCookies(Snackbar arg)
+    {
+        await JS.InvokeVoidAsync("cookieManager.setAcceptedCookies");
+        ShowBanner = false;
+        Snackbar.Clear();
+    }
+}

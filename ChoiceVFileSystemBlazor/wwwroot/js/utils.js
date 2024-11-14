@@ -14,3 +14,14 @@ function downloadFileFromUrl(filename, url) {
     link.download = filename;
     link.click();
 }
+
+window.cookieManager = {
+    hasAcceptedCookies: function () {
+        return document.cookie.includes("CookiesAccepted=true");
+    },
+    setAcceptedCookies: function () {
+        const expirationDate = new Date();
+        expirationDate.setFullYear(expirationDate.getFullYear() + 1);
+        document.cookie = "CookiesAccepted=true; expires=" + expirationDate.toUTCString() + "; path=/";
+    }
+};
