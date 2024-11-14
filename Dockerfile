@@ -4,17 +4,17 @@ EXPOSE 8080
 EXPOSE 8081
 
 # Kopiere das Zertifikat als Root
-COPY blazorapp.pfx /https/blazorapp.pfx
+COPY ucp_choicev_net.pfx /https/ucp_choicev_net.pfx
+COPY scp_choicev_net.pfx /https/scp_choicev_net.pfx
 # Ändere den Besitzer der Zertifikatsdatei auf den Benutzer, den du später festlegst
-RUN chown 1654 /https/blazorapp.pfx && chmod 600 /https/blazorapp.pfx
+RUN chown 1654 /https/scp_choicev_net.pfx && chmod 600 /https/scp_choicev_net.pfx
+RUN chown 1654 /https/ucp_choicev_net.pfx && chmod 600 /https/ucp_choicev_net.pfx
 
 # Wechsle nun zum nicht-Root-Benutzer
 USER $APP_UID
 
 # Umgebungsvariablen für HTTPS und Zertifikatspfad
-ENV ASPNETCORE_URLS="https://+:8080"
-ENV ASPNETCORE_Kestrel__Certificates__Default__Path=/https/blazorapp.pfx
-ENV ASPNETCORE_Kestrel__Certificates__Default__Password=187test
+ENV ASPNETCORE_URLS="https://+:8080;https://+:8081"
 
 # Build- und Publishing-Stufen
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build

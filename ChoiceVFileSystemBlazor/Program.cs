@@ -1,3 +1,4 @@
+using System.Security.Cryptography.X509Certificates;
 using ChoiceVFileSystemBlazor.Components;
 using ChoiceVFileSystemBlazor.Components._Base;
 using ChoiceVFileSystemBlazor.Components._Layout.Hubs;
@@ -137,7 +138,12 @@ if (!builder.Environment.IsDevelopment())
     {
         options.ListenAnyIP(8080, listenOptions =>
         {
-            listenOptions.UseHttps();
+            listenOptions.UseHttps(new X509Certificate2("/https/ucp_choicev_net.pfx", "187test"));
+        });
+
+        options.ListenAnyIP(8081, listenOptions =>
+        {
+            listenOptions.UseHttps(new X509Certificate2("/https/scp_choicev_net.pfx", "187test"));
         });
     });
 }
