@@ -167,7 +167,7 @@ app.UseStaticFiles();
 
 app.UseCors("AllowAllOrigins");
 
-
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
@@ -175,7 +175,6 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.UseRouting();
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapHub<BaseHub>(BaseHub.HubPattern);
