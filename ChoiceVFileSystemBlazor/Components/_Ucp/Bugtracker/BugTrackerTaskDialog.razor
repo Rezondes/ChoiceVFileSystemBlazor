@@ -60,7 +60,7 @@
             <MudList T="string">
                 @foreach (var comment in Comments.OrderByDescending(x => x.Created))
                 {
-                    var authorName = comment.Author.Id == VikunjaClientService.VikunjaApiUserId ? OwnDiscordName : comment.Author.Name;
+                    var authorName = comment.Author.Id == VikunjaClientService.VikunjaApiUserId ? OwnDiscordName : comment.Author.Username;
                     var labelText = $"{authorName} am {comment.Created}";
                     
                     <MudPaper Class="my-2">
