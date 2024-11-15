@@ -9,11 +9,6 @@ public static class HubHelper
     {
         return new HubConnectionBuilder()
             .WithUrl(navigation.ToAbsoluteUri(hubPattern))
-            .ConfigureLogging(logging =>
-            {
-                logging.AddConsole();
-                logging.SetMinimumLevel(LogLevel.Debug);
-            })
             .Build();
     }
 }
