@@ -5,15 +5,15 @@
 </style>
 
 @code {
-    private bool ShowBanner = true;
+    private bool _showBanner = true;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
         
-        ShowBanner = await JS.InvokeAsync<bool>("cookieManager.hasAcceptedCookies") == false;
+        _showBanner = await JS.InvokeAsync<bool>("cookieManager.hasAcceptedCookies") == false;
 
-        if (!ShowBanner) return;
+        if (!_showBanner) return;
         
         Snackbar.Add(
             "Diese Seite verwendet essentielle Cookies, um Ihnen die beste Erfahrung zu bieten." +
@@ -34,7 +34,7 @@
     private async Task AcceptCookies(Snackbar arg)
     {
         await JS.InvokeVoidAsync("cookieManager.setAcceptedCookies");
-        ShowBanner = false;
+        _showBanner = false;
         Snackbar.Clear();
     }
 }
