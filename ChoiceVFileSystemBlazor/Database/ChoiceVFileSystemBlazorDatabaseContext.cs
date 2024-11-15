@@ -4,6 +4,7 @@ using ChoiceVFileSystemBlazor.Database.News.DbModels;
 using ChoiceVFileSystemBlazor.Database.Ranks.DbModels;
 using ChoiceVFileSystemBlazor.Database.Supportfiles.DbModels;
 using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.DbModels;
+using ChoiceVFileSystemBlazor.Database.Ucp.Messenger.DbModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChoiceVFileSystemBlazor.Database;

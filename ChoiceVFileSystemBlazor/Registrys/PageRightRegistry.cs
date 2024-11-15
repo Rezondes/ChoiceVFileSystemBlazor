@@ -1,9 +1,11 @@
 using ChoiceVFileSystemBlazor.Components._Base;
+using ChoiceVFileSystemBlazor.Components._Ucp.Messenger;
 using ChoiceVFileSystemBlazor.Components.Access.Pages;
 using ChoiceVFileSystemBlazor.Components.Accounts.Pages;
 using ChoiceVFileSystemBlazor.Components.Admin.Pages;
 using ChoiceVFileSystemBlazor.Components.BankAccounts.Pages;
 using ChoiceVFileSystemBlazor.Components.Characters.Pages;
+using ChoiceVFileSystemBlazor.Components.Chats.Pages;
 using ChoiceVFileSystemBlazor.Components.Companies.Pages;
 using ChoiceVFileSystemBlazor.Components.Groupingfiles.Pages;
 using ChoiceVFileSystemBlazor.Components.Supportfiles.Pages;
@@ -55,6 +57,9 @@ public static class PageRightRegistry
         
         { WhitelistQuestionsOverview.Url, RightEnum.ViewWhitelistProcedures },
         { WhitelistQuestionsView.Url, RightEnum.ViewWhitelistQuestions },
+        
+        { MessengerChatsOverview.Url, RightEnum.None },
+        { MessengerChat.Url, RightEnum.None },
     };
 
     public static RightEnum GetNeededRankForPage(string relativePath)

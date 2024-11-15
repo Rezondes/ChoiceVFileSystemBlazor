@@ -25,3 +25,7 @@ window.cookieManager = {
         document.cookie = "CookiesAccepted=true; expires=" + expirationDate.toUTCString() + "; path=/";
     }
 };
+
+window.scrollToBottom = (element) => {
+    element.scrollTop = element.scrollHeight;
+};

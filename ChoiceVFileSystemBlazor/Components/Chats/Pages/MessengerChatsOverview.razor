@@ -1,0 +1,59 @@
+@page "/chats"
+
+@using ChoiceVFileSystemBlazor.Components.Chats.Components
+@implements IDisposable
+
+@code {
+    public const string Url = "/chats";
+    public static string GetRedirectUrl() => Url;
+}
+
+<PageTitle>Chats Übersicht</PageTitle>
+
+<MessengerChatsOverviewDataGrid @ref="_messengerChatsOverviewDataGrid"/>
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+
+    private MessengerChatsOverviewDataGrid _messengerChatsOverviewDataGrid;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
+        _shouldRedirect = !_isAuthorized;
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+
+        await Reload();
+        
+        ReloadService.OnCustomReload += Reload;
+    }
+
+    public void Dispose()
+    {
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+        
+        ReloadService.OnCustomReload -= Reload;
+    }
+
+    private async Task Reload()
+    {
+        await _messengerChatsOverviewDataGrid.Load(_cancellationTokenSource.Token);
+    }
+}

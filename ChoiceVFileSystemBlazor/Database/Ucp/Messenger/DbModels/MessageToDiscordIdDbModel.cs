@@ -1,4 +1,4 @@
-namespace ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.DbModels;
+namespace ChoiceVFileSystemBlazor.Database.Ucp.Messenger.DbModels;
 
 public class MessageToDiscordIdDbModel
 {

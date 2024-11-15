@@ -1,4 +1,5 @@
 ﻿@using ChoiceVFileSystemBlazor.Components.Admin.Pages
+@using ChoiceVFileSystemBlazor.Components.Chats.Pages
 @using ChoiceVFileSystemBlazor.Components.WhitelistProcedures.Pages
 @using ChoiceVFileSystemBlazor.Components.Supportkeylogs.Pages
 @namespace ChoiceVFileSystemBlazor.Components._Layout
@@ -10,6 +11,8 @@
     {
         <MudNavLink Href="@LiveCharacterOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.LiveTv">Online Charaktere</MudNavLink>
     }
+    
+    <MudNavLink Href="@MessengerChatsOverview.GetRedirectUrl()" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.ChatBubble">Supportchats</MudNavLink>
 
     @if (UserAccessService.HasRight(RightEnum.ViewSupportfilesArea))
     {

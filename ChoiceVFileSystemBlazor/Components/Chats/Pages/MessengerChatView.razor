@@ -1,0 +1,74 @@
+@page "/chats/view/{id}"
+
+@using ChoiceVFileSystemBlazor.Database.Ucp.Messenger.DbModels
+@using ChoiceVFileSystemBlazor.Components._Ucp.Messenger.Components
+@implements IDisposable
+
+@code {
+    public const string Url = "/chats/view/";
+    public static string GetRedirectUrl(string id) => Url + id;
+}
+
+<ChatComponent @ref="ChatComponent" LoadedForUcp="false" ForDiscordId="@Id" />
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+    private bool _loading = true;
+    
+    [Parameter] public string Id { get; set; }
+
+    private ChatComponent ChatComponent;
+    
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
+        _shouldRedirect = !_isAuthorized;
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+
+        var access = await UserAccessService.GetUserAccess();
+        if (access.Rank <= RankEnum.SupportTrainee)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+
+        await LoadAllAsync();
+        
+        ReloadService.OnCustomReload += LoadAllAsync;
+    }
+    
+    public void Dispose()
+    {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Dispose();
+        
+        ReloadService.OnCustomReload -= LoadAllAsync;
+    }
+
+    private async Task LoadAllAsync()
+    {
+        _loading = true;
+        StateHasChanged();
+
+        await ChatComponent.Load();
+        
+        _loading = false;
+        StateHasChanged();
+    }
+}

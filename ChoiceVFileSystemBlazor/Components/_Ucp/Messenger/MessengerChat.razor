@@ -1,183 +1,21 @@
 @page "/u/messenger"
-@using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.DbModels
+
+@using ChoiceVFileSystemBlazor.Components._Ucp.Messenger.Components
 
 @code {
     public const string Url = "/u/messenger";
     public static string GetRedirectUrl() => Url;
 }
 
-<style>
-    .chat-container {
-        display: flex;
-        flex-direction: column;
-        width: 80dvw;
-        gap: 1rem;
-        margin: auto;
-        padding: 1rem;
-        height: 80vh;
-        overflow-y: hidden;
-    }
-
-    .chat-messages {
-        flex-grow: 1;
-        display: flex;
-        overflow-y: auto;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .message-card {
-        max-width: 60%;
-        padding: 1rem;
-        border-radius: 12px;
-        word-wrap: break-word;
-    }
-
-    .message-right {
-        align-self: flex-end;
-    }
-
-    .message-left {
-        align-self: flex-start;
-    }
-
-    .message-content {
-        display: flex;
-        flex-direction: column;
-        gap: 0.2rem;
-    }
-    
-    .new-chat-message-container{
-        display: flex;
-        bottom: 0;
-        align-items: center;
-    }
-    
-    .new-chat-message-textfield{
-        margin: 0 10px;
-    }
-    
-    .multi-line-text {
-         white-space: pre-wrap; 
-         word-wrap: break-word; 
-         overflow-wrap: break-word;
-    }
-</style>
-
-<MudPaper Class="chat-container" Elevation="2">
-    @if (_loading)
-    {
-        <LoadingComponent />
-    }
-    else if (_failed)
-    {
-        <ErrorComponent />
-    }
-    else
-    {
-        <div class="chat-messages">
-            @foreach (var message in _messages)
-            {
-                <MudPaper Class="@GetMessageAlignmentClass(message.IsFromUser)" Elevation="2">
-                    <div class="message-content">
-                        <MudText Typo="Typo.body1" Class="multi-line-text">@message.Message</MudText>
-                        @if (!message.IsFromUser)
-                        {
-                            <MudText Typo="Typo.caption" Color="Color.Primary">@message.CreatorName</MudText>
-                        }
-                        <MudText Typo="Typo.caption" Color="Color.Primary">@message.Timestamp.ToLocalTime()</MudText>
-                    </div>
-                </MudPaper>
-            }
-        </div>
-    }
-    
-    <div class="new-chat-message-container">
-        <MudTextField Class="new-chat-message-textfield" @bind-Value="_newMessage" Lines="3" Placeholder="Schreibe eine Nachricht..." FullWidth="true" Immediate="true" Variant="Variant.Outlined" />
-        <MudButton OnClick="SendMessage" Disabled="@string.IsNullOrWhiteSpace(_newMessage)" Style="width: 130px; height: 40px;" Size="Size.Large" Variant="Variant.Filled" Color="Color.Primary">
-            Senden
-        </MudButton>
-    </div>
-</MudPaper>
-
+<ChatComponent @ref="ChatComponent" LoadedForUcp="true" />
 
 @code {
-    private bool _loading = true;
-    private bool _failed;
-    private List<MessageToDiscordIdDbModel> _messages = [];
-    private string _newMessage = string.Empty;
-
-    private bool _sendingMessage;
+    private ChatComponent ChatComponent;
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
 
-        await Load();
-    }
-
-    private async Task Load()
-    {
-        _loading = true;
-        StateHasChanged();
-
-        var discordId = await AuthenticationStateProvider.GetDiscordUserIdAsync();
-        if (discordId is null)
-        {
-            Snackbar.Add("Code: CrazyDuck. Bitte Lade die Seite neu oder melde ich Support!");
-            _failed = true;
-            _loading = false;
-            return;
-        }
-        
-        _messages = await MessageProxy.GetAllForDiscordIdAsync(discordId);
-
-        _loading = false;
-        StateHasChanged();
-    }
-    private string GetMessageAlignmentClass(bool isFromUser) => isFromUser ? "message-card message-right" : "message-card message-left";
-
-    private async Task SendMessage()
-    {
-        if (_loading) return;
-        if (_failed) return;
-        if (_sendingMessage) return;
-        
-        _sendingMessage = true;
-        
-        LoadingService.StartLoading();
-        
-        var discordId = await AuthenticationStateProvider.GetDiscordUserIdAsync();
-        if (discordId == null)
-        {
-            _sendingMessage = false;
-            LoadingService.StopLoading();
-            return;
-        }
-        
-        var discordName = await AuthenticationStateProvider.GetDiscordUserNameAsync();
-        if (discordName == null)
-        {
-            _sendingMessage = false;
-            LoadingService.StopLoading();
-            return;
-        }
-
-        var newMessage = new MessageToDiscordIdDbModel(
-            toDiscordId: discordId,
-            message: _newMessage,
-            isFromUser: true,
-            creatorName: discordName
-        );
-        
-        await MessageProxy.AddAsync(newMessage);
-        
-        _newMessage = string.Empty;
-        StateHasChanged();
-        
-        _sendingMessage = false;
-        LoadingService.StopLoading();
-
-        await Load();
+        await ChatComponent.Load();
     }
 }

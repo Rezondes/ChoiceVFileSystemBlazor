@@ -1,0 +1,86 @@
+@using ChoiceVFileSystemBlazor.Components.Chats.Pages
+@using ChoiceVFileSystemBlazor.Database.Ucp.Messenger.DbModels
+@using ChoiceVFileSystemBlazor.Database.Ucp.Messenger.Models
+@using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.DbModels
+@if (_loading)
+{
+    <LoadingComponent/>
+}
+else if (!_loading && _data is null)
+{
+    <ErrorComponent/>
+}
+else
+{
+    <MudDataGrid
+        T="ChatForDiscordIdModel" MultiSelection="true"
+        Items="@_data" SortMode="SortMode.Multiple" Filterable="true"
+        QuickFilter="@QuickFilter" RowClick="@RowClicked" Style="width: 100%;"
+        Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="@(Height is null ? "75vh" : Height)">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">@(Label ?? "Chat Übersicht")</MudText>
+            <MudSpacer/>
+            <MudTextField
+                T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+                Adornment="Adornment.Start" Immediate="true"
+                AdornmentIcon="@Icons.Material.Filled.Search"
+                IconSize="Size.Medium" Class="mt-0"/>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.LastMessageSent" Title="LastMessageSent"/>
+            <PropertyColumn Property="x => x.DiscordId" Title="DiscordId"/>
+            <PropertyColumn Property="x => x.MessageCount" Title="MessageCount"/>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="ChatForDiscordIdModel"/>
+        </PagerContent>
+    </MudDataGrid>
+}
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    [Parameter] public int? AccountId { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Height { get; set; }
+    [Parameter] public bool OnlyLive { get; set; }
+
+    private bool _loading = true;
+    private string? _searchString;
+
+    private List<ChatForDiscordIdModel>? _data = [];
+
+    public async Task Load(CancellationToken cancellationToken = default)
+    {
+        _loading = true;
+        StateHasChanged();
+
+        _data = await MessageProxy.GetAllChatsAsync();
+
+        _loading = false;
+        StateHasChanged();
+    }
+
+    private Func<ChatForDiscordIdModel, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+
+        var lowerSearchString = _searchString.ToLower();
+
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if (x.DiscordId.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if ($"{x.MessageCount}".ToLower().Contains(_searchString))
+            return true;
+
+        return false;
+    };
+
+    void RowClicked(DataGridRowClickEventArgs<ChatForDiscordIdModel> args)
+    {
+        Navigation.NavigateTo(MessengerChatView.GetRedirectUrl(args.Item.DiscordId));
+    }
+
+}
