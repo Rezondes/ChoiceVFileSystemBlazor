@@ -11,7 +11,7 @@ public class MessageProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseConte
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        return await dbContext.MessageToDiscordIdDbModels.AsNoTracking().ToListAsync(cancellationToken);
+        return await dbContext.MessageToDiscordIdDbModels.ToListAsync(cancellationToken);
     }
 
     public async Task<List<ChatForDiscordIdModel>> GetAllChatsAsync(CancellationToken cancellationToken = default)
@@ -38,7 +38,7 @@ public class MessageProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseConte
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
-        return await dbContext.MessageToDiscordIdDbModels.AsNoTracking().Where(x => x.ToDiscordId == discordId).ToListAsync(cancellationToken);
+        return await dbContext.MessageToDiscordIdDbModels.Where(x => x.ToDiscordId == discordId).ToListAsync(cancellationToken);
     }
 
     public async Task<MessageToDiscordIdDbModel> AddAsync(MessageToDiscordIdDbModel model)
@@ -65,6 +65,29 @@ public class MessageProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseConte
             throw new KeyNotFoundException("Eintrag nicht gefunden.");
 
         dbContext.Set<MessageToDiscordIdDbModel>().Remove(model);
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task<bool> HasNewMessagesAsync(string discordId)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        return dbContext.MessageToDiscordIdDbModels.AsNoTracking().Any(x => !x.IsReadByUser);
+    }
+    
+    public async Task UpdateToUserReadedAsync(IEnumerable<Ulid> messages)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var messageList = await dbContext.MessageToDiscordIdDbModels
+            .Where(x => messages.Contains(x.Id))
+            .ToListAsync();
+
+        foreach (var message in messageList)
+        {
+            message.IsReadByUser = true;
+        }
+        
         await dbContext.SaveChangesAsync();
     }
 }

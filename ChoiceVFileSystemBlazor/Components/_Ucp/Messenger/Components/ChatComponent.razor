@@ -137,6 +137,12 @@
         
         _messages = await MessageProxy.GetAllForDiscordIdAsync(discordId);
 
+        if (LoadedForUcp)
+        {
+            var updateMessages = _messages.Where(x => !x.IsReadByUser).Select(x => x.Id);
+            await MessageProxy.UpdateToUserReadedAsync(updateMessages);
+        }
+        
         _loading = false;
         StateHasChanged();
         
@@ -202,7 +208,8 @@
                 toDiscordId: ForDiscordId,
                 message: _newMessage,
                 isFromUser: false,
-                creatorName: access.Name
+                creatorName: access.Name,
+                scpUserId: access.Id
             );
         
             await MessageProxy.AddAsync(newMessage);

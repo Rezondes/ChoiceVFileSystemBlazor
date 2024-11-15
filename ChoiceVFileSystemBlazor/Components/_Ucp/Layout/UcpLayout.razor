@@ -29,7 +29,16 @@
             @if (AuthenticationStateProvider.IsAuthenticatedAsync().GetAwaiter().GetResult())
             {
                 <MudTooltip Text="Nachrichten" Duration="Constants.TOOLTIP_DURATION">
-                    <MudIconButton Icon="@Icons.Material.Filled.Message" OnClick="OpenMessages"/>
+                    @if (_hasNewMessages)
+                    {
+                        <MudBadge Dot="true" Origin="Origin.TopLeft" Color="Color.Error" Overlap="true" Bordered="true" >
+                            <MudIconButton Icon="@Icons.Material.Filled.Message" OnClick="OpenMessages"/>
+                        </MudBadge>
+                    }
+                    else
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Message" OnClick="OpenMessages"/>
+                    }
                 </MudTooltip>
                 <ThemeModeToggle IsDarkMode="_isDarkMode" OnDarkModeChanged="ToggleDarkMode"/>
                 <MudTooltip Text="Ausloggen" Duration="Constants.TOOLTIP_DURATION">
@@ -123,6 +132,8 @@
     private Breakpoint _breakpoint = Breakpoint.Lg;
     private DrawerClipMode _clipMode = DrawerClipMode.Always;
 
+    private bool _hasNewMessages = false;
+    
     protected override async Task OnInitializedAsync()
     {
         var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
@@ -157,11 +168,17 @@
             
             Navigation.NavigateTo("/", forceLoad: true);
         }
+        
+        await CheckForMessages();
     }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender) return;
+        if (!firstRender)
+        {
+            await CheckForMessages();
+            return;
+        }
 
         await JS.InvokeVoidAsync("setFavicon", "choicev_logo_partial.png");
 
@@ -183,6 +200,15 @@
                 }
             );
         }
+    }
+
+    private async Task CheckForMessages()
+    {
+        if (!await AuthenticationStateProvider.IsAuthenticatedAsync()) return;
+
+        var discordId = await AuthenticationStateProvider.GetDiscordUserNameAsync();
+
+        _hasNewMessages = await MessageProxy.HasNewMessagesAsync(discordId);
     }
     
     private void ToggleDrawer()

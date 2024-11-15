@@ -11,4 +11,6 @@ public interface IMessageProxy
     public Task<List<MessageToDiscordIdDbModel>> GetAllForDiscordIdAsync(string discordId, CancellationToken cancellationToken = default);
     public Task<MessageToDiscordIdDbModel> AddAsync(MessageToDiscordIdDbModel model);
     public Task RemoveAsync(Ulid id);
+    public Task<bool> HasNewMessagesAsync(string discordId);
+    public Task UpdateToUserReadedAsync(IEnumerable<Ulid> messages);
 }
