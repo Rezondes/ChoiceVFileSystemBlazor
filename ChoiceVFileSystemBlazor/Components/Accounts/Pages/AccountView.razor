@@ -47,18 +47,20 @@ else
                     <MudText Class="px-5" Typo="Typo.h5">Support-Funktionen</MudText>
                 </div>
                 <div Class="d-flex flex-row justify-content-evenly mud-width-full py-8">
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large"  OnClick="StartNewChat">UCP Chat starten</MudButton>
+                    
                     <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled="@(!_model.IsCurrentlyOnline)" OnClick="KickAccount">Kicken</MudButton>
                     <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" Disabled>Unstuck</MudButton>
-                    
+
                     @if (_model.State == AccountStateApiEnum.Banned)
                     {
                         <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="UnbanAccount">Unban</MudButton>
                     }
-                    else 
+                    else
                     {
                         <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="BanAccount">Bann</MudButton>
                     }
-                    
+
                     @if (_model.HasLightmodeFlag)
                     {
                         <MudButton Color="Color.Primary" Variant="Variant.Filled" Size="Size.Large" OnClick="RemoveLightmode">Lightmode entfernen</MudButton>
@@ -335,5 +337,12 @@ else
         
         Snackbar.Add("Lightmode wurde entfernt!", Severity.Success);
         await LoadAllAsync();
+    }
+
+    private async Task StartNewChat()
+    {
+        if (_model is null) return;
+        
+        await AccountHelper.StartNewChat(DiscordBotService, UserAccessService, DialogService, Snackbar, MessageProxy, LoadingService, Navigation, _model.DiscordId);
     }
 }

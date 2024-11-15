@@ -70,7 +70,9 @@ public class DiscordBotService : IHostedService
     
     public async Task<bool> ValidateDiscordId(string discordId)
     {
-        var user = await _client.GetUserAsync(ulong.Parse(discordId));
+        if (!ulong.TryParse(discordId, out var discordIdUlong)) return false;
+        
+        var user = await _client.GetUserAsync(discordIdUlong);
         
         return user != null;
     }

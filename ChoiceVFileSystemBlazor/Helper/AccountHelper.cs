@@ -1,7 +1,13 @@
+using ChoiceVFileSystemBlazor.Components.Chats.Pages;
+using ChoiceVFileSystemBlazor.Database.Ucp.Messenger.DbModels;
+using ChoiceVFileSystemBlazor.Database.Ucp.Messenger.Proxies;
+using ChoiceVFileSystemBlazor.Database.Ucp.Messenger.Proxies.Interfaces;
 using ChoiceVFileSystemBlazor.Models;
 using ChoiceVFileSystemBlazor.Services;
 using ChoiceVFileSystemBlazor.Services.Discord;
 using ChoiceVRefitClient;
+using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using MudBlazor;
 
 namespace ChoiceVFileSystemBlazor.Helper;
@@ -92,5 +98,72 @@ public static class AccountHelper
         loadingService.StopLoading();
         
         return true;
+    }
+
+    public static async Task StartNewChat(
+        DiscordBotService discordBotService,
+        UserAccessService userAccessService, 
+        IDialogService dialogService, 
+        ISnackbar snackbar, 
+        IMessageProxy messageProxy,
+        PageLoadingService loadingService,
+        NavigationManager navigation,
+        string discordId = "")
+    {
+        var access = await userAccessService.GetUserAccess();
+        
+        var inputs = new List<InputModel>
+        {
+            new(
+                InputTypes.Text,
+                "DiscordId",
+                discordId,
+                "DiscordId"
+            ),
+            new(
+                InputTypes.Text,
+                "Nachricht",
+                string.Empty,
+                "Kuhle Nachricht",
+                7
+            )
+        };
+
+        var dialogData = await dialogService.OpenDialog(
+            "Chat starten", 
+            "Der Spieler wird über jede Nachricht über Discord benachrichtigt. Pass auf was du schreibst!", 
+            "Absenden",
+            inputs);
+        if (dialogData is null) return;
+
+        var (validatedDiscordId, parsedDiscordId) = dialogData[0].ValidateInput<string>();
+        if (!validatedDiscordId)
+        {
+            snackbar.Add("Es wurde kein richtige DiscordId angegeben!", Severity.Error);
+            return;
+        }
+
+        if (!await discordBotService.ValidateDiscordId(parsedDiscordId!))
+        {
+            snackbar.Add("Es wurde kein richtige DiscordId angegeben!!", Severity.Error);
+            return;
+        }
+        
+        var (validatedMessage, parsedMessage) = dialogData[1].ValidateInput<string>();
+        if (!validatedMessage)
+        {
+            snackbar.Add("Es wurde keine richtige Nachricht angegeben!", Severity.Error);
+            return;
+        }
+
+        loadingService.StartLoading();
+        
+        var newMessage = await messageProxy.AddAsync(new MessageToDiscordIdDbModel(parsedDiscordId!, parsedMessage!, false, access.Name, access.Id));
+        
+        await discordBotService.SendNewMessageInfoToUserAsync(newMessage.ToDiscordId);
+        
+        navigation.NavigateTo(MessengerChatView.GetRedirectUrl(newMessage.ToDiscordId));
+        
+        loadingService.StopLoading();
     }
 }

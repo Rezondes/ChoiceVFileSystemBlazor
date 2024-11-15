@@ -89,61 +89,7 @@ else
 
     private async Task StartNewChat()
     {
-        var access = await UserAccessService.GetUserAccess();
-        
-        var inputs = new List<InputModel>
-        {
-            new(
-                InputTypes.Text,
-                "DiscordId",
-                string.Empty,
-                "DiscordId"
-            ),
-            new(
-                InputTypes.Text,
-                "Nachricht",
-                string.Empty,
-                "Kuhle Nachricht",
-                7
-            )
-        };
-
-        var dialogData = await DialogService.OpenDialog(
-            "Chat starten", 
-            "Der Spieler wird über jede Nachricht über Discord benachrichtigt. Pass auf was du schreibst!", 
-            "Absenden",
-            inputs);
-        if (dialogData is null) return;
-
-        var (validatedDiscordId, parsedDiscordId) = dialogData[0].ValidateInput<string>();
-        if (!validatedDiscordId)
-        {
-            Snackbar.Add("Es wurde kein richtige DiscordId angegeben!", Severity.Error);
-            return;
-        }
-
-        if (!await DiscordBotService.ValidateDiscordId(parsedDiscordId!))
-        {
-            Snackbar.Add("Es wurde kein richtige DiscordId angegeben!!", Severity.Error);
-            return;
-        }
-        
-        var (validatedMessage, parsedMessage) = dialogData[1].ValidateInput<string>();
-        if (!validatedMessage)
-        {
-            Snackbar.Add("Es wurde keine richtige Nachricht angegeben!", Severity.Error);
-            return;
-        }
-
-        LoadingService.StartLoading();
-        
-        var newMessage = await MessageProxy.AddAsync(new MessageToDiscordIdDbModel(parsedDiscordId!, parsedMessage!, false, access.Name, access.Id));
-        
-        await DiscordBotService.SendNewMessageInfoToUserAsync(newMessage.ToDiscordId);
-        
-        Navigation.NavigateTo(MessengerChatView.GetRedirectUrl(newMessage.ToDiscordId));
-        
-        LoadingService.StopLoading();
+        await AccountHelper.StartNewChat(DiscordBotService, UserAccessService, DialogService, Snackbar, MessageProxy, LoadingService, Navigation);
     }
 
 }
