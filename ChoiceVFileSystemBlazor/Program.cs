@@ -138,6 +138,7 @@ builder.Services.AddScoped<IDiscordRolesProxy, DiscordRoleProxy>();
 builder.Services.AddScoped<IDiscordRoleLogsProxy, DiscordRoleLogsProxy>();
 builder.Services.AddScoped<INewsProxy, NewsProxy>();
 builder.Services.AddScoped<IBugtrackerProxy, BugtrackerProxy>();
+builder.Services.AddScoped<IMessageProxy, MessageProxy>();
 #endregion
 
 builder.Services.Configure<VikunjaSettings>(builder.Configuration.GetSection("VikunjaApi"));

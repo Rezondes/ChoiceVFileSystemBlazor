@@ -1,5 +1,6 @@
 @inherits LayoutComponentDisposableBase
 
+@using ChoiceVFileSystemBlazor.Components._Ucp.Messenger
 @using Microsoft.AspNetCore.Authentication.Cookies
 @using Microsoft.AspNetCore.Authentication
 
@@ -25,15 +26,19 @@
         <MudSpacer/>
 
         <MudButtonGroup Color="Color.Inherit">
-            <ThemeModeToggle IsDarkMode="_isDarkMode" OnDarkModeChanged="ToggleDarkMode"/>
             @if (AuthenticationStateProvider.IsAuthenticatedAsync().GetAwaiter().GetResult())
             {
+                <MudTooltip Text="Nachrichten" Duration="Constants.TOOLTIP_DURATION">
+                    <MudIconButton Icon="@Icons.Material.Filled.Message" OnClick="OpenMessages"/>
+                </MudTooltip>
+                <ThemeModeToggle IsDarkMode="_isDarkMode" OnDarkModeChanged="ToggleDarkMode"/>
                 <MudTooltip Text="Ausloggen" Duration="Constants.TOOLTIP_DURATION">
                     <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Error" OnClick="Logout"/>
                 </MudTooltip>
             }
             else
             {
+                <ThemeModeToggle IsDarkMode="_isDarkMode" OnDarkModeChanged="ToggleDarkMode"/>
                 <MudTooltip Text="Einloggen" Duration="Constants.TOOLTIP_DURATION">
                     <MudIconButton Icon="@Icons.Material.Filled.Login" Color="Color.Success" OnClick="Login"/>
                 </MudTooltip>
@@ -215,5 +220,10 @@
         var currentUrl = Navigation.Uri.Replace(Navigation.BaseUri, "");
         var targetUri = $"/{currentUrl}?logout=true";
         Navigation.NavigateTo(targetUri, forceLoad: true);
+    }
+
+    private void OpenMessages()
+    {
+        Navigation.NavigateTo(MessengerChat.GetRedirectUrl());
     }
 }

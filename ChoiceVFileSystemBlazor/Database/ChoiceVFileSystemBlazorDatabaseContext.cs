@@ -40,6 +40,7 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
 
     #region UCP
     public DbSet<DiscordIdToBugTaskIdDbModel> DiscordIdToBugTaskIdDbModels { get; set; }
+    public DbSet<MessageToDiscordIdDbModel> MessageToDiscordIdDbModels { get; set; }
     #endregion
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -287,6 +288,19 @@ public class ChoiceVFileSystemBlazorDatabaseContext(DbContextOptions<ChoiceVFile
         modelBuilder.Entity<DiscordIdToBugTaskIdDbModel>(entity => 
         {
             entity.Property(e => e.Id)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+        });
+        
+        modelBuilder.Entity<MessageToDiscordIdDbModel>(entity => 
+        {
+            entity.Property(e => e.Id)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => Ulid.Parse(v));
+            
+            entity.Property(e => e.ScpUserId)
                 .HasConversion(
                     v => v.ToString(),
                     v => Ulid.Parse(v));
