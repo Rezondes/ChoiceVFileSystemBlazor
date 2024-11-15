@@ -213,6 +213,8 @@
             );
         
             await MessageProxy.AddAsync(newMessage);
+
+            await DiscordBotService.SendNewMessageInfoToUserAsync(ForDiscordId);
         }
 
         _newMessage = string.Empty;

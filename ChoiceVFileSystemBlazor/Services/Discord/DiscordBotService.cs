@@ -122,4 +122,38 @@ public class DiscordBotService : IHostedService
         }
         return Task.CompletedTask;
     }
+
+    public async Task<bool> SendNewMessageInfoToUserAsync(string discordId)
+    {
+        return await SendMessageToUserAsync(discordId, "Du hast eine neue Nachricht im User Control Panel! Schau jetzt nach auf https://ucp.choicev.net.");
+    }
+    
+    public async Task<bool> SendMessageToUserAsync(string discordId, string message)
+    {
+        if (!ulong.TryParse(discordId, out var userId))
+        {
+            _logger.LogWarning($"Die angegebene DiscordId '{discordId}' ist ungültig.");
+            return false;
+        }
+
+        if (!_guildUserCache.TryGetValue(userId, out var user))
+        {
+            _logger.LogWarning($"Benutzer mit der DiscordId {discordId} ist nicht in der Guild oder nicht gecached.");
+            return false;
+        }
+
+        try
+        {
+            var dmChannel = await user.CreateDMChannelAsync();
+            await dmChannel.SendMessageAsync(message);
+
+            _logger.LogInformation($"Nachricht an Benutzer {user.Username} (ID: {userId}) gesendet.");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Fehler beim Senden der Nachricht an Benutzer {discordId}.");
+            return false;
+        }
+    }
 }
