@@ -77,6 +77,11 @@
                         <MudText Typo="Typo.body1" Class="multi-line-text">@message.Message</MudText>
                         <MudText Typo="Typo.caption" Color="Color.Primary">@message.CreatorName</MudText>
                         <MudText Typo="Typo.caption" Color="Color.Primary">@message.Timestamp.ToLocalTime()</MudText>
+                        
+                        @if (!LoadedForUcp && !message.IsReadByUser)
+                        {
+                            <MudText Typo="Typo.caption" Style="color: rgba(255,255,255,0.3)">(noch nicht gelesen)</MudText>
+                        }
                     </div>
                 </MudPaper>
             }
