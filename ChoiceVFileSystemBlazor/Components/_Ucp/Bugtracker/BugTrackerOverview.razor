@@ -88,36 +88,32 @@ else
         }
         
         var scpBugsResult = await VikunjaClientService.Client.GetAllTasksInProjectAsync(VikunjaClientService.ScpBugsProjectId);
-        
         var choiceVBugsResult = await VikunjaClientService.Client.GetAllTasksInProjectAsync(VikunjaClientService.ChoiceVBugsProjectId);
         
         var dbSavedTasks = await BugtrackerProxy.GetAllForDiscordIdAsync(discordId);
         foreach (var dbTask in dbSavedTasks)
         {
-            if (scpBugsResult.Select(x => x.Id).Contains(dbTask.BugTaskId))
-            {
-                _underExaminationData.Add(dbTask);
-                continue;
-            }
-            if (choiceVBugsResult.Select(x => x.Id).Contains(dbTask.BugTaskId))
-            {
-                var result = await VikunjaClientService.Client.HandleApiRequestAsync(
-                    async _ => await VikunjaClientService.Client.GetTaskByIdAsync(dbTask.BugTaskId));
+            var dbStatus = await dbTask.GetStatus(VikunjaClientService);
 
-                if (result.Data!.Done)
-                {
-                    _doneData.Add(dbTask);
-                }
-                else
-                {
+            switch (dbStatus)
+            {
+                case BugTaskStatus.Pending:
+                    _underExaminationData.Add(dbTask);
+                    break;
+                case BugTaskStatus.Rejected:
+                    _rejectedData.Add(dbTask);
+                    break;
+                case BugTaskStatus.Accepted:
                     _acceptedData.Add(dbTask);
-                }
-                continue;
+                    break;
+                case BugTaskStatus.Done:
+                    _doneData.Add(dbTask);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-            
-            _rejectedData.Add(dbTask);
         }
-        
+
         _loading = false;
         StateHasChanged();
     }
