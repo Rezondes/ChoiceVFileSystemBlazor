@@ -20,6 +20,8 @@
 <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="TestSupportKeyInfoApi">Test SupportKeyInfoApi</MudButton>
 <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="TestVikunjaApi">Test VikunjaApi</MudButton>
 
+<MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="CheckWhitelist">Check Roles/Whitelist</MudButton>
+
 @code {
     [CascadingParameter] public UserAccessService UserAccessService { get; set; }
     private bool _isAuthorized;
@@ -49,10 +51,56 @@
     {
         if (!firstRender) return;
 
-        if (!_shouldRedirect) return;
-        
-        Navigation.NavigateToNotAuthorized();
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
     }
+
+    private async Task CheckWhitelist()
+    {
+        var result = await AccountApi.HandleApiRequestAsync(
+            async token => await AccountApi.GetAllAsync(token));
+        
+        if (!result.IsSuccess)
+        {
+            Snackbar.Add(result.Error?.Message ?? "Unknown error", Severity.Error);
+            return;
+        }
+
+        var discordGuildUsers = DiscordBotService.GetGuildUserCache()
+            .Select(x => x.Value)
+            .Where(x => x.Roles.Select(y => y.Id)
+                .Contains(DiscordBotService.GetCitizenRoleId()))
+            .ToArray();
+        
+        var accounts = result.Data!
+            .Where(x => x.State == AccountStateApiEnum.Whitelisted)
+            .ToArray();
+
+        var onlyInGuildUsers = discordGuildUsers
+            .Where(user => accounts.All(acc => acc.DiscordId != user.Id.ToString()))
+            .ToList();
+
+        var onlyInAccounts = accounts
+            .Where(acc => discordGuildUsers.All(user => user.Id.ToString() != acc.DiscordId))
+            .ToList();
+        
+        Console.WriteLine("Nur die CitizenRolle im Discord:");
+        foreach (var guildUser in onlyInGuildUsers)
+        {
+            Console.WriteLine(guildUser.Id + " " + guildUser.DisplayName);
+        }
+
+        Console.WriteLine("\nNur whitelisted:");
+        foreach (var account in onlyInAccounts)
+        {
+            Console.WriteLine(account.Id + " " + account.Name);
+        }
+        
+    }
+    
     
     private async Task StartStopTest()
     {
