@@ -1,0 +1,124 @@
+@using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.Model
+@if (_loading)
+{
+    <LoadingComponent/>
+}
+else if (!_loading && _data is null)
+{
+    <ErrorComponent/>
+}
+else
+{
+    <MudDataGrid
+        T="BugTaskModel" MultiSelection="true"
+        Items="@_data" SortMode="SortMode.Multiple" Filterable="true"
+        QuickFilter="@QuickFilter" Style="width: 100%;"
+        Hideable="true" Hover="true" Striped="true" FixedHeader="true" Height="@(Height is null ? "75vh" : Height)">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">@(Label ?? "Charakter Übersicht")</MudText>
+            <MudSpacer/>
+            <MudTextField
+                T="string" @bind-Value="_searchString" Placeholder="@Constants.DATAGRID_SEARCHBAR_PLACEHOLDER"
+                Adornment="Adornment.Start" Immediate="true"
+                AdornmentIcon="@Icons.Material.Filled.Search"
+                IconSize="Size.Medium" Class="mt-0"/>
+        </ToolBarContent>
+        <Columns>
+            <PropertyColumn Property="x => x.Id" Title="#" Filterable="false"/>
+            <PropertyColumn Property="x => x.DiscordId" Title="DiscordId"/>
+            <PropertyColumn Property="x => x.DiscordName" Title="DiscordName"/>
+            <PropertyColumn Property="x => x.BugTaskId" Title="BugTaskId"/>
+            <PropertyColumn Property="x => x.BugTaskName" Title="BugTaskName"/>
+            <TemplateColumn CellClass="d-flex justify-end">
+                <CellTemplate>
+                    <MudStack Row>
+                        @if (UserAccessService.HasRight(RightEnum.NewsEdit))
+                        {
+                            <MudTooltip Text="In Vikunja öffnen" Duration="@Constants.TOOLTIP_DURATION">
+                                <MudIconButton
+                                    Size="@Size.Small"
+                                    Variant="@Variant.Filled"
+                                    Icon="@Icons.Material.Filled.OpenInBrowser"
+                                    Color="@Color.Primary"
+                                    OnClick="() => OpenBug(context.Item)"/>
+                            </MudTooltip>
+                        }
+                        @if (UserAccessService.HasRight(RightEnum.NewsDelete))
+                        {
+                            <MudTooltip Text="UCP Chat starten" Duration="@Constants.TOOLTIP_DURATION">
+                                <MudIconButton
+                                    Size="@Size.Small"
+                                    Variant="@Variant.Filled"
+                                    Icon="@Icons.Material.Filled.ChatBubble"
+                                    Color="@Color.Error"
+                                    OnClick="() => StartUcpChat(context.Item)"/>
+                            </MudTooltip>
+                        }
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager T="BugTaskModel"/>
+        </PagerContent>
+    </MudDataGrid>
+}
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    [Parameter] public int? AccountId { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Height { get; set; }
+    [Parameter] public bool OnlyLive { get; set; }
+
+    private bool _loading = true;
+    private string? _searchString;
+
+    private List<BugTaskModel>? _data = [];
+
+    public async Task Load(CancellationToken cancellationToken = default)
+    {
+        _loading = true;
+        StateHasChanged();
+
+        _data = await BugtrackerProxy.GetAllBugsAsync(cancellationToken);
+
+        _loading = false;
+        StateHasChanged();
+    }
+
+    private Func<BugTaskModel, bool> QuickFilter => x =>
+    {
+        if (_searchString == null) return true;
+
+        var lowerSearchString = _searchString.ToLower();
+
+        if (string.IsNullOrWhiteSpace(lowerSearchString))
+            return true;
+
+        if ($"{x.DiscordId}".ToLower().Contains(_searchString))
+            return true;
+        if ($"{x.DiscordName}".ToLower().Contains(_searchString))
+            return true;
+        if ($"{x.BugTaskId}".ToLower().Contains(_searchString))
+            return true;
+        if ($"{x.BugTaskName}".ToLower().Contains(_searchString))
+            return true;
+
+        if ($"{x.Id}".ToLower().Contains(_searchString))
+            return true;
+
+        return false;
+    };
+
+    private void OpenBug(BugTaskModel contextItem)
+    {
+        Navigation.NavigateTo("https://board.choicev.net/tasks/" + contextItem.BugTaskId);
+    }
+
+    private async Task StartUcpChat(BugTaskModel contextItem)
+    {
+        await AccountHelper.StartNewChat(DiscordBotService, UserAccessService, DialogService, Snackbar, MessageProxy, LoadingService, Navigation, contextItem.DiscordId);
+    }
+
+}

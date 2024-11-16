@@ -1,0 +1,59 @@
+@page "/bugs"
+
+@using ChoiceVFileSystemBlazor.Components.BugTickets.Components
+@implements IDisposable
+
+@code {
+    public const string Url = "/bugs";
+    public static string GetRedirectUrl() => Url;
+}
+
+<PageTitle>Bugtickets Übersicht</PageTitle>
+
+<BugTrackerOverviewDataGrid @ref="_dataGrid"/>
+
+@code {
+    [CascadingParameter] public UserAccessService UserAccessService { get; set; }
+    
+    private bool _isAuthorized;
+    private bool _shouldRedirect;
+
+    private BugTrackerOverviewDataGrid _dataGrid;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _isAuthorized = await UserAccessService.HasRightAsync(PageRightRegistry.GetNeededRankForPage(Url));
+        _shouldRedirect = !_isAuthorized;
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        if (_shouldRedirect)
+        {
+            Navigation.NavigateToNotAuthorized();
+            return;
+        }
+
+        await Reload();
+        
+        ReloadService.OnCustomReload += Reload;
+    }
+    
+    public void Dispose()
+    {
+        _cancellationTokenSource?.Cancel();
+        _cancellationTokenSource?.Dispose();
+        
+        ReloadService.OnCustomReload -= Reload;
+    }
+
+    private async Task Reload()
+    {
+        await _dataGrid.Load(_cancellationTokenSource.Token);
+    }
+}
