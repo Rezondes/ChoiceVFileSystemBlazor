@@ -9,6 +9,18 @@
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
+<MudText
+    Style="
+        opacity: 0.2;
+        position: absolute;
+        left: 341px;
+        top: 0;
+        z-index: 9999;
+        color: white;"
+    Typo="Typo.body2">
+    @Constants.VERSION
+</MudText>
+
 <MudLayout Style="height: 100vh; overflow: hidden;">
     <MudAppBar>
         @if (AuthenticationStateProvider.IsCitizenAsync(DiscordBotService).GetAwaiter().GetResult())
