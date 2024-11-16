@@ -1,11 +1,12 @@
 using ChoiceVFileSystemBlazor.Database.Ucp.Messenger.DbModels;
 using ChoiceVFileSystemBlazor.Database.Ucp.Messenger.Models;
 using ChoiceVFileSystemBlazor.Database.Ucp.Messenger.Proxies.Interfaces;
+using ChoiceVFileSystemBlazor.Services.Discord;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChoiceVFileSystemBlazor.Database.Ucp.Messenger.Proxies;
 
-public class MessageProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext> dbContextFactory) : IMessageProxy
+public class MessageProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext> dbContextFactory, DiscordBotService discordBotService) : IMessageProxy
 {
     public async Task<List<MessageToDiscordIdDbModel>> GetAllAsync(CancellationToken cancellationToken = default)
     {
@@ -22,13 +23,18 @@ public class MessageProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseConte
         
         var chats = allMessages
             .GroupBy(message => message.ToDiscordId)
-            .Select(group => new ChatForDiscordIdModel
+            .Select(group =>
             {
-                DiscordId = group.Key,
-                MessageCount = group.Count(),
-                LastMessageSent = group.OrderByDescending(message => message.Timestamp).FirstOrDefault()?.Timestamp ?? DateTime.MinValue
+                var username = discordBotService.GetUsername(group.Key);
+                
+                return new ChatForDiscordIdModel(
+                    group.Key,
+                    username ?? "Unknown User",
+                    group.Count(),
+                    group.OrderByDescending(message => message.Timestamp).FirstOrDefault()?.Timestamp ?? DateTime.MinValue
+                );
             })
-            .OrderBy(message => message.LastMessageSent)
+            .OrderBy(chat => chat.LastMessageSent)
             .ToList();
 
         return chats;

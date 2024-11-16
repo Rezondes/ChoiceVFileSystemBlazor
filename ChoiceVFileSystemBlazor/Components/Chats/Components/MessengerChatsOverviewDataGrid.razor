@@ -33,6 +33,7 @@ else
         <Columns>
             <PropertyColumn Property="x => x.LastMessageSent" Title="LastMessageSent"/>
             <PropertyColumn Property="x => x.DiscordId" Title="DiscordId"/>
+            <PropertyColumn Property="x => x.DiscordName" Title="DiscordName"/>
             <PropertyColumn Property="x => x.MessageCount" Title="MessageCount"/>
         </Columns>
         <PagerContent>
@@ -76,6 +77,12 @@ else
         if (x.DiscordId.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
             return true;
 
+        if (x.DiscordName.ToLower().Contains(lowerSearchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if ($"{x.LastMessageSent}".ToLower().Contains(_searchString))
+            return true;
+        
         if ($"{x.MessageCount}".ToLower().Contains(_searchString))
             return true;
 

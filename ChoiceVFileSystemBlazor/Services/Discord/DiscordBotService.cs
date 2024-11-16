@@ -43,6 +43,14 @@ public class DiscordBotService : IHostedService
         return user;
     }
 
+    public string? GetUsername(string userId)
+    {
+        if (!ulong.TryParse(userId, out var userIdUlong)) return null;
+        
+        _guildUserCache.TryGetValue(userIdUlong, out var user);
+        return user?.DisplayName;
+    }
+
     public ulong GetCitizenRoleId()
     {
         return _settings.CitizenRoleId;
