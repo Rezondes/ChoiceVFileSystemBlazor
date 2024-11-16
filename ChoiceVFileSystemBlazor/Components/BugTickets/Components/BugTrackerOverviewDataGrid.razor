@@ -25,6 +25,7 @@ else
         </ToolBarContent>
         <Columns>
             <PropertyColumn Property="x => x.Id" Title="#" Filterable="false"/>
+            <PropertyColumn Property="x => x.Status" Title="Status"/>
             <PropertyColumn Property="x => x.DiscordId" Title="DiscordId"/>
             <PropertyColumn Property="x => x.DiscordName" Title="DiscordName"/>
             <PropertyColumn Property="x => x.BugTaskId" Title="BugTaskId"/>
@@ -96,6 +97,8 @@ else
         if (string.IsNullOrWhiteSpace(lowerSearchString))
             return true;
 
+        if ($"{x.Status}".ToLower().Contains(_searchString))
+            return true;
         if ($"{x.DiscordId}".ToLower().Contains(_searchString))
             return true;
         if ($"{x.DiscordName}".ToLower().Contains(_searchString))

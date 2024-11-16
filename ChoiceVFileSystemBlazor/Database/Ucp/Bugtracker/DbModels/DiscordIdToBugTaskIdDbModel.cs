@@ -46,7 +46,6 @@ public static class DiscordIdToBugTaskIdDbModelExtensions
             async _ => await vikunjaClientService.Client.GetTaskByIdAsync(dbTask.BugTaskId));
 
         return result.Data!.Done ? BugTaskStatus.Done : BugTaskStatus.Accepted;
-
     }
     
     public static async Task<BugTaskStatus> GetStatus(this DiscordIdToBugTaskIdDbModel dbTask, VikunjaClientService vikunjaClientService)
@@ -63,6 +62,5 @@ public static class DiscordIdToBugTaskIdDbModelExtensions
             async _ => await vikunjaClientService.Client.GetTaskByIdAsync(dbTask.BugTaskId));
 
         return result.Data!.Done ? BugTaskStatus.Done : BugTaskStatus.Accepted;
-
     }
 }

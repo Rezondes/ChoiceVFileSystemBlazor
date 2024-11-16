@@ -2,11 +2,12 @@ using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.DbModels;
 using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.Model;
 using ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.Proxies.Interfaces;
 using ChoiceVFileSystemBlazor.Services.Discord;
+using ChoiceVFileSystemBlazor.Services.Vikunja;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChoiceVFileSystemBlazor.Database.Ucp.Bugtracker.Proxies;
 
-public class BugtrackerProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext> dbContextFactory, DiscordBotService discordBotService) : IBugtrackerProxy
+public class BugtrackerProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseContext> dbContextFactory, DiscordBotService discordBotService, VikunjaClientService vikunjaClientService) : IBugtrackerProxy
 {
     public async Task<List<DiscordIdToBugTaskIdDbModel>> GetAllAsync()
     {
@@ -21,21 +22,19 @@ public class BugtrackerProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseCo
 
         var allBugs = await dbContext.DiscordIdToBugTaskIdDbModels.AsNoTracking().ToListAsync(cancellationToken);
 
-        var bugTasksModels = allBugs.Select(x =>
+        var allScpBugs = await vikunjaClientService.Client.GetAllTasksInProjectAsync(vikunjaClientService.ScpBugsProjectId);
+        var allChoiceVBugs = await vikunjaClientService.Client.GetAllTasksInProjectAsync(vikunjaClientService.ChoiceVBugsProjectId);
+        
+        var data = new List<BugTaskModel>();
+        foreach (var bug in allBugs)
         {
-            var discordName = discordBotService.GetUsername(x.DiscordId);
+            var discordName = discordBotService.GetUsername(bug.DiscordId);
+            var status = await bug.GetStatus(vikunjaClientService, allScpBugs, allChoiceVBugs);
 
-            return new BugTaskModel(
-                x.Id, 
-                x.DiscordId, 
-                discordName ?? "Unknown User",
-                x.BugTaskId, 
-                x.BugTaskName
-            );
-        })
-        .ToList();
-
-        return bugTasksModels;
+            data.Add(new BugTaskModel(bug.Id, bug.DiscordId, discordName ?? "Unknown User", bug.BugTaskId, bug.BugTaskName, status));
+        }
+        
+        return data;
     }
 
     public async Task<List<DiscordIdToBugTaskIdDbModel>> GetAllForDiscordIdAsync(string discordId)
