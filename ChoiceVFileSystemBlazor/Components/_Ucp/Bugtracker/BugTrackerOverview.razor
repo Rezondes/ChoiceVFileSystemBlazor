@@ -34,7 +34,7 @@ else
         <MudContainer Gutters="false" MaxWidth="MaxWidth.ExtraLarge" Class="d-flex justify-content-around py-5">
             @if (_rejectedData.Any())
             {
-                <BugTrackerStackComponent Title="Kein Bug" Data="_rejectedData" ClickAbleChild="false"/>
+                <BugTrackerStackComponent Title="Kein Bug/Duplikat" Data="_rejectedData" ClickAbleChild="false"/>
             }
 
             <BugTrackerStackComponent Title="In Prüfung" Data="_underExaminationData"/>
