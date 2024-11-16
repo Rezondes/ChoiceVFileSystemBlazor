@@ -78,7 +78,7 @@ public class MessageProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseConte
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync();
 
-        return dbContext.MessageToDiscordIdDbModels.AsNoTracking().Any(x => !x.IsReadByUser);
+        return dbContext.MessageToDiscordIdDbModels.AsNoTracking().Where(x => x.ToDiscordId == discordId).Any(x => !x.IsReadByUser);
     }
     
     public async Task UpdateToUserReadedAsync(IEnumerable<Ulid> messages)
