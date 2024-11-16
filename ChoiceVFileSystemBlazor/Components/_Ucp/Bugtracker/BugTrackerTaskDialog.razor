@@ -144,38 +144,52 @@
     private async Task OpenNewFileInPreview(IBrowserFile file)
     {
         if (file is null) return;
+
+        byte[] mime;
+        try
+        {
+            mime = await ConvertToByteArray(file);
+        }
+        catch (NotSupportedException ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+            return;
+        }
         
-        selectedFile = file;
         var vikunjaFile = new VikunjaFile
         {
             Name = file.Name,
-            Mime = await ConvertToByteArray(file)
+            Mime = mime
         };
 
+        selectedFile = file;
         previewAttachment = new VikunjaAttachment(null, null, vikunjaFile, null, Task.Id);
         showImagePreview = true;
         isNewUpload = true;
     }
     
+    
     const int maxFileSize = 100 * 1024 * 1024;
     
     private async Task<byte[]> ConvertToByteArray(IBrowserFile file)
     {
+        var contentType = file.GetContentType();
+        
         var supportedImageTypes = new HashSet<string> { "image/png", "image/jpeg", "image/jpg", "image/gif", "image/bmp", "image/svg+xml" };
         var supportedVideoTypes = new HashSet<string> { "video/mp4", "video/webm", "video/ogg" };
         var supportedAudioTypes = new HashSet<string> { "audio/mpeg", "audio/wav", "audio/ogg" };
         var supportedDocTypes = new HashSet<string> { "application/pdf", "text/plain" };
 
-        if (supportedImageTypes.Contains(file.ContentType))
+        if (supportedImageTypes.Contains(contentType))
         {
-            var resizedFile = await file.RequestImageFileAsync(file.ContentType, 800, 600);
+            var resizedFile = await file.RequestImageFileAsync(contentType, 800, 600);
             await using var stream = resizedFile.OpenReadStream(maxFileSize);
             using var memoryStream = new MemoryStream();
             await stream.CopyToAsync(memoryStream);
             return memoryStream.ToArray();
         }
         
-        if (supportedVideoTypes.Contains(file.ContentType) || supportedAudioTypes.Contains(file.ContentType) || supportedDocTypes.Contains(file.ContentType))
+        if (supportedVideoTypes.Contains(contentType) || supportedAudioTypes.Contains(contentType) || supportedDocTypes.Contains(contentType))
         {
             await using var stream = file.OpenReadStream(maxFileSize);
             using var memoryStream = new MemoryStream();
@@ -183,7 +197,7 @@
             return memoryStream.ToArray();
         }
         
-        throw new NotSupportedException($"Der Dateityp {file.ContentType} wird nicht unterstützt.");
+        throw new NotSupportedException($"Der Dateityp {contentType} wird nicht unterstützt.");
     }
 
     private async Task UploadPreview()
