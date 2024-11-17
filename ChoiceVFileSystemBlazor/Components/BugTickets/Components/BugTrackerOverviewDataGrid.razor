@@ -33,28 +33,22 @@ else
             <TemplateColumn CellClass="d-flex justify-end">
                 <CellTemplate>
                     <MudStack Row>
-                        @if (UserAccessService.HasRight(RightEnum.NewsEdit))
-                        {
-                            <MudTooltip Text="In Vikunja öffnen" Duration="@Constants.TOOLTIP_DURATION">
-                                <MudIconButton
-                                    Size="@Size.Small"
-                                    Variant="@Variant.Filled"
-                                    Icon="@Icons.Material.Filled.OpenInBrowser"
-                                    Color="@Color.Primary"
-                                    OnClick="() => OpenBug(context.Item)"/>
-                            </MudTooltip>
-                        }
-                        @if (UserAccessService.HasRight(RightEnum.NewsDelete))
-                        {
-                            <MudTooltip Text="UCP Chat starten" Duration="@Constants.TOOLTIP_DURATION">
-                                <MudIconButton
-                                    Size="@Size.Small"
-                                    Variant="@Variant.Filled"
-                                    Icon="@Icons.Material.Filled.ChatBubble"
-                                    Color="@Color.Error"
-                                    OnClick="() => StartUcpChat(context.Item)"/>
-                            </MudTooltip>
-                        }
+                        <MudTooltip Text="In Vikunja öffnen" Duration="@Constants.TOOLTIP_DURATION">
+                            <MudIconButton
+                                Size="@Size.Small"
+                                Variant="@Variant.Filled"
+                                Icon="@Icons.Material.Filled.OpenInBrowser"
+                                Color="@Color.Primary"
+                                OnClick="() => OpenBug(context.Item)"/>
+                        </MudTooltip>
+                        <MudTooltip Text="UCP Chat starten" Duration="@Constants.TOOLTIP_DURATION">
+                            <MudIconButton
+                                Size="@Size.Small"
+                                Variant="@Variant.Filled"
+                                Icon="@Icons.Material.Filled.ChatBubble"
+                                Color="@Color.Error"
+                                OnClick="() => StartUcpChat(context.Item)"/>
+                        </MudTooltip>
                     </MudStack>
                 </CellTemplate>
             </TemplateColumn>
