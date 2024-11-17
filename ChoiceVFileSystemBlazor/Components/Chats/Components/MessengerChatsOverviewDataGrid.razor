@@ -59,7 +59,7 @@ else
         _loading = true;
         StateHasChanged();
 
-        _data = await MessageProxy.GetAllChatsAsync();
+        _data = await MessageProxy.GetAllChatsAsync(cancellationToken);
 
         _loading = false;
         StateHasChanged();
