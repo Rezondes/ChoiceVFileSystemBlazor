@@ -34,7 +34,7 @@ public class MessageProxy(IDbContextFactory<ChoiceVFileSystemBlazorDatabaseConte
                     group.OrderByDescending(message => message.Timestamp).FirstOrDefault()?.Timestamp ?? DateTime.MinValue
                 );
             })
-            .OrderBy(chat => chat.LastMessageSent)
+            .OrderByDescending(chat => chat.LastMessageSent)
             .ToList();
 
         return chats;
